@@ -1,0 +1,56 @@
+---
+name: Build and test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        #os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mpi4py/setup-mpi@v1
+      - uses: ssciwr/doxygen-install@v1
+      - uses: tlylt/install-graphviz@v1
+      - name: Download ADMB
+        run: "wget https://github.com/admb-project/admb/releases/download/admb-13.2/admb-13.2-linux.zip"
+      - name: Extract ADMB
+        run: "unzip admb-13.2-linux.zip"
+      - name: ADMB lib names
+        run: |
+          ln -s libadmb-x86_64-linux-g++11.so libadmb.so
+          ln -s libadmbo-x86_64-linux-g++11.so libadmbo.so
+          ln -s libadmb-contrib-x86_64-linux-g++11.so libadmb-contrib.so
+          ln -s libadmb-contribo-x86_64-linux-g++11.so libadmb-contribo.so
+          ls -l
+        working-directory: admb/lib
+      - run: mv admb ~/
+      - run: pwd
+      - run: ls -l
+      - run: mkdir build
+      - name: Configure with cmake
+        run: cmake -B build -DADMB_HOME=~/admb .
+      - name: Build with cmake
+        run: cmake --build build
+      - name: Build docs with cmake
+        run: cmake --build build --target doc_doxygen
+      - run: ls -l docs
+      - run: ls -l docs/html
+      - run: ls -l build
+      - run: ls -l build/src
+      - run: ls -l build/tests
+#      - name: Test with cmake
+#        run: ctest --output-on-failure
+#        working-directory: build
+      - name: Deploy documentation
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ github.ref == 'refs/heads/actions' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/html
+          publish_branch: gh-pages
