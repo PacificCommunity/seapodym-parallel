@@ -13,8 +13,12 @@ int main(int argc, char** argv) {
     CmdLineArgParser cmdLine;
     cmdLine.set("-na", 3, "Number of age groups");
     cmdLine.set("-nt", 5, "Total number of time steps");
-    if (!cmdLine.parse(argc, argv) || cmdLine.get<bool>("-h")) {
+    bool success = cmdLine.parse(argc, argv);
+    bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
+    if (!success) {
         std::cerr << "Error parsing command line arguments." << std::endl;
+    }
+    if (help) {
         cmdLine.help();
         MPI_Finalize();
         return 1;
@@ -25,10 +29,15 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &numWorkers);
     int workerId;
     MPI_Comm_rank(MPI_COMM_WORLD, &workerId);
-    if (na <= 0 || nt <= 0 || na > numWorkers) {
-        std::cerr << "Invalid number of age groups or time steps." << std::endl;
+    if (na <= 0 || nt <= 0 || na < numWorkers) {
+        if (workerId == 0) {
+            // Print an error message only from the master worker
+            std::cerr << "Invalid number of age groups (" << na << "), time steps (" << nt << ") or workers (" << numWorkers << ").\n";
+            std::cerr << "Number of age groups must be positive and at least equal to the number of workers." << std::endl;
+            cmdLine.help();
+        }
         MPI_Finalize();
-        return 1;
+        return 2;
     }
 
     if (workerId == 0) {
@@ -52,6 +61,9 @@ int main(int argc, char** argv) {
             cohort.stepForward(dvar_vector());
         }
         std::cout << "Worker " << workerId << " completed task " << taksId << "." << std::endl;
+        // Get the dependencies of the new task on older tasks
+        std::set<int> dependencies = taskManager.getDependencies(taksId);
+        // TO DO.... accumulate the data from all workers
 
     }
 
