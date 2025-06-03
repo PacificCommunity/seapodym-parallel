@@ -69,6 +69,9 @@ class SeapodymCourier {
      */
     void accumulate(const std::set<int>& source_workers, int target_worker);
 
+    /**
+     * @brief Free the MPI window and reset the data pointer
+     */
     void free() {
         if (this->win != MPI_WIN_NULL) {
             MPI_Win_free(&this->win);
