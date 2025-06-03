@@ -1,3 +1,5 @@
+![Build and test](https://github.com/PacificCommunity/seapodym-parallel/actions/workflows/build.yml/badge.svg)
+
 # seapodym-parallel
 Code development of population dynamics models aka SEAPODYM with parallel runs and parameter estimations
 
