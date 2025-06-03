@@ -67,8 +67,20 @@ class SeapodymCourier {
      * @param source_workers Set of ranks of source processes from which to fetch data
      * @param target_worker Rank of the target process from which to fetch data
      */
-    void accumulate(const std::set<int>& source_workers, int target_worker); 
+    void accumulate(const std::set<int>& source_workers, int target_worker);
 
+    void free() {
+        if (this->win != MPI_WIN_NULL) {
+            MPI_Win_free(&this->win);
+        }
+        this->data = nullptr;
+        this->data_size = 0;
+    }
+
+    // Disable copy and assignment operations
+    // to prevent accidental copying of the SeapodymCourier instance
+    // This is important because the class manages an MPI window and data pointer
+    // which should not be copied or assigned.
     SeapodymCourier(const SeapodymCourier&) = delete; // Disable copy constructor
     SeapodymCourier& operator=(const SeapodymCourier&) = delete; // Disable assignment operator
     SeapodymCourier(SeapodymCourier&& other) noexcept; // Move constructor

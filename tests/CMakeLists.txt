@@ -37,4 +37,11 @@ endif()
 
 add_test(NAME testSeapodymCourier2 COMMAND mpiexec -n 2 testSeapodymCourier)
 
-add_test(NAME testParallel3_5 COMMAND mpiexec -n 2 testParallel -na 3 -nt 5)
+add_test(NAME testParallel_nw3_na3_nt5 COMMAND mpiexec -n 3 testParallel -na 3 -nt 5)
+set_tests_properties(testParallel_nw3_na3_nt5 PROPERTIES
+  TIMEOUT 5  # Timeout in seconds
+)
+add_test(NAME testParallel_nw2_na3_nt5 COMMAND mpiexec -n 2 testParallel -na 3 -nt 5)
+set_tests_properties(testParallel_nw2_na3_nt5 PROPERTIES
+  TIMEOUT 5 # Timeout in seconds
+)

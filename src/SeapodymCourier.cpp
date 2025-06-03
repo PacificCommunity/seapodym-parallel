@@ -13,12 +13,7 @@ SeapodymCourier::SeapodymCourier(MPI_Comm comm) {
 }
 
 SeapodymCourier::~SeapodymCourier() {
-    if (this->win != MPI_WIN_NULL) {
-        MPI_Win_free(&this->win);
-    }
-    // The data pointer is owned by the caller, so we do not free it here.
-    this->data = nullptr;
-    this->data_size = 0;
+    this->free();
 }
 
 void 
