@@ -91,12 +91,17 @@ $(function(){ initResizable(false); });
   <div class="headertitle"><div class="title">SeapodymCohortAbstract Class Reference<span class="mlabels"><span class="mlabel abstract">abstract</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Abstract class for a cohort object. Specific implementation must derive from this class and override its methods.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="SeapodymCohortAbstract_8h_source.html">SeapodymCohortAbstract.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for SeapodymCohortAbstract:</div>
 <div class="dyncontent">
 <div class="center"><img src="classSeapodymCohortAbstract__inherit__graph.png" border="0" usemap="#aSeapodymCohortAbstract_inherit__map" alt="Inheritance graph"/></div>
 <map name="aSeapodymCohortAbstract_inherit__map" id="aSeapodymCohortAbstract_inherit__map">
-<area shape="rect" title=" " alt="" coords="5,5,193,31"/>
+<area shape="rect" title="Abstract class for a cohort object. Specific implementation must derive from this class and override ..." alt="" coords="5,5,193,31"/>
 <area shape="rect" href="classSeapodymCohortFake.html" title=" " alt="" coords="18,79,181,104"/>
 <area shape="poly" title=" " alt="" coords="102,44,102,79,97,79,97,44"/>
 </map>
@@ -108,6 +113,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ab3823bec38c8b40012330a18d5f336f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step forward.  <br /></td></tr>
 <tr class="separator:ab3823bec38c8b40012330a18d5f336f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa172eb3cd71f6fc27398796b3249d7f7" id="r_aa172eb3cd71f6fc27398796b3249d7f7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa172eb3cd71f6fc27398796b3249d7f7">setStateFromArray</a> (const std::vector&lt; double &gt; &amp;array)=0</td></tr>
+<tr class="memdesc:aa172eb3cd71f6fc27398796b3249d7f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set state from array.  <br /></td></tr>
 <tr class="separator:aa172eb3cd71f6fc27398796b3249d7f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afcabc8d41e389a745d882b128fd79554" id="r_afcabc8d41e389a745d882b128fd79554"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afcabc8d41e389a745d882b128fd79554">getArrayFromState</a> () const =0</td></tr>
 <tr class="memdesc:afcabc8d41e389a745d882b128fd79554"><td class="mdescLeft">&#160;</td><td class="mdescRight">Serialize the state.  <br /></td></tr>
@@ -116,7 +122,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a4f798cc803a2f54c508b06eb5719dc27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save the current state to a file.  <br /></td></tr>
 <tr class="separator:a4f798cc803a2f54c508b06eb5719dc27"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Abstract class for a cohort object. Specific implementation must derive from this class and override its methods. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="afcabc8d41e389a745d882b128fd79554" name="afcabc8d41e389a745d882b128fd79554"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afcabc8d41e389a745d882b128fd79554">&#9670;&#160;</a></span>getArrayFromState()</h2>
 
@@ -204,7 +212,9 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Set state from array </p><dl class="params"><dt>Parameters</dt><dd>
+
+<p>Set state from array. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">array</td><td>serialization of the object's state </td></tr>
   </table>
