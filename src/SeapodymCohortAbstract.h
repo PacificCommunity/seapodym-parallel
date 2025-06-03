@@ -7,6 +7,9 @@
 #ifndef SEAPODYM_COHORT_ABSTRACT
 #define SEAPODYM_COHORT_ABSTRACT
 
+/**
+ * @brief Abstract class for a cohort object. Specific implementation must derive from this class and override its methods.
+ */
 class SeapodymCohortAbstract {
 
   public:
@@ -18,7 +21,7 @@ class SeapodymCohortAbstract {
      virtual void stepForward(const dvar_vector& paramVector) = 0;
 
      /**
-      * Set state from array
+      * @brief Set state from array
       * @param array serialization of the object's state
       */
     virtual void setStateFromArray(const std::vector<double>& array) = 0;
