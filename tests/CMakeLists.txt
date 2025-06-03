@@ -36,3 +36,5 @@ else()
 endif()
 
 add_test(NAME testSeapodymCourier2 COMMAND mpiexec -n 2 testSeapodymCourier)
+
+add_test(NAME testParallel3_5 COMMAND mpiexec -n 2 testParallel -na 3 -nt 5)
