@@ -27,6 +27,12 @@ add_test(NAME testSeapodymCohort COMMAND testSeapodymCohort)
 
 add_test(NAME testSeapodymTaskManager COMMAND testSeapodymTaskManager)
 
-add_test(NAME testSeapodymTaskManagerFake COMMAND testSeapodymTaskManagerFake)
+if (VALGRIND_EXECUTABLE)
+  add_test(NAME testSeapodymTaskManagerFake COMMAND ${VALGRIND_EXECUTABLE} --leak-check=full --error-exitcode=1 ./testSeapodymTaskManagerFake)
+  set_tests_properties(testSeapodymTaskManagerFake
+    PROPERTIES PASS_REGULAR_EXPRESSION "ERROR SUMMARY: 0 errors")
+else()
+  add_test(NAME testSeapodymTaskManagerFake COMMAND testSeapodymTaskManagerFake)
+endif()
 
 add_test(NAME testSeapodymCourier2 COMMAND mpiexec -n 2 testSeapodymCourier)
