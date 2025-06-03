@@ -37,21 +37,21 @@ class SeapodymTaskManager {
          * @param numAgeGroups number of age groups that are run concurrently
          * @param numWorkers number of workers
          * @param numTimeSteps total number of time steps of the simulation
-         * @retun list of tasks
+         * @return list of tasks
          */
         SeapodymTaskManager(int numAgeGroups, int numWorkers, int numTimeSteps);
 
         /**
          * Get the initial list of tasks
          * @param workerId worker ID
-         * @retun list of tasks
+         * @return list of tasks
          */
         std::vector<int> getInitTaskIds(int workerId) const;
 
         /**
          * Get the number of current steps a task will run
          * @param taskId task ID
-         * @retun number of steps
+         * @return number of steps
          */
         int getNumSteps(int taskId) const;
 
