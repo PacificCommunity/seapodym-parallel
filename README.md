@@ -28,7 +28,11 @@ In the build directory
 ```
 cmake --build . --target doc_doxygen
 ```
-This will generate the documention in the top source directory `docs`.
+This will generate the documention in the top source directory `docs`. 
+
+## Documentation
+
+Documentation is built and pushed after every code change to ![here](https://pacificcommunity.github.io/seapodym-parallel/).
 
 ## How to test the code
 
