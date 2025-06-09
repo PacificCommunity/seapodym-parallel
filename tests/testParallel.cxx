@@ -61,53 +61,53 @@ int main(int argc, char** argv) {
         std::cout << "Number of age groups: " << numAgeGroups << ", Total number of time steps: " << nt << std::endl;
     }
 
-    SeapodymCohortManager taskManager(numAgeGroups, numWorkers, nt);
+    SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, nt);
     SeapodymCourier courier(MPI_COMM_WORLD);
 
     std::vector<double> data(nd, workerId);
     courier.expose(data.data(), nd);
 
-    std::vector<int> taskIds = taskManager.getInitCohortIds(workerId);
+    std::vector<int> cohortIds = cohortManager.getInitCohortIds(workerId);
 
-    // Initialize the step counter for each task
-    std::vector<int> step_counter(taskIds.size(), 0);
+    // Initialize the step counter for each cohort task
+    std::vector<int> step_counter(cohortIds.size(), 0);
 
-    // Initialize the number of steps for each task
-    std::vector<int> taskNumSteps(taskIds.size());
-    std::vector<SeapodymCohortFake*> cohortsPerWorker(taskIds.size());
-    for (auto i = 0; i < taskIds.size(); ++i) {
-        taskNumSteps[i] = taskManager.getNumSteps(taskIds[i]);
-        SeapodymCohortFake* cohortPtr = new SeapodymCohortFake(nm, nd, taskIds[i]);
+    // Initialize the number of steps for each cohort task
+    std::vector<int> cohortNumSteps(cohortIds.size());
+    std::vector<SeapodymCohortFake*> cohortsPerWorker(cohortIds.size());
+    for (auto i = 0; i < cohortIds.size(); ++i) {
+        cohortNumSteps[i] = cohortManager.getNumSteps(cohortIds[i]);
+        SeapodymCohortFake* cohortPtr = new SeapodymCohortFake(nm, nd, cohortIds[i]);
         cohortsPerWorker[i] = cohortPtr;
     }
 
     // Iterate over the global time steps
     for (auto istep = 0; istep < nt; ++istep) {
 
-        // Iterate over the tasks assigned to this worker
-        for (auto itask = 0; itask < taskIds.size(); ++itask) {
+        // Iterate over the cohort tasks assigned to this worker
+        for (auto icohort = 0; icohort < cohortIds.size(); ++icohort) {
         
-            // Get the task Id
-            int taskId = taskIds[itask];
+            // Get the cohort Id
+            int cohortId = cohortIds[icohort];
 
-            // Get the number of steps for this task
-            int numSteps = taskNumSteps[itask];
+            // Get the number of steps for this cohort task
+            int numSteps = cohortNumSteps[icohort];
 
-            std::cout <<   "Worker " << workerId << " processing task " << taskId 
-                      << " at time step " << istep << " with " << numSteps - step_counter[itask] << " remaining steps." << std::endl;  
+            std::cout <<   "Worker " << workerId << " processing cohort " << cohortId 
+                      << " at time step " << istep << " with " << numSteps - step_counter[icohort] << " remaining steps." << std::endl;  
             
             // Simulate the time taken for a step
-            cohortsPerWorker[itask]->stepForward(dvar_vector());
+            cohortsPerWorker[icohort]->stepForward(dvar_vector());
             
             // Done with the step
-            step_counter[itask]++;
+            step_counter[icohort]++;
 
-            // Find out whether we have to switch to another task
-            if (step_counter[itask] >= numSteps) {
-                // Switch over to a new task, reset the step counter and the number of steps
-                taskIds[itask] = taskManager.getNextCohort(taskId);
-                step_counter[itask] = 0;
-                taskNumSteps[itask] = taskManager.getNumSteps(taskIds[itask]);
+            // Find out whether we have to switch to another cohort task
+            if (step_counter[icohort] >= numSteps) {
+                // Switch over to a new cohort task, reset the step counter and the number of steps
+                cohortIds[icohort] = cohortManager.getNextCohort(cohortId);
+                step_counter[icohort] = 0;
+                cohortNumSteps[icohort] = cohortManager.getNumSteps(cohortIds[icohort]);
 
                 // Accumulate the data from all workers
                 std:vector<double> sum_data(nd, 0.0);
