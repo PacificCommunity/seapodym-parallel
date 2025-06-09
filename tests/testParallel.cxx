@@ -63,20 +63,28 @@ int main(int argc, char** argv) {
 
 
     SeapodymTaskManager taskManager(na, numWorkers, nt);
-    std::vector<int> taskIds = taskManager.getInitTaskIds(workerId);
     SeapodymCourier courier(MPI_COMM_WORLD);
 
     std::vector<double> data(nd, workerId);
     courier.expose(data.data(), nd);
 
     std::vector<int> initTaskIds = taskManager.getInitTaskIds(workerId);
-    for (auto itask = 0; itask < taskIds.size(); ++itask) {
+
+    // NEED TO REVERSE THE ORDER OF THIS LOOP WITH THE STEP LOOP BELOW
+    for (auto itask = 0; itask < initTaskIds.size(); ++itask) {
         int taskId = initTaskIds[itask];
+
+        // step index of each cohort
         int step_counter = 0;
         int numSteps = taskManager.getNumSteps(taskId);
+
+        // istep is the global time step index
         for (auto istep = 0; istep < nt; ++istep) {
             std::cout <<   "Worker " << workerId << " processing task " << taskId 
                       << " at time step " << istep << " with " << numSteps - step_counter << " remaining steps." << std::endl;  
+            
+            // PERFORM THE STEP HERE.... (TO DO)
+            
             step_counter++;
             if (step_counter >= numSteps) {
                 // Switch over to a new task and reset the step counter
@@ -86,6 +94,7 @@ int main(int argc, char** argv) {
 
                 std:vector<double> sum_data(nd, 0.0);
                 // Fetch the data from the other workers
+                // Consider accumulating the data (TO DO)
                 for (auto iw = 0; iw < numWorkers; ++iw) {
                     if (iw != workerId) {
                         std::vector<double> fetchedData = courier.fetch(iw);
