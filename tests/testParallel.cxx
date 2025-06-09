@@ -61,134 +61,35 @@ int main(int argc, char** argv) {
         std::cout << "Number of age groups: " << na << ", Total number of time steps: " << nt << std::endl;
     }
 
-    SeapodymCourier courier(MPI_COMM_WORLD);
 
-    // Initialize the data array with the worker ID 
-    std::vector<double> data(nd, workerId);
-    // Buffer for communication
-    std::vector<double> buffer(nd);
-
-    // Expose the data to other workers
-    courier.expose(data.data(), nd); 
-
-    // Initialize the SeapodymTaskManager
     SeapodymTaskManager taskManager(na, numWorkers, nt);
     std::vector<int> taskIds = taskManager.getInitTaskIds(workerId);
+    SeapodymCourier courier(MPI_COMM_WORLD);
 
-    // Assign the tasks to the worker
-    std::vector<int> workerTasks;
-    for (auto taskId : taskIds) {
-        if (taskId % numWorkers == workerId) {
-            workerTasks.push_back(taskId);
-        }
-    }
+    std::vector<double> data(nd, workerId);
+    courier.expose(data.data(), nd);
 
-    std::set<int> allWorkers;
-    for (int i = 0; i < numWorkers; ++i) {
-        allWorkers.insert(i);
-    }
-
-    int taskStep = 0;
-
-    // Step in time
-    for (int istep = 0; istep < nt; ++istep) {
-
-        // Each worker processes its assigned tasks
-        for (auto itask = 0; itask < workerTasks.size(); ++itask) {
-
-            int taskId = workerTasks[itask];
-
-            // Simulate processing the task
-            std::cout << "Worker " << workerId << " processing task " << taskId << " at time step " << istep << "." << std::endl;
-
-            if (taskStep >= taskManager.getNumSteps(taskId)) {
+    std::vector<int> initTaskIds = taskManager.getInitTaskIds(workerId);
+    for (auto itask = 0; itask < taskIds.size(); ++itask) {
+        int taskId = initTaskIds[itask];
+        int step_counter = 0;
+        int numSteps = taskManager.getNumSteps(taskId);
+        for (auto istep = 0; istep < nt; ++istep) {
+            std::cout <<   "Worker " << workerId << " processing task " << taskId 
+                      << " at time step " << istep << " with " << numSteps << " steps." << std::endl;  
+            step_counter++;
+            if (step_counter >= numSteps) {
                 // Switch over to a new task and reset the step counter
-                taskStep = 0;
-                workerTasks[itask] = taskManager.getNextTask(taskId);
+                step_counter = 0;
+                taskId = taskManager.getNextTask(taskId);
+                numSteps = taskManager.getNumSteps(taskId);
+                // fetch the data from the other workers
+                courier.fetch(0); //MPI_ANY_SOURCE); // Fetch data from any source worker
+                double* fetchedData = courier.getDataPtr();
             }
-            else {
-                // Keep on stepping forward the current task
-                ++taskStep;
-            }
-
         }
-
     }
 
-
-
-
-
-
-
-    // // Iterate over the tasks assigned to this worker
-    // for (auto taskId : workerTasks) {
-
-    //     std::cout << "Worker " << workerId << " assigned task " << taskId << "." << std::endl;
-
-    //     // Create a new cohort
-    //     SeapodymCohortFake* cohort = new SeapodymCohortFake(nm, nd, taskId);
-
-    //     // Step forward
-    //     for (int step = 0; step < taskManager.getNumSteps(taskId); ++step) {
-    //         // Simulate a forward step
-    //         cohort->stepForward(dvar_vector());
-    //     }
-
-    //     // The cohort reached its end of life
-    //     std::cout << "Worker " << workerId << " completed task " << taskId << "." << std::endl;
-    //     delete cohort; // Delete the cohort after processing
-
-    //     // Get the next task
-    //     int nextTaskId = taskManager.getNextTaskId(taskId);
-        
-    // }
-
-
-
-
-    // // One worker may handle multiple tasks (or cohorts)
-    // for (auto taskId : taskManager.getInitTaskIds(workerId)) {
-
-    //     // Create a new task for the worker
-    //     SeapodymCohortFake* cohort = new SeapodymCohortFake(nm, nd, taskId);
-
-
-    //     // Number of steps to run for this task
-    //     int numSteps = taskManager.getNumSteps(taskId);
-    //     std::cout << "Worker " << workerId << " has task " << taskId << " with " << numSteps << " steps." << std::endl;
-
-    //     // March forward
-    //     for (int step = 0; step < numSteps; ++step) {
-    //         // Simulate a forward step
-    //         cohort->stepForward(dvar_vector());
-    //     }
-
-    //     std::cout << "Worker " << workerId << " completed task " << taskId << "." << std::endl;
-    //     delete cohort; // Delete the cohort after processing
-
-    //     // Get the next task
-    //     int 
-
-    //     cohort = new SeapodymCohortFake(nm, nd, workerId); // Create a new cohort for the next task
-
-
-
-    //     // Get the dependencies of the new task on older tasks
-    //     std::set<int> dependencies = taskManager.getDependencies(taskId);
-
-    //     // // Accumulate the data from all workers
-    //     // std::set<int> sourceWorkers;
-    //     // for (int i = 0; i < numWorkers; ++i) {
-    //     //     if (i != workerId) {
-    //     //         sourceWorkers.insert(i);
-    //     //     }
-    //     // }
-    //     // courier.accumulate(sourceWorkers, workerId);
-
-    // }
-
-    // Gather the results from all workers TO DO 
 
     courier.free(); // Free the MPI window
 
