@@ -9,11 +9,11 @@ configure_file(testSeapodymCohort.cpp testSeapodymCohort.cxx)
 add_executable(testSeapodymCohort testSeapodymCohort.cxx)
 target_link_libraries(testSeapodymCohort PRIVATE seapodym_api)
 
-add_executable(testSeapodymTaskManager testSeapodymTaskManager.cxx)
-target_link_libraries(testSeapodymTaskManager PRIVATE seapodym_api)
+add_executable(testSeapodymCohortManager testSeapodymCohortManager.cxx)
+target_link_libraries(testSeapodymCohortManager PRIVATE seapodym_api)
 
-add_executable(testSeapodymTaskManagerFake testSeapodymTaskManagerFake.cxx)
-target_link_libraries(testSeapodymTaskManagerFake PRIVATE seapodym_api)
+add_executable(testSeapodymCohortManagerFake testSeapodymCohortManagerFake.cxx)
+target_link_libraries(testSeapodymCohortManagerFake PRIVATE seapodym_api)
 
 add_executable(testSeapodymCourier testSeapodymCourier.cxx)
 target_link_libraries(testSeapodymCourier PRIVATE seapodym_api)
@@ -25,14 +25,14 @@ target_link_libraries(testParallel PRIVATE seapodym_api)
 # Register the test
 add_test(NAME testSeapodymCohort COMMAND testSeapodymCohort)
 
-add_test(NAME testSeapodymTaskManager COMMAND testSeapodymTaskManager)
+add_test(NAME testSeapodymCohortManager COMMAND testSeapodymCohortManager)
 
 if (VALGRIND_EXECUTABLE)
-  add_test(NAME testSeapodymTaskManagerFake COMMAND ${VALGRIND_EXECUTABLE} --leak-check=full --error-exitcode=1 ./testSeapodymTaskManagerFake)
-  set_tests_properties(testSeapodymTaskManagerFake
+  add_test(NAME testSeapodymCohortManagerFake COMMAND ${VALGRIND_EXECUTABLE} --leak-check=full --error-exitcode=1 ./testSeapodymCohortManagerFake)
+  set_tests_properties(testSeapodymCohortManagerFake
     PROPERTIES PASS_REGULAR_EXPRESSION "ERROR SUMMARY: 0 errors")
 else()
-  add_test(NAME testSeapodymTaskManagerFake COMMAND testSeapodymTaskManagerFake)
+  add_test(NAME testSeapodymCohortManagerFake COMMAND testSeapodymCohortManagerFake)
 endif()
 
 add_test(NAME testSeapodymCourier2 COMMAND mpiexec -n 2 testSeapodymCourier)

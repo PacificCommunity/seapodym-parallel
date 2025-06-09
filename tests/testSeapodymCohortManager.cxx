@@ -1,16 +1,16 @@
 #include <iostream>
-#include <SeapodymTaskManager.h>
+#include <SeapodymCohortManager.h>
 
 void test(int na, int nw, int nt) {
 
-    SeapodymTaskManager tm(na, nw, nt);
+    SeapodymCohortManager tm(na, nw, nt);
 
     // iterate over the workers
     for (auto iw = 0; iw < nw; ++iw) {
         std::cout << "test(" << na << ", " << nw << ", " << nt << ") worker " << iw << ": ";
 
         // get the initial tasks for this worker
-        auto tasks = tm.getInitTaskIds(iw);
+        auto tasks = tm.getInitCohortIds(iw);
 
         // itereate over the inital tasks
         for (auto t : tasks) {
@@ -30,7 +30,7 @@ void test(int na, int nw, int nt) {
                 }
 
                 // are there more tasks to execute?
-                tid = tm.getNextTask(tid);
+                tid = tm.getNextCohort(tid);
                 auto deps = tm.getDependencies(tid);
                 std::cout << "[";
                 for (auto d : deps){

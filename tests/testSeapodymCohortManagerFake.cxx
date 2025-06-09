@@ -1,6 +1,6 @@
 #include <iostream>
 #include <SeapodymCohortFake.h>
-#include <SeapodymTaskManager.h>
+#include <SeapodymCohortManager.h>
 
 /**
  * Test function
@@ -13,7 +13,7 @@ void test(int na, int nw, int nt) {
     const int milliseconds_step = 15;
     const int data_size = 100;
 
-    SeapodymTaskManager tm(na, nw, nt);
+    SeapodymCohortManager tm(na, nw, nt);
     dvar_vector no_param;
 
     // iterate over the workers
@@ -21,7 +21,7 @@ void test(int na, int nw, int nt) {
         std::cout << "test(" << na << ", " << nw << ", " << nt << ") worker " << iw << ": ";
 
         // get the initial tasks for this worker
-        auto tasks = tm.getInitTaskIds(iw);
+        auto tasks = tm.getInitCohortIds(iw);
 
         // itereate over the inital tasks
         for (auto t : tasks) {
@@ -43,7 +43,7 @@ void test(int na, int nw, int nt) {
                 }
 
                 // are there more tasks to execute?
-                tid = tm.getNextTask(tid);
+                tid = tm.getNextCohort(tid);
                 delete sc;
                 sc = new SeapodymCohortFake(milliseconds_step, data_size, tid);
                 auto deps = tm.getDependencies(tid);

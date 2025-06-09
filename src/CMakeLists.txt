@@ -4,7 +4,7 @@ include_directories(
 )
 set(SRCS
    SeapodymCohortFake.cpp
-   SeapodymTaskManager.cpp
+   SeapodymCohortManager.cpp
    SeapodymCourier.cpp
    CmdLineArgParser.cpp
    )

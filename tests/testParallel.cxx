@@ -1,5 +1,5 @@
 #include <SeapodymCohortFake.h>
-#include <SeapodymTaskManager.h>
+#include <SeapodymCohortManager.h>
 #include <SeapodymCourier.h>
 #include <CmdLineArgParser.h>
 #include <mpi.h>
@@ -61,13 +61,13 @@ int main(int argc, char** argv) {
         std::cout << "Number of age groups: " << numAgeGroups << ", Total number of time steps: " << nt << std::endl;
     }
 
-    SeapodymTaskManager taskManager(numAgeGroups, numWorkers, nt);
+    SeapodymCohortManager taskManager(numAgeGroups, numWorkers, nt);
     SeapodymCourier courier(MPI_COMM_WORLD);
 
     std::vector<double> data(nd, workerId);
     courier.expose(data.data(), nd);
 
-    std::vector<int> taskIds = taskManager.getInitTaskIds(workerId);
+    std::vector<int> taskIds = taskManager.getInitCohortIds(workerId);
 
     // Initialize the step counter for each task
     std::vector<int> step_counter(taskIds.size(), 0);
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
             // Find out whether we have to switch to another task
             if (step_counter[itask] >= numSteps) {
                 // Switch over to a new task, reset the step counter and the number of steps
-                taskIds[itask] = taskManager.getNextTask(taskId);
+                taskIds[itask] = taskManager.getNextCohort(taskId);
                 step_counter[itask] = 0;
                 taskNumSteps[itask] = taskManager.getNumSteps(taskIds[itask]);
 
