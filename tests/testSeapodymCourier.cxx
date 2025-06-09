@@ -54,12 +54,11 @@ int main(int argc, char* argv[]) {
             std::cout << std::endl;
         }
 
-        // test the accumulate function
+        // test the fetch function
         std::set<int> source_workers;
         for (int i = 1; i < world_size; ++i) {
-            source_workers.insert(i);
+            courier.fetch(i);
         }
-        courier.accumulate(source_workers, 0);
 
         // Clean up the SeapodymCourier instance
         // The destructor will automatically free the MPI window

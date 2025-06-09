@@ -58,16 +58,9 @@ class SeapodymCourier {
 
     /**
      * @brief Fetch data from a remote process and store it in the local data array
-     * @param target_worker Rank of the target process from which to fetch data
+     * @param source_worker Rank of the target process from which to fetch data
      */
-    void fetch(int target_worker);
-
-    /**
-     * @brief Accumulate/sum the data from multiple source workers into a target worker's local data array
-     * @param source_workers Set of ranks of source processes from which to fetch data
-     * @param target_worker Rank of the target process from which to fetch data
-     */
-    void accumulate(const std::set<int>& source_workers, int target_worker);
+    void fetch(int source_worker);
 
     /**
      * @brief Free the MPI window and reset the data pointer
