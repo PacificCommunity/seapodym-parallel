@@ -112,12 +112,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae52ed7ffbb7e2fed9b5cf59e523cdf39" id="r_ae52ed7ffbb7e2fed9b5cf59e523cdf39"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae52ed7ffbb7e2fed9b5cf59e523cdf39">expose</a> (double *data, int data_size)</td></tr>
 <tr class="memdesc:ae52ed7ffbb7e2fed9b5cf59e523cdf39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Expose the memory to other processes.  <br /></td></tr>
 <tr class="separator:ae52ed7ffbb7e2fed9b5cf59e523cdf39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b14ecd41a3b44ee75948adb695da284" id="r_a3b14ecd41a3b44ee75948adb695da284"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b14ecd41a3b44ee75948adb695da284">fetch</a> (int target_worker)</td></tr>
-<tr class="memdesc:a3b14ecd41a3b44ee75948adb695da284"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch data from a remote process and store it in the local data array.  <br /></td></tr>
-<tr class="separator:a3b14ecd41a3b44ee75948adb695da284"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3bb5f978dec32bf7c97a1d497cac32fd" id="r_a3bb5f978dec32bf7c97a1d497cac32fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3bb5f978dec32bf7c97a1d497cac32fd">accumulate</a> (const std::set&lt; int &gt; &amp;source_workers, int target_worker)</td></tr>
-<tr class="memdesc:a3bb5f978dec32bf7c97a1d497cac32fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulate/sum the data from multiple source workers into a target worker's local data array.  <br /></td></tr>
-<tr class="separator:a3bb5f978dec32bf7c97a1d497cac32fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8926f148c1694d2ae4e7564b41f60cb6" id="r_a8926f148c1694d2ae4e7564b41f60cb6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8926f148c1694d2ae4e7564b41f60cb6">fetch</a> (int source_worker)</td></tr>
+<tr class="memdesc:a8926f148c1694d2ae4e7564b41f60cb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch data from a remote process and store it in the local data array.  <br /></td></tr>
+<tr class="separator:a8926f148c1694d2ae4e7564b41f60cb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a774fcc2ea3b74d81998550d73f1b0c29" id="r_a774fcc2ea3b74d81998550d73f1b0c29"><td class="memItemLeft" align="right" valign="top"><a id="a774fcc2ea3b74d81998550d73f1b0c29" name="a774fcc2ea3b74d81998550d73f1b0c29"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 <tr class="memdesc:a774fcc2ea3b74d81998550d73f1b0c29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free the MPI window and reset the data pointer. <br /></td></tr>
@@ -165,36 +162,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a3bb5f978dec32bf7c97a1d497cac32fd" name="a3bb5f978dec32bf7c97a1d497cac32fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3bb5f978dec32bf7c97a1d497cac32fd">&#9670;&#160;</a></span>accumulate()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SeapodymCourier::accumulate </td>
-          <td>(</td>
-          <td class="paramtype">const std::set&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>source_workers</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>target_worker</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Accumulate/sum the data from multiple source workers into a target worker's local data array. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">source_workers</td><td>Set of ranks of source processes from which to fetch data </td></tr>
-    <tr><td class="paramname">target_worker</td><td>Rank of the target process from which to fetch data </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="ae52ed7ffbb7e2fed9b5cf59e523cdf39" name="ae52ed7ffbb7e2fed9b5cf59e523cdf39"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae52ed7ffbb7e2fed9b5cf59e523cdf39">&#9670;&#160;</a></span>expose()</h2>
 
@@ -225,8 +192,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 
 </div>
 </div>
-<a id="a3b14ecd41a3b44ee75948adb695da284" name="a3b14ecd41a3b44ee75948adb695da284"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3b14ecd41a3b44ee75948adb695da284">&#9670;&#160;</a></span>fetch()</h2>
+<a id="a8926f148c1694d2ae4e7564b41f60cb6" name="a8926f148c1694d2ae4e7564b41f60cb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8926f148c1694d2ae4e7564b41f60cb6">&#9670;&#160;</a></span>fetch()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -234,7 +201,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
         <tr>
           <td class="memname">void SeapodymCourier::fetch </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>target_worker</em></span></td><td>)</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>source_worker</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -243,7 +210,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 <p>Fetch data from a remote process and store it in the local data array. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">target_worker</td><td>Rank of the target process from which to fetch data </td></tr>
+    <tr><td class="paramname">source_worker</td><td>Rank of the target process from which to fetch data </td></tr>
   </table>
   </dd>
 </dl>
