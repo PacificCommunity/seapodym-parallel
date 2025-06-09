@@ -94,69 +94,70 @@ $(function(){ initResizable(false); });
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &lt;mpi.h&gt;</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &lt;set&gt;</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#ifndef SEAPODYM_COURIER</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#define SEAPODYM_COURIER</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#ifndef SEAPODYM_COURIER</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#define SEAPODYM_COURIER</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">using </span>Tuple3 = std::tuple&lt;MPI_Win, double*, std::size_t&gt;;</div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span></div>
-<div class="foldopen" id="foldopen00015" data-start="{" data-end="};">
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="classSeapodymCourier.html">   15</a></span><span class="keyword">class </span><a class="code hl_function" href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier</a> {</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <span class="comment">// MPI communicator to use for communication</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        MPI_Comm comm;</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="comment">// Pointer to the data exposed by this worker. This class does not own this pointer, </span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="comment">// it is provided by the user. The data is expected to be allocated by the user and </span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        <span class="comment">// should remain valid for the lifetime of this SeapodymCourier instance.</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="keywordtype">double</span> *data;</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="keywordtype">int</span> data_size; </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="comment">// MPI window for the exposed data</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        MPI_Win win;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="comment">// Local MPI rank</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordtype">int</span> local_rank;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <a class="code hl_function" href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier</a>(MPI_Comm comm=MPI_COMM_WORLD);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <a class="code hl_function" href="classSeapodymCourier.html#adec831829f685120d8b5c1643a8742de">~SeapodymCourier</a>();</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882">   50</a></span>    <span class="keywordtype">double</span>* <a class="code hl_function" href="classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882">getDataPtr</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> this-&gt;data;}</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classSeapodymCourier.html#ae52ed7ffbb7e2fed9b5cf59e523cdf39">expose</a>(<span class="keywordtype">double</span>* data, <span class="keywordtype">int</span> data_size);</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classSeapodymCourier.html#a8926f148c1694d2ae4e7564b41f60cb6">fetch</a>(<span class="keywordtype">int</span> source_worker);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span></div>
-<div class="foldopen" id="foldopen00068" data-start="{" data-end="}">
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classSeapodymCourier.html#a774fcc2ea3b74d81998550d73f1b0c29">   68</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classSeapodymCourier.html#a774fcc2ea3b74d81998550d73f1b0c29">free</a>() {</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordflow">if</span> (this-&gt;win != MPI_WIN_NULL) {</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            MPI_Win_free(&amp;this-&gt;win);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        }</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        this-&gt;data = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        this-&gt;data_size = 0;</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    }</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">using </span>Tuple3 = std::tuple&lt;MPI_Win, double*, std::size_t&gt;;</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span></div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="};">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classSeapodymCourier.html">   16</a></span><span class="keyword">class </span><a class="code hl_function" href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier</a> {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        <span class="comment">// MPI communicator to use for communication</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        MPI_Comm comm;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="comment">// Pointer to the data exposed by this worker. This class does not own this pointer, </span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        <span class="comment">// it is provided by the user. The data is expected to be allocated by the user and </span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="comment">// should remain valid for the lifetime of this SeapodymCourier instance.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="keywordtype">double</span> *data;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        <span class="keywordtype">int</span> data_size; </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="comment">// MPI window for the exposed data</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        MPI_Win win;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="comment">// Local MPI rank</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keywordtype">int</span> local_rank;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_function" href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier</a>(MPI_Comm comm=MPI_COMM_WORLD);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_function" href="classSeapodymCourier.html#adec831829f685120d8b5c1643a8742de">~SeapodymCourier</a>();</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882">   51</a></span>    <span class="keywordtype">double</span>* <a class="code hl_function" href="classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882">getDataPtr</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> this-&gt;data;}</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classSeapodymCourier.html#ae52ed7ffbb7e2fed9b5cf59e523cdf39">expose</a>(<span class="keywordtype">double</span>* data, <span class="keywordtype">int</span> data_size);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    std::vector&lt;double&gt; <a class="code hl_function" href="classSeapodymCourier.html#ad47286e31a166fbc52c9c3e522e6e2b9">fetch</a>(<span class="keywordtype">int</span> source_worker);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span></div>
+<div class="foldopen" id="foldopen00070" data-start="{" data-end="}">
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classSeapodymCourier.html#a774fcc2ea3b74d81998550d73f1b0c29">   70</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classSeapodymCourier.html#a774fcc2ea3b74d81998550d73f1b0c29">free</a>() {</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keywordflow">if</span> (this-&gt;win != MPI_WIN_NULL) {</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            MPI_Win_free(&amp;this-&gt;win);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        }</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        this-&gt;data = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        this-&gt;data_size = 0;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    }</div>
 </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="comment">// Disable copy and assignment operations</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="comment">// to prevent accidental copying of the SeapodymCourier instance</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="comment">// This is important because the class manages an MPI window and data pointer</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="comment">// which should not be copied or assigned.</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <a class="code hl_function" href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier</a>(<span class="keyword">const</span> <a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp;) = <span class="keyword">delete</span>; <span class="comment">// Disable copy constructor</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp; operator=(<span class="keyword">const</span> <a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp;) = <span class="keyword">delete</span>; <span class="comment">// Disable assignment operator</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <a class="code hl_function" href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier</a>(<a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp;&amp; other) <span class="keyword">noexcept</span>; <span class="comment">// Move constructor</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp; operator=(<a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp;&amp; other) <span class="keyword">noexcept</span>; <span class="comment">// Move assignment operator</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>};</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="comment">// Disable copy and assignment operations</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="comment">// to prevent accidental copying of the SeapodymCourier instance</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="comment">// This is important because the class manages an MPI window and data pointer</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="comment">// which should not be copied or assigned.</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <a class="code hl_function" href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier</a>(<span class="keyword">const</span> <a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp;) = <span class="keyword">delete</span>; <span class="comment">// Disable copy constructor</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp; operator=(<span class="keyword">const</span> <a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp;) = <span class="keyword">delete</span>; <span class="comment">// Disable assignment operator</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <a class="code hl_function" href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier</a>(<a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp;&amp; other) <span class="keyword">noexcept</span>; <span class="comment">// Move constructor</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp; operator=(<a class="code hl_class" href="classSeapodymCourier.html">SeapodymCourier</a>&amp;&amp; other) <span class="keyword">noexcept</span>; <span class="comment">// Move assignment operator</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>};</div>
 </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#endif </span><span class="comment">// SEAPODYM_COURIER</span></div>
-<div class="ttc" id="aclassSeapodymCourier_html"><div class="ttname"><a href="classSeapodymCourier.html">SeapodymCourier</a></div><div class="ttdoc">SeapodymCourier class for managing memory exposure and data fetching between MPI processes.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.h:15</div></div>
-<div class="ttc" id="aclassSeapodymCourier_html_a774fcc2ea3b74d81998550d73f1b0c29"><div class="ttname"><a href="classSeapodymCourier.html#a774fcc2ea3b74d81998550d73f1b0c29">SeapodymCourier::free</a></div><div class="ttdeci">void free()</div><div class="ttdoc">Free the MPI window and reset the data pointer.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.h:68</div></div>
-<div class="ttc" id="aclassSeapodymCourier_html_a8926f148c1694d2ae4e7564b41f60cb6"><div class="ttname"><a href="classSeapodymCourier.html#a8926f148c1694d2ae4e7564b41f60cb6">SeapodymCourier::fetch</a></div><div class="ttdeci">void fetch(int source_worker)</div><div class="ttdoc">Fetch data from a remote process and store it in the local data array.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.cpp:31</div></div>
-<div class="ttc" id="aclassSeapodymCourier_html_ac63cac5667d7f923915b74b96fbdc882"><div class="ttname"><a href="classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882">SeapodymCourier::getDataPtr</a></div><div class="ttdeci">double * getDataPtr() const</div><div class="ttdoc">Get the pointer to the exposed data.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.h:50</div></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#endif </span><span class="comment">// SEAPODYM_COURIER</span></div>
+<div class="ttc" id="aclassSeapodymCourier_html"><div class="ttname"><a href="classSeapodymCourier.html">SeapodymCourier</a></div><div class="ttdoc">SeapodymCourier class for managing memory exposure and data fetching between MPI processes.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.h:16</div></div>
+<div class="ttc" id="aclassSeapodymCourier_html_a774fcc2ea3b74d81998550d73f1b0c29"><div class="ttname"><a href="classSeapodymCourier.html#a774fcc2ea3b74d81998550d73f1b0c29">SeapodymCourier::free</a></div><div class="ttdeci">void free()</div><div class="ttdoc">Free the MPI window and reset the data pointer.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.h:70</div></div>
+<div class="ttc" id="aclassSeapodymCourier_html_ac63cac5667d7f923915b74b96fbdc882"><div class="ttname"><a href="classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882">SeapodymCourier::getDataPtr</a></div><div class="ttdeci">double * getDataPtr() const</div><div class="ttdoc">Get the pointer to the exposed data.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.h:51</div></div>
+<div class="ttc" id="aclassSeapodymCourier_html_ad47286e31a166fbc52c9c3e522e6e2b9"><div class="ttname"><a href="classSeapodymCourier.html#ad47286e31a166fbc52c9c3e522e6e2b9">SeapodymCourier::fetch</a></div><div class="ttdeci">std::vector&lt; double &gt; fetch(int source_worker)</div><div class="ttdoc">Fetch data from a remote process and store it in the local data array.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.cpp:31</div></div>
 <div class="ttc" id="aclassSeapodymCourier_html_adec831829f685120d8b5c1643a8742de"><div class="ttname"><a href="classSeapodymCourier.html#adec831829f685120d8b5c1643a8742de">SeapodymCourier::~SeapodymCourier</a></div><div class="ttdeci">~SeapodymCourier()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.cpp:15</div></div>
 <div class="ttc" id="aclassSeapodymCourier_html_ae52ed7ffbb7e2fed9b5cf59e523cdf39"><div class="ttname"><a href="classSeapodymCourier.html#ae52ed7ffbb7e2fed9b5cf59e523cdf39">SeapodymCourier::expose</a></div><div class="ttdeci">void expose(double *data, int data_size)</div><div class="ttdoc">Expose the memory to other processes.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.cpp:20</div></div>
 <div class="ttc" id="aclassSeapodymCourier_html_ae91c61cd645742324ac8cb8886146b51"><div class="ttname"><a href="classSeapodymCourier.html#ae91c61cd645742324ac8cb8886146b51">SeapodymCourier::SeapodymCourier</a></div><div class="ttdeci">SeapodymCourier(MPI_Comm comm=MPI_COMM_WORLD)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> SeapodymCourier.cpp:7</div></div>

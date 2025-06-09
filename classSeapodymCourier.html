@@ -112,9 +112,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae52ed7ffbb7e2fed9b5cf59e523cdf39" id="r_ae52ed7ffbb7e2fed9b5cf59e523cdf39"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae52ed7ffbb7e2fed9b5cf59e523cdf39">expose</a> (double *data, int data_size)</td></tr>
 <tr class="memdesc:ae52ed7ffbb7e2fed9b5cf59e523cdf39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Expose the memory to other processes.  <br /></td></tr>
 <tr class="separator:ae52ed7ffbb7e2fed9b5cf59e523cdf39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8926f148c1694d2ae4e7564b41f60cb6" id="r_a8926f148c1694d2ae4e7564b41f60cb6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8926f148c1694d2ae4e7564b41f60cb6">fetch</a> (int source_worker)</td></tr>
-<tr class="memdesc:a8926f148c1694d2ae4e7564b41f60cb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch data from a remote process and store it in the local data array.  <br /></td></tr>
-<tr class="separator:a8926f148c1694d2ae4e7564b41f60cb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad47286e31a166fbc52c9c3e522e6e2b9" id="r_ad47286e31a166fbc52c9c3e522e6e2b9"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad47286e31a166fbc52c9c3e522e6e2b9">fetch</a> (int source_worker)</td></tr>
+<tr class="memdesc:ad47286e31a166fbc52c9c3e522e6e2b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch data from a remote process and store it in the local data array.  <br /></td></tr>
+<tr class="separator:ad47286e31a166fbc52c9c3e522e6e2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a774fcc2ea3b74d81998550d73f1b0c29" id="r_a774fcc2ea3b74d81998550d73f1b0c29"><td class="memItemLeft" align="right" valign="top"><a id="a774fcc2ea3b74d81998550d73f1b0c29" name="a774fcc2ea3b74d81998550d73f1b0c29"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 <tr class="memdesc:a774fcc2ea3b74d81998550d73f1b0c29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free the MPI window and reset the data pointer. <br /></td></tr>
@@ -192,14 +192,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 
 </div>
 </div>
-<a id="a8926f148c1694d2ae4e7564b41f60cb6" name="a8926f148c1694d2ae4e7564b41f60cb6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8926f148c1694d2ae4e7564b41f60cb6">&#9670;&#160;</a></span>fetch()</h2>
+<a id="ad47286e31a166fbc52c9c3e522e6e2b9" name="ad47286e31a166fbc52c9c3e522e6e2b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad47286e31a166fbc52c9c3e522e6e2b9">&#9670;&#160;</a></span>fetch()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SeapodymCourier::fetch </td>
+          <td class="memname">std::vector&lt; double &gt; SeapodymCourier::fetch </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>source_worker</em></span></td><td>)</td>
           <td></td>
@@ -214,6 +214,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>data </dd></dl>
 
 </div>
 </div>
