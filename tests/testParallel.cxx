@@ -68,33 +68,48 @@ int main(int argc, char** argv) {
     std::vector<double> data(nd, workerId);
     courier.expose(data.data(), nd);
 
-    std::vector<int> initTaskIds = taskManager.getInitTaskIds(workerId);
+    std::vector<int> taskIds = taskManager.getInitTaskIds(workerId);
+    std::vector<int> taskNumSteps;
 
-    // NEED TO REVERSE THE ORDER OF THIS LOOP WITH THE STEP LOOP BELOW
-    for (auto itask = 0; itask < initTaskIds.size(); ++itask) {
-        int taskId = initTaskIds[itask];
+    // Initialize the step counter for each task
+    std::vector<int> step_counter(taskIds.size(), 0);
 
-        // step index of each cohort
-        int step_counter = 0;
-        int numSteps = taskManager.getNumSteps(taskId);
+    // Initialize the number of steps for each task
+    taskNumSteps.reserve(taskIds.size());
+    for (auto taskId : taskIds) {
+        taskNumSteps.push_back(taskManager.getNumSteps(taskId));
+    }
 
-        // istep is the global time step index
-        for (auto istep = 0; istep < nt; ++istep) {
+    // Iterate over the global time steps
+    for (auto istep = 0; istep < nt; ++istep) {
+
+        // Iterate over the tasks assigned to this worker
+        for (auto itask = 0; itask < taskIds.size(); ++itask) {
+        
+            // Get the task Id
+            int taskId = taskIds[itask];
+
+            // Get the number of steps for this task
+            int numSteps = taskNumSteps[itask];
+
             std::cout <<   "Worker " << workerId << " processing task " << taskId 
-                      << " at time step " << istep << " with " << numSteps - step_counter << " remaining steps." << std::endl;  
+                      << " at time step " << istep << " with " << numSteps - step_counter[itask] << " remaining steps." << std::endl;  
             
             // PERFORM THE STEP HERE.... (TO DO)
             
-            step_counter++;
-            if (step_counter >= numSteps) {
-                // Switch over to a new task and reset the step counter
-                step_counter = 0;
-                taskId = taskManager.getNextTask(taskId);
-                numSteps = taskManager.getNumSteps(taskId);
+            // Done with the step
+            step_counter[itask]++;
 
+            // Find out whether we have to switch to another task
+            if (step_counter[itask] >= numSteps) {
+                // Switch over to a new task, reset the step counter and the number of steps
+                taskIds[itask] = taskManager.getNextTask(taskId);
+                step_counter[itask] = 0;
+                taskNumSteps[itask] = taskManager.getNumSteps(taskIds[itask]);
+
+                // Accumulate the data from all workers
                 std:vector<double> sum_data(nd, 0.0);
-                // Fetch the data from the other workers
-                // Consider accumulating the data (TO DO)
+                // Could be using MPI_Accumulate instead
                 for (auto iw = 0; iw < numWorkers; ++iw) {
                     if (iw != workerId) {
                         std::vector<double> fetchedData = courier.fetch(iw);
@@ -106,8 +121,9 @@ int main(int argc, char** argv) {
                         std::cout << std::endl;
                     }
                 }
-             }
+            }
         }
+
     }
 
 
