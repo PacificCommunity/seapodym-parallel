@@ -32,11 +32,11 @@ int main(int argc, char** argv) {
 
     // Number of age groups, time steps, milliseconds per step, and number of doubles
     // These values are set by the command line arguments
-    int na = cmdLine.get<int>("-na");
+    int numAgeGroups = cmdLine.get<int>("-na");
     int nt = cmdLine.get<int>("-nt");
     int nm = cmdLine.get<int>("-nm");
     int nd = cmdLine.get<int>("-nd");
-    if (na <= 0 || nt <= 0 || nm <= 0 || nd <= 0) {
+    if (numAgeGroups <= 0 || nt <= 0 || nm <= 0 || nd <= 0) {
         if (workerId == 0) {
             // Print an error message only from the master worker
             std::cerr << "Invalid command line arguments. All values must be positive integers." << std::endl;
@@ -45,10 +45,10 @@ int main(int argc, char** argv) {
         MPI_Finalize();
         return 1;
     }
-    if (na <= 0 || nt <= 0 || na < numWorkers) {
+    if (numAgeGroups <= 0 || nt <= 0 || numAgeGroups < numWorkers) {
         if (workerId == 0) {
             // Print an error message only from the master worker
-            std::cerr << "Invalid number of age groups (" << na << "), time steps (" << nt << ") or workers (" << numWorkers << ").\n";
+            std::cerr << "Invalid number of age groups (" << numAgeGroups << "), time steps (" << nt << ") or workers (" << numWorkers << ").\n";
             std::cerr << "Number of age groups must be positive and at least equal to the number of workers." << std::endl;
             cmdLine.help();
         }
@@ -58,26 +58,27 @@ int main(int argc, char** argv) {
 
     if (workerId == 0) {
         std::cout << "Running with " << numWorkers << " workers." << std::endl;
-        std::cout << "Number of age groups: " << na << ", Total number of time steps: " << nt << std::endl;
+        std::cout << "Number of age groups: " << numAgeGroups << ", Total number of time steps: " << nt << std::endl;
     }
 
-
-    SeapodymTaskManager taskManager(na, numWorkers, nt);
+    SeapodymTaskManager taskManager(numAgeGroups, numWorkers, nt);
     SeapodymCourier courier(MPI_COMM_WORLD);
 
     std::vector<double> data(nd, workerId);
     courier.expose(data.data(), nd);
 
     std::vector<int> taskIds = taskManager.getInitTaskIds(workerId);
-    std::vector<int> taskNumSteps;
 
     // Initialize the step counter for each task
     std::vector<int> step_counter(taskIds.size(), 0);
 
     // Initialize the number of steps for each task
-    taskNumSteps.reserve(taskIds.size());
-    for (auto taskId : taskIds) {
-        taskNumSteps.push_back(taskManager.getNumSteps(taskId));
+    std::vector<int> taskNumSteps(taskIds.size());
+    std::vector<SeapodymCohortFake*> cohortsPerWorker(taskIds.size());
+    for (auto i = 0; i < taskIds.size(); ++i) {
+        taskNumSteps[i] = taskManager.getNumSteps(taskIds[i]);
+        SeapodymCohortFake* cohortPtr = new SeapodymCohortFake(nm, nd, taskIds[i]);
+        cohortsPerWorker[i] = cohortPtr;
     }
 
     // Iterate over the global time steps
@@ -95,7 +96,8 @@ int main(int argc, char** argv) {
             std::cout <<   "Worker " << workerId << " processing task " << taskId 
                       << " at time step " << istep << " with " << numSteps - step_counter[itask] << " remaining steps." << std::endl;  
             
-            // PERFORM THE STEP HERE.... (TO DO)
+            // Simulate the time taken for a step
+            cohortsPerWorker[itask]->stepForward(dvar_vector());
             
             // Done with the step
             step_counter[itask]++;
@@ -126,6 +128,11 @@ int main(int argc, char** argv) {
 
     }
 
+    for (auto cohortPtr : cohortsPerWorker) {
+        if (cohortPtr) {
+            delete cohortPtr; // Free the memory allocated for the cohort
+        }
+    }
 
     courier.free(); // Free the MPI window
 
