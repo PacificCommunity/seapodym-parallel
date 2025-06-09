@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <set>
+#include <vector>
 #ifndef SEAPODYM_COURIER
 #define SEAPODYM_COURIER
 
@@ -59,8 +60,9 @@ class SeapodymCourier {
     /**
      * @brief Fetch data from a remote process and store it in the local data array
      * @param source_worker Rank of the target process from which to fetch data
+     * @return data
      */
-    void fetch(int source_worker);
+    std::vector<double> fetch(int source_worker);
 
     /**
      * @brief Free the MPI window and reset the data pointer

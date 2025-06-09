@@ -27,14 +27,16 @@ SeapodymCourier::expose(double* data, int data_size) {
     MPI_Win_create(data, data_size * sizeof(double), sizeof(double), MPI_INFO_NULL, this->comm, &this->win);
 }
 
-void 
+std::vector<double>
 SeapodymCourier::fetch(int source_rank) {
 
     if (this->local_rank == source_rank) {
         // If the source rank is the same as the local rank, we can just copy the data
         // This avoids unnecessary MPI calls when fetching from self
-        return;
+        return std::vector<double>(this->data, this->data + this->data_size);
     }
+
+    std::vector<double> res(this->data_size);
 
     // Ensure the window is ready for access
     // MPI_LOCK_SHARED allows multiple processes to read from the window simultaneously
@@ -43,8 +45,10 @@ SeapodymCourier::fetch(int source_rank) {
     MPI_Win_lock(MPI_LOCK_SHARED, source_rank, MPI_MODE_NOCHECK, this->win);
     
     // Fetch the data from the remote process
-    MPI_Get(this->data, this->data_size, MPI_DOUBLE, source_rank, 0, this->data_size, MPI_DOUBLE, this->win);
+    MPI_Get(res.data(), this->data_size, MPI_DOUBLE, source_rank, 0, this->data_size, MPI_DOUBLE, this->win);
     
     // Complete the access to the window
     MPI_Win_unlock(source_rank, this->win);
+
+    return res;
 }

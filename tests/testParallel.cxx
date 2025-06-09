@@ -76,17 +76,28 @@ int main(int argc, char** argv) {
         int numSteps = taskManager.getNumSteps(taskId);
         for (auto istep = 0; istep < nt; ++istep) {
             std::cout <<   "Worker " << workerId << " processing task " << taskId 
-                      << " at time step " << istep << " with " << numSteps << " steps." << std::endl;  
+                      << " at time step " << istep << " with " << numSteps - step_counter << " remaining steps." << std::endl;  
             step_counter++;
             if (step_counter >= numSteps) {
                 // Switch over to a new task and reset the step counter
                 step_counter = 0;
                 taskId = taskManager.getNextTask(taskId);
                 numSteps = taskManager.getNumSteps(taskId);
-                // fetch the data from the other workers
-                courier.fetch(0); //MPI_ANY_SOURCE); // Fetch data from any source worker
-                double* fetchedData = courier.getDataPtr();
-            }
+
+                std:vector<double> sum_data(nd, 0.0);
+                // Fetch the data from the other workers
+                for (auto iw = 0; iw < numWorkers; ++iw) {
+                    if (iw != workerId) {
+                        std::vector<double> fetchedData = courier.fetch(iw);
+                        std::cout << "Worker " << workerId << " fetched data from worker " << iw << ": ";
+                        for (int i = 0; i < nd; ++i) {
+                            std::cout << fetchedData[i] << " ";
+                            sum_data[i] += fetchedData[i]; // Sum the data from all workers
+                        }
+                        std::cout << std::endl;
+                    }
+                }
+             }
         }
     }
 
