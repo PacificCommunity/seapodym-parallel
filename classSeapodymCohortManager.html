@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>seapodym-parallel: SeapodymTaskManager Class Reference</title>
+<title>seapodym-parallel: SeapodymCohortManager Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -87,41 +87,41 @@ $(function(){ initResizable(false); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="classSeapodymTaskManager-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">SeapodymTaskManager Class Reference</div></div>
+<a href="classSeapodymCohortManager-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">SeapodymCohortManager Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="classSeapodymTaskManager.html" title="The SeapodymTaskManager knows how to distribute tasks across workers, how many times a tasks needs to...">SeapodymTaskManager</a> knows how to distribute tasks across workers, how many times a tasks needs to be executed and what the next task should be given to a worker.  
+<p>The SeapodymTaskManager knows how to distribute task cohorts across workers, how many times a cohort task needs to be executed and what the next cohort task should be given to a worker.  
  <a href="#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="SeapodymTaskManager_8h_source.html">SeapodymTaskManager.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="SeapodymCohortManager_8h_source.html">SeapodymCohortManager.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af9912299262d32e56de93073fb027ad4" id="r_af9912299262d32e56de93073fb027ad4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9912299262d32e56de93073fb027ad4">SeapodymTaskManager</a> (int numAgeGroups, int numWorkers, int numTimeSteps)</td></tr>
-<tr class="separator:af9912299262d32e56de93073fb027ad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b7044e4972c24e9ff4cdcb28c2ad53b" id="r_a8b7044e4972c24e9ff4cdcb28c2ad53b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b7044e4972c24e9ff4cdcb28c2ad53b">getInitTaskIds</a> (int workerId) const</td></tr>
-<tr class="separator:a8b7044e4972c24e9ff4cdcb28c2ad53b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a98b3a68ec04a28d09cdd9c7441ddfb" id="r_a8a98b3a68ec04a28d09cdd9c7441ddfb"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a98b3a68ec04a28d09cdd9c7441ddfb">getNumSteps</a> (int taskId) const</td></tr>
-<tr class="separator:a8a98b3a68ec04a28d09cdd9c7441ddfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3230a6fd3b713dc7e026fb6e0c2f2901" id="r_a3230a6fd3b713dc7e026fb6e0c2f2901"><td class="memItemLeft" align="right" valign="top">std::set&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3230a6fd3b713dc7e026fb6e0c2f2901">getDependencies</a> (int taskId) const</td></tr>
-<tr class="separator:a3230a6fd3b713dc7e026fb6e0c2f2901"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6851ee6dfbeb0ff23c44280a73c3e25b" id="r_a6851ee6dfbeb0ff23c44280a73c3e25b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6851ee6dfbeb0ff23c44280a73c3e25b">getNextTask</a> (int taskId) const</td></tr>
-<tr class="separator:a6851ee6dfbeb0ff23c44280a73c3e25b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c122d88a79633f504866db9dce7f3c3" id="r_a2c122d88a79633f504866db9dce7f3c3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c122d88a79633f504866db9dce7f3c3">SeapodymCohortManager</a> (int numAgeGroups, int numWorkers, int numTimeSteps)</td></tr>
+<tr class="separator:a2c122d88a79633f504866db9dce7f3c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d90c24a146c23af511eb06fbc942c6a" id="r_a8d90c24a146c23af511eb06fbc942c6a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8d90c24a146c23af511eb06fbc942c6a">getInitCohortIds</a> (int workerId) const</td></tr>
+<tr class="separator:a8d90c24a146c23af511eb06fbc942c6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae34f18f3427e70e294759cffa82850a9" id="r_ae34f18f3427e70e294759cffa82850a9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae34f18f3427e70e294759cffa82850a9">getNumSteps</a> (int cohortId) const</td></tr>
+<tr class="separator:ae34f18f3427e70e294759cffa82850a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae15701826cfb8393928ca0d0d2af49f5" id="r_ae15701826cfb8393928ca0d0d2af49f5"><td class="memItemLeft" align="right" valign="top">std::set&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae15701826cfb8393928ca0d0d2af49f5">getDependencies</a> (int cohortId) const</td></tr>
+<tr class="separator:ae15701826cfb8393928ca0d0d2af49f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5df2ede3e48e612d6673338dfdd5b796" id="r_a5df2ede3e48e612d6673338dfdd5b796"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5df2ede3e48e612d6673338dfdd5b796">getNextCohort</a> (int cohortId) const</td></tr>
+<tr class="separator:a5df2ede3e48e612d6673338dfdd5b796"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The <a class="el" href="classSeapodymTaskManager.html" title="The SeapodymTaskManager knows how to distribute tasks across workers, how many times a tasks needs to...">SeapodymTaskManager</a> knows how to distribute tasks across workers, how many times a tasks needs to be executed and what the next task should be given to a worker. </p>
-<p>Class <a class="el" href="classSeapodymTaskManager.html" title="The SeapodymTaskManager knows how to distribute tasks across workers, how many times a tasks needs to...">SeapodymTaskManager</a> </p>
+<div class="textblock"><p>The SeapodymTaskManager knows how to distribute task cohorts across workers, how many times a cohort task needs to be executed and what the next cohort task should be given to a worker. </p>
+<p>Class <a class="el" href="classSeapodymCohortManager.html" title="The SeapodymTaskManager knows how to distribute task cohorts across workers, how many times a cohort ...">SeapodymCohortManager</a> </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="af9912299262d32e56de93073fb027ad4" name="af9912299262d32e56de93073fb027ad4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af9912299262d32e56de93073fb027ad4">&#9670;&#160;</a></span>SeapodymTaskManager()</h2>
+<a id="a2c122d88a79633f504866db9dce7f3c3" name="a2c122d88a79633f504866db9dce7f3c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c122d88a79633f504866db9dce7f3c3">&#9670;&#160;</a></span>SeapodymCohortManager()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">SeapodymTaskManager::SeapodymTaskManager </td>
+          <td class="memname">SeapodymCohortManager::SeapodymCohortManager </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numAgeGroups</em></span>, </td>
         </tr>
@@ -145,100 +145,100 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>list of tasks </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>list of cohort tasks </dd></dl>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a3230a6fd3b713dc7e026fb6e0c2f2901" name="a3230a6fd3b713dc7e026fb6e0c2f2901"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3230a6fd3b713dc7e026fb6e0c2f2901">&#9670;&#160;</a></span>getDependencies()</h2>
+<a id="ae15701826cfb8393928ca0d0d2af49f5" name="ae15701826cfb8393928ca0d0d2af49f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae15701826cfb8393928ca0d0d2af49f5">&#9670;&#160;</a></span>getDependencies()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::set&lt; int &gt; SeapodymTaskManager::getDependencies </td>
+          <td class="memname">std::set&lt; int &gt; SeapodymCohortManager::getDependencies </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>taskId</em></span></td><td>)</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cohortId</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the dependencies of a new task on othe preceeding tasks </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Get the dependencies of a new cohort task on other preceding tasks </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">taskId</td><td>task ID </td></tr>
+    <tr><td class="paramname">cohortId</td><td>cohort task ID </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>all the other tasks that feed into this task </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>all the other tasks that feed into this cohort task </dd></dl>
 
 </div>
 </div>
-<a id="a8b7044e4972c24e9ff4cdcb28c2ad53b" name="a8b7044e4972c24e9ff4cdcb28c2ad53b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b7044e4972c24e9ff4cdcb28c2ad53b">&#9670;&#160;</a></span>getInitTaskIds()</h2>
+<a id="a8d90c24a146c23af511eb06fbc942c6a" name="a8d90c24a146c23af511eb06fbc942c6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d90c24a146c23af511eb06fbc942c6a">&#9670;&#160;</a></span>getInitCohortIds()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt; int &gt; SeapodymTaskManager::getInitTaskIds </td>
+          <td class="memname">std::vector&lt; int &gt; SeapodymCohortManager::getInitCohortIds </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>workerId</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the initial list of tasks </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Get the initial list of cohort tasks </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">workerId</td><td>worker ID </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>list of tasks </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>list </dd></dl>
 
 </div>
 </div>
-<a id="a6851ee6dfbeb0ff23c44280a73c3e25b" name="a6851ee6dfbeb0ff23c44280a73c3e25b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6851ee6dfbeb0ff23c44280a73c3e25b">&#9670;&#160;</a></span>getNextTask()</h2>
+<a id="a5df2ede3e48e612d6673338dfdd5b796" name="a5df2ede3e48e612d6673338dfdd5b796"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5df2ede3e48e612d6673338dfdd5b796">&#9670;&#160;</a></span>getNextCohort()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int SeapodymTaskManager::getNextTask </td>
+          <td class="memname">int SeapodymCohortManager::getNextCohort </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>taskId</em></span></td><td>)</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cohortId</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the task that follows a terminated task </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Get the cohort task that follows a terminated cohort task </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">taskId</td><td>task ID </td></tr>
+    <tr><td class="paramname">cohortId</td><td>cohort task ID </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the next task </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the next cohort task </dd></dl>
 
 </div>
 </div>
-<a id="a8a98b3a68ec04a28d09cdd9c7441ddfb" name="a8a98b3a68ec04a28d09cdd9c7441ddfb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8a98b3a68ec04a28d09cdd9c7441ddfb">&#9670;&#160;</a></span>getNumSteps()</h2>
+<a id="ae34f18f3427e70e294759cffa82850a9" name="ae34f18f3427e70e294759cffa82850a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae34f18f3427e70e294759cffa82850a9">&#9670;&#160;</a></span>getNumSteps()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int SeapodymTaskManager::getNumSteps </td>
+          <td class="memname">int SeapodymCohortManager::getNumSteps </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>taskId</em></span></td><td>)</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cohortId</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the number of current steps a task will run </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Get the number of current steps a cohort task will run </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">taskId</td><td>task ID </td></tr>
+    <tr><td class="paramname">cohortId</td><td>cohort task ID </td></tr>
   </table>
   </dd>
 </dl>
@@ -247,8 +247,8 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>src/<a class="el" href="SeapodymTaskManager_8h_source.html">SeapodymTaskManager.h</a></li>
-<li>src/<b>SeapodymTaskManager.cpp</b></li>
+<li>src/<a class="el" href="SeapodymCohortManager_8h_source.html">SeapodymCohortManager.h</a></li>
+<li>src/<b>SeapodymCohortManager.cpp</b></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
