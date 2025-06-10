@@ -4,6 +4,8 @@
 #include <CmdLineArgParser.h>
 #include <mpi.h>
 #include <admodel.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include <iostream>
 
 int main(int argc, char** argv) {
@@ -33,10 +35,10 @@ int main(int argc, char** argv) {
     // Number of age groups, time steps, milliseconds per step, and number of doubles
     // These values are set by the command line arguments
     int numAgeGroups = cmdLine.get<int>("-na");
-    int nt = cmdLine.get<int>("-nt");
+    int numTimeSteps = cmdLine.get<int>("-nt");
     int nm = cmdLine.get<int>("-nm");
     int nd = cmdLine.get<int>("-nd");
-    if (numAgeGroups <= 0 || nt <= 0 || nm <= 0 || nd <= 0) {
+    if (numAgeGroups <= 0 || numTimeSteps <= 0 || nm <= 0 || nd <= 0) {
         if (workerId == 0) {
             // Print an error message only from the master worker
             std::cerr << "Invalid command line arguments. All values must be positive integers." << std::endl;
@@ -45,10 +47,10 @@ int main(int argc, char** argv) {
         MPI_Finalize();
         return 1;
     }
-    if (numAgeGroups <= 0 || nt <= 0 || numAgeGroups < numWorkers) {
+    if (numAgeGroups <= 0 || numTimeSteps <= 0 || numAgeGroups < numWorkers) {
         if (workerId == 0) {
             // Print an error message only from the master worker
-            std::cerr << "Invalid number of age groups (" << numAgeGroups << "), time steps (" << nt << ") or workers (" << numWorkers << ").\n";
+            std::cerr << "Invalid number of age groups (" << numAgeGroups << "), time steps (" << numTimeSteps << ") or workers (" << numWorkers << ").\n";
             std::cerr << "Number of age groups must be positive and at least equal to the number of workers." << std::endl;
             cmdLine.help();
         }
@@ -58,10 +60,10 @@ int main(int argc, char** argv) {
 
     if (workerId == 0) {
         std::cout << "Running with " << numWorkers << " workers." << std::endl;
-        std::cout << "Number of age groups: " << numAgeGroups << ", Total number of time steps: " << nt << std::endl;
+        std::cout << "Number of age groups: " << numAgeGroups << ", Total number of time steps: " << numTimeSteps << std::endl;
     }
 
-    SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, nt);
+    SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
     SeapodymCourier courier(MPI_COMM_WORLD);
 
     std::vector<double> data(nd, workerId);
@@ -82,7 +84,7 @@ int main(int argc, char** argv) {
     }
 
     // Iterate over the global time steps
-    for (auto istep = 0; istep < nt; ++istep) {
+    for (auto istep = 0; istep < numTimeSteps; ++istep) {
 
         // Iterate over the cohort tasks assigned to this worker
         for (auto icohort = 0; icohort < cohortIds.size(); ++icohort) {

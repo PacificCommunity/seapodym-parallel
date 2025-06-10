@@ -12,7 +12,7 @@ void test(int numAgeGroups, int numWorkers, int numTimeSteps) {
         // get the initial tasks for this worker
         auto tasks = tm.getInitCohortIds(iw);
 
-        // itereate over the inital tasks
+        // iterate over the inital tasks
         for (auto t : tasks) {
 
             // set the task

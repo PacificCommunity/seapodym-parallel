@@ -19,7 +19,7 @@ add_executable(testSeapodymCourier testSeapodymCourier.cxx)
 target_link_libraries(testSeapodymCourier PRIVATE seapodym_api)
 
 add_executable(testParallel testParallel.cxx)
-target_link_libraries(testParallel PRIVATE seapodym_api)
+target_link_libraries(testParallel PRIVATE seapodym_api spdlog::spdlog)
 
 
 # Register the test
