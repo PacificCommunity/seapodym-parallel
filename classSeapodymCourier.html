@@ -115,6 +115,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad47286e31a166fbc52c9c3e522e6e2b9" id="r_ad47286e31a166fbc52c9c3e522e6e2b9"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad47286e31a166fbc52c9c3e522e6e2b9">fetch</a> (int source_worker)</td></tr>
 <tr class="memdesc:ad47286e31a166fbc52c9c3e522e6e2b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch data from a remote process and store it in the local data array.  <br /></td></tr>
 <tr class="separator:ad47286e31a166fbc52c9c3e522e6e2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70897f532e325d638efb8f78301a7caf" id="r_a70897f532e325d638efb8f78301a7caf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a70897f532e325d638efb8f78301a7caf">accumulate</a> (int targetWorker) const</td></tr>
+<tr class="memdesc:a70897f532e325d638efb8f78301a7caf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulate the data from all workers.  <br /></td></tr>
+<tr class="separator:a70897f532e325d638efb8f78301a7caf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a774fcc2ea3b74d81998550d73f1b0c29" id="r_a774fcc2ea3b74d81998550d73f1b0c29"><td class="memItemLeft" align="right" valign="top"><a id="a774fcc2ea3b74d81998550d73f1b0c29" name="a774fcc2ea3b74d81998550d73f1b0c29"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 <tr class="memdesc:a774fcc2ea3b74d81998550d73f1b0c29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free the MPI window and reset the data pointer. <br /></td></tr>
@@ -162,6 +165,32 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a70897f532e325d638efb8f78301a7caf" name="a70897f532e325d638efb8f78301a7caf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70897f532e325d638efb8f78301a7caf">&#9670;&#160;</a></span>accumulate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SeapodymCourier::accumulate </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>targetWorker</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Accumulate the data from all workers. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">targetWorker</td><td>Rank of the target process to which to accumulate data </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Use getDataPtr to access the accumulated data after this call on the target worker </dd></dl>
+
+</div>
+</div>
 <a id="ae52ed7ffbb7e2fed9b5cf59e523cdf39" name="ae52ed7ffbb7e2fed9b5cf59e523cdf39"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae52ed7ffbb7e2fed9b5cf59e523cdf39">&#9670;&#160;</a></span>expose()</h2>
 
