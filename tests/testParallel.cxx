@@ -25,6 +25,9 @@ int main(int argc, char** argv) {
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
     if (!success) {
         std::cerr << "Error parsing command line arguments." << std::endl;
+        cmdLine.help();
+        MPI_Finalize();
+        return 1;
     }
     if (help) {
         cmdLine.help();
@@ -50,17 +53,23 @@ int main(int argc, char** argv) {
     if (numAgeGroups <= 0 || numTimeSteps <= 0 || numAgeGroups < numWorkers) {
         if (workerId == 0) {
             // Print an error message only from the master worker
-            std::cerr << "Invalid number of age groups (" << numAgeGroups << "), time steps (" << numTimeSteps << ") or workers (" << numWorkers << ").\n";
-            std::cerr << "Number of age groups must be positive and at least equal to the number of workers." << std::endl;
+            std::cerr << "Invalid number of age groups (" << 
+            numAgeGroups << "), time steps (" << numTimeSteps << ") or workers (" << 
+            numWorkers << ").\n";
+            std::cerr << "Number of age groups must be > 0 and >= number of workers." << std::endl;
             cmdLine.help();
         }
         MPI_Finalize();
-        return 2;
+        return 1;
     }
 
+    std::string sworkerId = std::to_string(workerId);
+    auto logger = spdlog::basic_logger_mt(sworkerId, "logs/log_worker" + sworkerId + ".txt");
+    logger->set_level(spdlog::level::debug);
+
     if (workerId == 0) {
-        std::cout << "Running with " << numWorkers << " workers." << std::endl;
-        std::cout << "Number of age groups: " << numAgeGroups << ", Total number of time steps: " << numTimeSteps << std::endl;
+        logger->info("Running with {} workers", numWorkers);
+        logger->info("Number of age groups: {}, Total number of time steps: {}", numAgeGroups, numTimeSteps);
     }
 
     SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
@@ -95,8 +104,7 @@ int main(int argc, char** argv) {
             // Get the number of steps for this cohort task
             int numSteps = cohortNumSteps[icohort];
 
-            std::cout <<   "Worker " << workerId << " processing cohort " << cohortId 
-                      << " at time step " << istep << " with " << numSteps - step_counter[icohort] << " remaining steps." << std::endl;  
+            logger->info("processing cohort {} at time step {}", cohortId, istep);  
             
             // Simulate the time taken for a step
             cohortsPerWorker[icohort]->stepForward(dvar_vector());
@@ -117,12 +125,10 @@ int main(int argc, char** argv) {
                 for (auto iw = 0; iw < numWorkers; ++iw) {
                     if (iw != workerId) {
                         std::vector<double> fetchedData = courier.fetch(iw);
-                        std::cout << "Worker " << workerId << " fetched data from worker " << iw << ": ";
+                        logger->info("fetched data from worker {}", iw);
                         for (int i = 0; i < dataSize; ++i) {
-                            std::cout << fetchedData[i] << " ";
                             sum_data[i] += fetchedData[i]; // Sum the data from all workers
                         }
-                        std::cout << std::endl;
                     }
                 }
             }

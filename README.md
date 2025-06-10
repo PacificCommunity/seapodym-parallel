@@ -9,6 +9,7 @@ You will need:
  * A C++ compiler (e.g. g++) and MPI libraries installed (e.g. OpenMPI)
  * CMake
  * ADMB
+ * [spdlog](https://github.com/gabime/spdlog)
 
 
 ## How to build the seapodym-parallel
