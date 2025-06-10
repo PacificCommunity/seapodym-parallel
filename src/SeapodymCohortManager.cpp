@@ -68,7 +68,6 @@ SeapodymCohortManager::getDependencies(int cohortId) const {
     return res;
 }
 
-
 int 
 SeapodymCohortManager::getNextCohort(int cohortId) const {
             
@@ -82,4 +81,9 @@ SeapodymCohortManager::getNextCohort(int cohortId) const {
         res = -1;
     }
     return res;
+}
+
+int
+SeapodymCohortManager::getNewCohortWorker(int timeStep) const {
+    return (this->numAgeGroups - timeStep) % this->numAgeGroups;
 }

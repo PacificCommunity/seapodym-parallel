@@ -52,3 +52,17 @@ SeapodymCourier::fetch(int source_rank) {
 
     return res;
 }
+
+void
+SeapodymCourier::accumulate(int targetWorker) const {
+    
+    // Ensure the window is ready for access
+    // Possible values are MPI_MODE_NOCHECK, MPI_MODE_NOSTORE, MPI_MODE_NOPUT, MPI_MODE_NOSUCCEED
+    // MPI_MODE_NOPRECEDE:  No RMA calls before this point can access the window
+    MPI_Win_fence(MPI_MODE_NOPRECEDE, win);
+
+    MPI_Accumulate(this->data, this->data_size, MPI_DOUBLE, targetWorker, 0, this->data_size, MPI_DOUBLE, MPI_SUM, this->win);
+
+    // Complete the access to the window, no RMA calls after this point
+    MPI_Win_fence(MPI_MODE_NOSUCCEED, win);
+}

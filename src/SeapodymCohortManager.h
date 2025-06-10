@@ -56,9 +56,9 @@ class SeapodymCohortManager {
         int getNumSteps(int cohortId) const;
 
         /**
-         * Get the dependencies of a new cohort task on other preceding tasks
+         * Get the dependencies of a new cohort task on other preceding cohorts
          * @param cohortId cohort task ID
-         * @return all the other tasks that feed into this cohort task
+         * @return all the other cohort tasks that feed into this cohort task
          */
         std::set<int> getDependencies(int cohortId) const;
 
@@ -68,6 +68,13 @@ class SeapodymCohortManager {
          * @return the next cohort task
          */
         int getNextCohort(int cohortId) const;
+
+        /**
+         * Get the worker ID for the new cohort
+         * @param timeStep current time step
+         * @return number
+         */
+        int getNewCohortWorker(int timeStep) const;
 
 };
 
