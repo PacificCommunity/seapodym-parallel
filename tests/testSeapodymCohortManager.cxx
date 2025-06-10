@@ -1,13 +1,13 @@
 #include <iostream>
 #include <SeapodymCohortManager.h>
 
-void test(int na, int nw, int nt) {
+void test(int numAgeGroups, int numWorkers, int numTimeSteps) {
 
-    SeapodymCohortManager tm(na, nw, nt);
+    SeapodymCohortManager tm(numAgeGroups, numWorkers, numTimeSteps);
 
     // iterate over the workers
-    for (auto iw = 0; iw < nw; ++iw) {
-        std::cout << "test(" << na << ", " << nw << ", " << nt << ") worker " << iw << ": ";
+    for (auto iw = 0; iw < numWorkers; ++iw) {
+        std::cout << "test(" << numAgeGroups << ", " << numWorkers << ", " << numTimeSteps << ") worker " << iw << ": ";
 
         // get the initial tasks for this worker
         auto tasks = tm.getInitCohortIds(iw);
