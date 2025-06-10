@@ -17,6 +17,7 @@ jobs:
       - uses: mpi4py/setup-mpi@v1
       - uses: ssciwr/doxygen-install@v1
       - uses: tlylt/install-graphviz@v1
+      - uses: mesonbuild/spdlog@v1
       - name: Download ADMB
         run: "wget https://github.com/admb-project/admb/releases/download/admb-13.2/admb-13.2-linux.zip"
       - name: Extract ADMB

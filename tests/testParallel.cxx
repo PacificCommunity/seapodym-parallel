@@ -104,11 +104,13 @@ int main(int argc, char** argv) {
             // Get the number of steps for this cohort task
             int numSteps = cohortNumSteps[icohort];
 
-            logger->info("processing cohort {} at time step {}", cohortId, istep);  
+            logger->info("starting processing cohort {} at time step {}...", cohortId, istep);  
             
             // Simulate the time taken for a step
             cohortsPerWorker[icohort]->stepForward(dvar_vector());
-            
+
+            logger->info("done processing cohort {} at time step {}...", cohortId, istep);  
+
             // Done with the step
             step_counter[icohort]++;
 
@@ -133,7 +135,6 @@ int main(int argc, char** argv) {
                 }
             }
         }
-
     }
 
     for (auto cohortPtr : cohortsPerWorker) {
