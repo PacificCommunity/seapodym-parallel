@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
 # Set the project name and version
 project(seapodym-parallel VERSION 0.1)
@@ -8,6 +8,15 @@ enable_testing()
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# handle spdlog dependency
+include(FetchContent)
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG v1.13.0  # Use the latest stable version or a specific one
+)
+FetchContent_MakeAvailable(spdlog)
 
 
 find_package(MPI REQUIRED)
