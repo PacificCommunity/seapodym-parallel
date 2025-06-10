@@ -36,9 +36,9 @@ int main(int argc, char** argv) {
     // These values are set by the command line arguments
     int numAgeGroups = cmdLine.get<int>("-na");
     int numTimeSteps = cmdLine.get<int>("-nt");
-    int nm = cmdLine.get<int>("-nm");
+    int numMilliseconds = cmdLine.get<int>("-nm");
     int nd = cmdLine.get<int>("-nd");
-    if (numAgeGroups <= 0 || numTimeSteps <= 0 || nm <= 0 || nd <= 0) {
+    if (numAgeGroups <= 0 || numTimeSteps <= 0 || numMilliseconds <= 0 || nd <= 0) {
         if (workerId == 0) {
             // Print an error message only from the master worker
             std::cerr << "Invalid command line arguments. All values must be positive integers." << std::endl;
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
     std::vector<SeapodymCohortFake*> cohortsPerWorker(cohortIds.size());
     for (auto i = 0; i < cohortIds.size(); ++i) {
         cohortNumSteps[i] = cohortManager.getNumSteps(cohortIds[i]);
-        SeapodymCohortFake* cohortPtr = new SeapodymCohortFake(nm, nd, cohortIds[i]);
+        SeapodymCohortFake* cohortPtr = new SeapodymCohortFake(numMilliseconds, nd, cohortIds[i]);
         cohortsPerWorker[i] = cohortPtr;
     }
 
