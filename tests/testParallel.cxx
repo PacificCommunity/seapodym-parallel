@@ -37,8 +37,8 @@ int main(int argc, char** argv) {
     int numAgeGroups = cmdLine.get<int>("-na");
     int numTimeSteps = cmdLine.get<int>("-nt");
     int numMilliseconds = cmdLine.get<int>("-nm");
-    int nd = cmdLine.get<int>("-nd");
-    if (numAgeGroups <= 0 || numTimeSteps <= 0 || numMilliseconds <= 0 || nd <= 0) {
+    int dataSize = cmdLine.get<int>("-nd");
+    if (numAgeGroups <= 0 || numTimeSteps <= 0 || numMilliseconds <= 0 || dataSize <= 0) {
         if (workerId == 0) {
             // Print an error message only from the master worker
             std::cerr << "Invalid command line arguments. All values must be positive integers." << std::endl;
@@ -66,8 +66,8 @@ int main(int argc, char** argv) {
     SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
     SeapodymCourier courier(MPI_COMM_WORLD);
 
-    std::vector<double> data(nd, workerId);
-    courier.expose(data.data(), nd);
+    std::vector<double> data(dataSize, workerId);
+    courier.expose(data.data(), dataSize);
 
     std::vector<int> cohortIds = cohortManager.getInitCohortIds(workerId);
 
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
     std::vector<SeapodymCohortFake*> cohortsPerWorker(cohortIds.size());
     for (auto i = 0; i < cohortIds.size(); ++i) {
         cohortNumSteps[i] = cohortManager.getNumSteps(cohortIds[i]);
-        SeapodymCohortFake* cohortPtr = new SeapodymCohortFake(numMilliseconds, nd, cohortIds[i]);
+        SeapodymCohortFake* cohortPtr = new SeapodymCohortFake(numMilliseconds, dataSize, cohortIds[i]);
         cohortsPerWorker[i] = cohortPtr;
     }
 
@@ -112,13 +112,13 @@ int main(int argc, char** argv) {
                 cohortNumSteps[icohort] = cohortManager.getNumSteps(cohortIds[icohort]);
 
                 // Accumulate the data from all workers
-                std:vector<double> sum_data(nd, 0.0);
+                std:vector<double> sum_data(dataSize, 0.0);
                 // Could be using MPI_Accumulate instead
                 for (auto iw = 0; iw < numWorkers; ++iw) {
                     if (iw != workerId) {
                         std::vector<double> fetchedData = courier.fetch(iw);
                         std::cout << "Worker " << workerId << " fetched data from worker " << iw << ": ";
-                        for (int i = 0; i < nd; ++i) {
+                        for (int i = 0; i < dataSize; ++i) {
                             std::cout << fetchedData[i] << " ";
                             sum_data[i] += fetchedData[i]; // Sum the data from all workers
                         }
