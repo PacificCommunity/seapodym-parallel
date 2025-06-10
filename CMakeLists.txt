@@ -21,7 +21,6 @@ FetchContent_MakeAvailable(spdlog)
 
 find_package(MPI REQUIRED)
 find_program(VALGRIND_EXECUTABLE valgrind)
-find_package(spdlog REQUIRED)
 
 option(ADMB_HOME "Path to ADMB installation" "")
 # If ADMB_HOME is set, use it to configure include and library paths
