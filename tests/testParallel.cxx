@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
             // Simulate the time taken for a step
             cohortsPerWorker[icohort]->stepForward(dvar_vector());
 
-            logger->info("done processing cohort {} at time step {}...", cohortId, istep);  
+            logger->info("done processing cohort {} at time step {}", cohortId, istep);  
 
             // Done with the step
             step_counter[icohort]++;

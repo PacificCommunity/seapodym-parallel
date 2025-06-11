@@ -1,0 +1,14 @@
+#!/bin/bash -e
+#SBATCH --job-name=testParallel
+#SBATCH --time=00:10:00
+#SBATCH --ntasks=3
+#SBTACH --cpus-per-task=1
+
+NUM_AGES_GROUPS=${SLURM_NTASKS}
+NUM_TIME_STEPS=$((2 * NUM_AGES_GROUPS))
+MILLISECONDS="15"
+DATA_SIZE="24000"
+
+rm -rf logs
+srun @CMAKE_BINARY_DIR@/tests/testParallel -na ${SLURM_NTASKS} -nt ${NUM_TIME_STEPS} -nm ${MILLISECONDS} -nd ${DATA_SIZE}
+cp -r logs logs${SLURM_NTASKS}
