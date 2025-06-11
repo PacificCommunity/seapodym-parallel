@@ -15,6 +15,9 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &numWorkers);
     int workerId;
     MPI_Comm_rank(MPI_COMM_WORLD, &workerId);
+
+    // times
+    double tic, ttotStep = 0., ttotComm = 0.;
     
     CmdLineArgParser cmdLine;
     cmdLine.set("-na", 3, "Number of age groups");
@@ -107,7 +110,9 @@ int main(int argc, char** argv) {
             logger->info("starting processing cohort {} at time step {}...", cohortId, istep);  
             
             // Simulate the time taken for a step
+	    tic = MPI_Wtime();
             cohortsPerWorker[icohort]->stepForward(dvar_vector());
+	    ttotStep += MPI_Wtime() - tic; 
 
             logger->info("done processing cohort {} at time step {}", cohortId, istep);  
 
@@ -122,6 +127,7 @@ int main(int argc, char** argv) {
                 cohortNumSteps[icohort] = cohortManager.getNumSteps(cohortIds[icohort]);
 
                 // Accumulate the data from all workers
+		tic = MPI_Wtime();
                 std:vector<double> sum_data(dataSize, 0.0);
                 // Could be using MPI_Accumulate instead
                 for (auto iw = 0; iw < numWorkers; ++iw) {
@@ -133,18 +139,31 @@ int main(int argc, char** argv) {
                         }
                     }
                 }
+		ttotComm += MPI_Wtime() - tic;
             }
         }
     }
 
+    // Total times for all the steps and the communication
+    double ttotStepMin, ttotStepMax, ttotCommMin, ttotCommMax;
+    MPI_Reduce(&ttotStep, &ttotStepMin, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&ttotStep, &ttotStepMax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&ttotComm, &ttotCommMin, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);                                                                                                                                    
+    MPI_Reduce(&ttotComm, &ttotCommMax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD); 
+    if (workerId == 0) {
+	std::cout << "Num workers: " << numWorkers << " num age groups: " << numAgeGroups << " num time steps: " << numTimeSteps << '\n';
+	std::cout << "milliseconds per step: " << numMilliseconds << " data size: " << dataSize << '\n';
+	std::cout << "Total times step: [" << ttotStepMin << ',' << ttotStepMax << 
+	    "] communication: [" << ttotCommMin << ',' << ttotCommMax << "]\n";
+    }	    
+
+    // clean up
     for (auto cohortPtr : cohortsPerWorker) {
         if (cohortPtr) {
             delete cohortPtr; // Free the memory allocated for the cohort
         }
     }
-
     courier.free(); // Free the MPI window
-
 
     MPI_Finalize();
     return 0;
