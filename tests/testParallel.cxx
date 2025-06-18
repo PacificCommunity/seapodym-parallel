@@ -125,10 +125,10 @@ int main(int argc, char** argv) {
 
             // Accumulate the data from all workers
             int newCohortWorkerId = cohortManager.getNewCohortWorker(istep);
-            if (workerId == newCohortWorkerId) {
 
-                // Individual fetches
-                std::vector<double> sum_data(dataSize, 0);
+            // Individual fetches
+            std::vector<double> sum_data(dataSize, 0);
+            if (workerId == newCohortWorkerId) {
                 for (auto iw = 0; iw < numWorkers; ++iw) {
                     std::vector<double> fetchedData = courier.fetch(iw);
                     logger->info("fetched data from worker {} at time step {}", iw, istep);
@@ -136,13 +136,15 @@ int main(int argc, char** argv) {
                         sum_data[i] += fetchedData[i]; // Sum the data from all workers
                     }
                 }
+            }
+
+            if (workerId == newCohortWorkerId) {
                 // Checksum
                 double checksum = 0.0;
                 for (int i = 0; i < dataSize; ++i) {
                     checksum += sum_data[i];
                 }
-                logger->info("checksum from all workers at end of time step {}: {}", istep, checksum);
-                  
+                logger->info("checksum from all workers at end of time step {}: {}", istep, checksum);  
             }
         }
     }
