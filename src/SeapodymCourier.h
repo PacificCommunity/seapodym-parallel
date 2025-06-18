@@ -28,6 +28,10 @@ class SeapodymCourier {
 
         // MPI window for the exposed data
         MPI_Win win;
+        MPI_Win winRecv;
+
+        // data array to receive the accumulate operation
+        std::vector<double> dataRecv;
 
         // Local MPI rank
         int local_rank;
@@ -69,7 +73,7 @@ class SeapodymCourier {
      * @param targetWorker Rank of the target process to which to accumulate data
      * @return A vector containing the accumulated data from all workers
      */
-    std::vector<double> accumulate(int targetWorker) const; 
+    std::vector<double> accumulate(int targetWorker); 
 
     /**
      * @brief Free the MPI window and reset the data pointer

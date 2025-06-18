@@ -9,6 +9,7 @@ SeapodymCourier::SeapodymCourier(MPI_Comm comm) {
     this->data = nullptr;
     this->data_size = 0;
     this->win = MPI_WIN_NULL;
+    this->winRecv = MPI_WIN_NULL;
     MPI_Comm_rank(comm, &this->local_rank);
 }
 
@@ -25,6 +26,10 @@ SeapodymCourier::expose(double* data, int data_size) {
         MPI_Win_free(&this->win);
     }
     MPI_Win_create(data, data_size * sizeof(double), sizeof(double), MPI_INFO_NULL, this->comm, &this->win);
+
+    // Create window to reveive the result of MPI_Accumulate
+    this->dataRecv.resize(data_size);
+    MPI_Win_create(this->dataRecv.data(), data_size * sizeof(double), sizeof(double), MPI_INFO_NULL, this->comm, &this->winRecv);
 }
 
 std::vector<double>
@@ -54,20 +59,24 @@ SeapodymCourier::fetch(int source_rank) {
 }
 
 std::vector<double>
-SeapodymCourier::accumulate(int targetWorker) const {
-
-    // Copy into new vector to avoid modifying the original data
-    std::vector<double> res(this->data, this->data + this->data_size);
+SeapodymCourier::accumulate(int targetWorker) {
     
     // Ensure the window is ready for access
     // Possible values are MPI_MODE_NOCHECK, MPI_MODE_NOSTORE, MPI_MODE_NOPUT, MPI_MODE_NOSUCCEED
     // MPI_MODE_NOPRECEDE:  No RMA calls before this point can access the window
-    MPI_Win_fence(MPI_MODE_NOPRECEDE, win);
+    MPI_Win_fence(MPI_MODE_NOPRECEDE, this->winRecv);
+    //std::cerr << "*** > top fence called by worker " << this->local_rank;
+    //MPI_Win_fence(0, this->winRecv);
+    //std::cerr << "<\n";
 
-    MPI_Accumulate(res.data(), this->data_size, MPI_DOUBLE, targetWorker, 0, this->data_size, MPI_DOUBLE, MPI_SUM, this->win);
+    // Need to reset the buffer to zero, otherwise it will add to the exisiting values
+    std::fill(this->dataRecv.begin(), this->dataRecv.end(), 0.0);
+
+    // The result of the reduction operation will be in this->dataRecv
+    MPI_Accumulate(this->data, this->data_size, MPI_DOUBLE, targetWorker, 0, this->data_size, MPI_DOUBLE, MPI_SUM, this->winRecv);
 
     // Complete the access to the window, no RMA calls after this point
-    MPI_Win_fence(MPI_MODE_NOSUCCEED, win);
+    MPI_Win_fence(MPI_MODE_NOSUCCEED, this->winRecv);
 
-    return res;
+    return this->dataRecv;
 }

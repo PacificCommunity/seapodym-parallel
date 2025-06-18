@@ -123,30 +123,45 @@ int main(int argc, char** argv) {
                 cohortNumSteps[icohort] = cohortManager.getNumSteps(cohortIds[icohort]);
             }
 
-            // Accumulate the data from all workers
-            int newCohortWorkerId = cohortManager.getNewCohortWorker(istep);
+        }
 
-            // Individual fetches
-            std::vector<double> sum_data(dataSize, 0);
-            if (workerId == newCohortWorkerId) {
-                for (auto iw = 0; iw < numWorkers; ++iw) {
-                    std::vector<double> fetchedData = courier.fetch(iw);
-                    logger->info("fetched data from worker {} at time step {}", iw, istep);
-                    for (int i = 0; i < dataSize; ++i) {
-                        sum_data[i] += fetchedData[i]; // Sum the data from all workers
-                    }
-                }
-            }
-
-            if (workerId == newCohortWorkerId) {
-                // Checksum
-                double checksum = 0.0;
+        // Accumulate the data from all workers
+        int newCohortWorkerId = cohortManager.getNewCohortWorker(istep);
+        logger->info("new cohort created by worker {} after time step {}", 
+            newCohortWorkerId, istep);
+//#define SEAPODYM_FETCH
+#ifdef SEAPODYM_FETCH
+        // Individual fetches
+        std::vector<double> sum_data(dataSize, 0);
+        if (workerId == newCohortWorkerId) {
+            for (auto iw = 0; iw < numWorkers; ++iw) {
+                std::vector<double> fetchedData = courier.fetch(iw);
+                logger->info("fetched data from worker {} at time step {}", iw, istep);
                 for (int i = 0; i < dataSize; ++i) {
-                    checksum += sum_data[i];
+                    sum_data[i] += fetchedData[i]; // Sum the data from all workers
                 }
-                logger->info("checksum from all workers at end of time step {}: {}", istep, checksum);  
             }
         }
+#else
+        // Accumulate
+        //std::vector<double> sum_data(dataSize, 0);
+        //if (istep < numTimeSteps - 1) {
+        std::vector<double> sum_data = courier.accumulate(newCohortWorkerId);
+        if (workerId == newCohortWorkerId) {
+            logger->info("done accumulating data after time step {}", istep);
+        }
+        //}
+#endif            
+
+        if (workerId == newCohortWorkerId) {
+            // Checksum
+            double checksum = 0.0;
+            for (int i = 0; i < dataSize; ++i) {
+                checksum += sum_data[i];
+            }
+            logger->info("checksum from all workers at end of time step {}: {}", istep, checksum);  
+        }
+
     }
 
     for (auto cohortPtr : cohortsPerWorker) {
