@@ -140,6 +140,9 @@ int main(int argc, char** argv) {
                     }
                 }
 		ttotComm += MPI_Wtime() - tic;
+		double tot_sum = 0;
+		for (auto i = 0; i < dataSize; ++i) tot_sum += sum_data[i];
+                logger->info("checksum received data: {}", tot_sum);
             }
         }
     }
