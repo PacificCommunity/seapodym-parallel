@@ -144,13 +144,10 @@ int main(int argc, char** argv) {
         }
 #else
         // Accumulate
-        //std::vector<double> sum_data(dataSize, 0);
-        //if (istep < numTimeSteps - 1) {
         std::vector<double> sum_data = courier.accumulate(newCohortWorkerId);
         if (workerId == newCohortWorkerId) {
             logger->info("done accumulating data after time step {}", istep);
         }
-        //}
 #endif            
 
         if (workerId == newCohortWorkerId) {

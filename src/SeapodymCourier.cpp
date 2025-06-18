@@ -65,9 +65,6 @@ SeapodymCourier::accumulate(int targetWorker) {
     // Possible values are MPI_MODE_NOCHECK, MPI_MODE_NOSTORE, MPI_MODE_NOPUT, MPI_MODE_NOSUCCEED
     // MPI_MODE_NOPRECEDE:  No RMA calls before this point can access the window
     MPI_Win_fence(MPI_MODE_NOPRECEDE, this->winRecv);
-    //std::cerr << "*** > top fence called by worker " << this->local_rank;
-    //MPI_Win_fence(0, this->winRecv);
-    //std::cerr << "<\n";
 
     // Need to reset the buffer to zero, otherwise it will add to the exisiting values
     std::fill(this->dataRecv.begin(), this->dataRecv.end(), 0.0);
