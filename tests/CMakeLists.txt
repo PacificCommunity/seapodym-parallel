@@ -45,3 +45,9 @@ add_test(NAME testParallel_nw2_na3_nt5 COMMAND mpiexec -n 2 testParallel -na 3 -
 set_tests_properties(testParallel_nw2_na3_nt5 PROPERTIES
   TIMEOUT 5 # Timeout in seconds
 )
+add_test(NAME testParallel_nw4_na4_nt7 COMMAND mpiexec -n 4 testParallel -na 4 -nt 7 -nd 1)
+set_tests_properties(testParallel_nw4_na4_nt7 PROPERTIES
+                     FAIL_REGULAR_EXPRESSION "checksum: [^6]")
+add_test(NAME testParallel_nw3_na4_nt7 COMMAND mpiexec -n 4 testParallel -na 4 -nt 7 -nd 1)
+set_tests_properties(testParallel_nw3_na4_nt7 PROPERTIES
+                     FAIL_REGULAR_EXPRESSION "checksum: [^3") 

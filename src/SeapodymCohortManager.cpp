@@ -1,4 +1,5 @@
 #include "SeapodymCohortManager.h"
+#include <iostream>
 
 
 SeapodymCohortManager::SeapodymCohortManager(int numAgeGroups, int numWorkers, int numTimeSteps) {
@@ -15,6 +16,10 @@ SeapodymCohortManager::SeapodymCohortManager(int numAgeGroups, int numWorkers, i
             for (auto i = 0; i < this->numAgeGroups; ++i) {
                 int workerId = i % this->numWorkers;
                 this->worker2cohort[workerId].push_back(i);
+            }
+
+            for (auto ia = 0; ia < this->numAgeGroups; ++ia) {
+                this->ageIndex2Worker[ia] = ia % this->numWorkers;
             }
         
         }
@@ -85,5 +90,8 @@ SeapodymCohortManager::getNextCohort(int cohortId) const {
 
 int
 SeapodymCohortManager::getNewCohortWorker(int timeStep) const {
-    return (this->numAgeGroups - timeStep) % this->numAgeGroups;
+    // positive version of  (this->numAgeGroups - timeStep - 1) % this->numAgeGroups
+    int ageIndex = ( (this->numAgeGroups - timeStep - 1) % this->numAgeGroups + this->numAgeGroups ) % this->numAgeGroups;
+    int workerId = this->ageIndex2Worker.at(ageIndex);
+    return workerId;
 }

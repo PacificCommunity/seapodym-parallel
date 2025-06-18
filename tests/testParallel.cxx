@@ -78,6 +78,7 @@ int main(int argc, char** argv) {
     SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
     SeapodymCourier courier(MPI_COMM_WORLD);
 
+    // Set the data value to the workerId (for example)
     std::vector<double> data(dataSize, workerId);
     courier.expose(data.data(), dataSize);
 
@@ -125,26 +126,52 @@ int main(int argc, char** argv) {
                 cohortIds[icohort] = cohortManager.getNextCohort(cohortId);
                 step_counter[icohort] = 0;
                 cohortNumSteps[icohort] = cohortManager.getNumSteps(cohortIds[icohort]);
+            }
 
-                // Accumulate the data from all workers
+        }
+
+        // Accumulate the data from all workers
+        int newCohortWorkerId = cohortManager.getNewCohortWorker(istep);
+        logger->info("new cohort created by worker {} after time step {}", 
+            newCohortWorkerId, istep);
+
+//#define SEAPODYM_FETCH
+#ifdef SEAPODYM_FETCH
+        // Individual fetches
+        std::vector<double> sum_data(dataSize, 0);
+        if (workerId == newCohortWorkerId) {
+            for (auto iw = 0; iw < numWorkers; ++iw) {
 		tic = MPI_Wtime();
-                std:vector<double> sum_data(dataSize, 0.0);
-                // Could be using MPI_Accumulate instead
-                for (auto iw = 0; iw < numWorkers; ++iw) {
-                    if (iw != workerId) {
-                        std::vector<double> fetchedData = courier.fetch(iw);
-                        logger->info("fetched data from worker {}", iw);
-                        for (int i = 0; i < dataSize; ++i) {
-                            sum_data[i] += fetchedData[i]; // Sum the data from all workers
-                        }
-                    }
+                std::vector<double> fetchedData = courier.fetch(iw);
+                logger->info("fetched data from worker {} at time step {}", iw, istep);
+                for (int i = 0; i < dataSize; ++i) {
+                    sum_data[i] += fetchedData[i]; // Sum the data from all workers
                 }
 		ttotComm += MPI_Wtime() - tic;
-		double tot_sum = 0;
-		for (auto i = 0; i < dataSize; ++i) tot_sum += sum_data[i];
-                logger->info("checksum received data: {}", tot_sum);
             }
+	    logger->info("done fetching data after time step {}", istep);
         }
+#else
+        // Accumulate
+	tic = MPI_Wtime();
+        std::vector<double> sum_data = courier.accumulate(newCohortWorkerId);
+	ttotComm += MPI_Wtime() - tic;
+        if (workerId == newCohortWorkerId) {
+            logger->info("done accumulating data after time step {}", istep);
+        }
+#endif            
+
+        if (workerId == newCohortWorkerId) {
+            // Checksum
+            double checksum = 0.0;
+            for (int i = 0; i < dataSize; ++i) {
+                checksum += sum_data[i];
+            }
+            logger->info("checksum from all workers at end of time step {}: {}", 
+                istep, checksum);
+            std::cout << "[" << workerId << "] @ step: " << istep << " checksum: " << checksum << '\n';
+        }
+
     }
 
     // Total times for all the steps and the communication
