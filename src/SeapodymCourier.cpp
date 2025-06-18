@@ -10,6 +10,7 @@ SeapodymCourier::SeapodymCourier(MPI_Comm comm) {
     this->data_size = 0;
     this->win = MPI_WIN_NULL;
     this->winRecv = MPI_WIN_NULL;
+    this->dataRecv.clear();
     MPI_Comm_rank(comm, &this->local_rank);
 }
 
@@ -28,6 +29,9 @@ SeapodymCourier::expose(double* data, int data_size) {
     MPI_Win_create(data, data_size * sizeof(double), sizeof(double), MPI_INFO_NULL, this->comm, &this->win);
 
     // Create window to reveive the result of MPI_Accumulate
+    if (this->winRecv != MPI_WIN_NULL) {
+       MPI_Win_free(&this->winRecv);
+    }
     this->dataRecv.resize(data_size);
     MPI_Win_create(this->dataRecv.data(), data_size * sizeof(double), sizeof(double), MPI_INFO_NULL, this->comm, &this->winRecv);
 }

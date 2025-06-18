@@ -82,8 +82,12 @@ class SeapodymCourier {
         if (this->win != MPI_WIN_NULL) {
             MPI_Win_free(&this->win);
         }
+	if (this->winRecv != MPI_WIN_NULL) {
+            MPI_Win_free(&this->winRecv);
+	}
         this->data = nullptr;
         this->data_size = 0;
+	this->dataRecv.clear();
     }
 
     // Disable copy and assignment operations
