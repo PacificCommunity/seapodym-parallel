@@ -121,10 +121,14 @@ int main(int argc, char** argv) {
                 cohortIds[icohort] = cohortManager.getNextCohort(cohortId);
                 step_counter[icohort] = 0;
                 cohortNumSteps[icohort] = cohortManager.getNumSteps(cohortIds[icohort]);
+            }
 
-                // Accumulate the data from all workers
-                std:vector<double> sum_data(dataSize, 0.0);
-                // Could be using MPI_Accumulate instead
+            // Accumulate the data from all workers
+            int newCohortWorkerId = cohortManager.getNewCohortWorker(istep);
+            if (workerId == newCohortWorkerId) {
+
+                // Individual fetches
+                std::vector<double> sum_data(dataSize, 0);
                 for (auto iw = 0; iw < numWorkers; ++iw) {
                     std::vector<double> fetchedData = courier.fetch(iw);
                     logger->info("fetched data from worker {} at time step {}", iw, istep);
@@ -138,6 +142,7 @@ int main(int argc, char** argv) {
                     checksum += sum_data[i];
                 }
                 logger->info("checksum from all workers at end of time step {}: {}", istep, checksum);
+                  
             }
         }
     }

@@ -30,6 +30,9 @@ class SeapodymCohortManager {
         // assign cohort Ids to workers
         std::map<int, std::vector<int> > worker2cohort;
 
+        // map age index to worker ID
+        std::map<int, int> ageIndex2Worker;
+
     public:
 
         /**

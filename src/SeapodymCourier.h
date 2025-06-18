@@ -67,9 +67,9 @@ class SeapodymCourier {
     /**
      * @brief Accumulate the data from all workers
      * @param targetWorker Rank of the target process to which to accumulate data
-     * @note Use getDataPtr to access the accumulated data after this call on the target worker
+     * @return A vector containing the accumulated data from all workers
      */
-    void accumulate(int targetWorker) const; 
+    std::vector<double> accumulate(int targetWorker) const; 
 
     /**
      * @brief Free the MPI window and reset the data pointer
