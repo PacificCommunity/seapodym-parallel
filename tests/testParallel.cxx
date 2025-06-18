@@ -156,7 +156,9 @@ int main(int argc, char** argv) {
             for (int i = 0; i < dataSize; ++i) {
                 checksum += sum_data[i];
             }
-            logger->info("checksum from all workers at end of time step {}: {}", istep, checksum);  
+            logger->info("checksum from all workers at end of time step {}: {}", 
+                istep, checksum);
+            std::cout << "[" << workerId << "] @ step: " << istep << " checksum: " << checksum << '\n';
         }
 
     }
