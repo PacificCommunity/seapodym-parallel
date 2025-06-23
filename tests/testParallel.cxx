@@ -135,7 +135,6 @@ int main(int argc, char** argv) {
         logger->info("new cohort created by worker {} after time step {}", 
             newCohortWorkerId, istep);
 
-//#define SEAPODYM_FETCH
 #ifdef SEAPODYM_FETCH
         // Individual fetches
         std::vector<double> sum_data(dataSize, 0);

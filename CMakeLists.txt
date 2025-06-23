@@ -22,6 +22,11 @@ FetchContent_MakeAvailable(spdlog)
 find_package(MPI REQUIRED)
 find_program(VALGRIND_EXECUTABLE valgrind)
 
+option(SEAPODYM_FETCH "Whether to fetch data individually from each cohort and sum the result (ON), or just accumulate (OFF)" OFF)
+if (SEAPODYM_FETCH) 
+    add_definitions(-DSEAPODYM_FETCH)
+endif ()
+
 option(ADMB_HOME "Path to ADMB installation" "")
 # If ADMB_HOME is set, use it to configure include and library paths
 if(ADMB_HOME)
