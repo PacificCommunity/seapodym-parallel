@@ -91,6 +91,8 @@ SeapodymCohortManager::getNextCohort(int cohortId) const {
 int
 SeapodymCohortManager::getNewCohortWorker(int timeStep) const {
     // positive version of  (this->numAgeGroups - timeStep - 1) % this->numAgeGroups
+    // unlike the % operator in Python, C++'s % operator can return negative values
+    // so we need to ensure that the result is always positive
     int ageIndex = ( (this->numAgeGroups - timeStep - 1) % this->numAgeGroups + this->numAgeGroups ) % this->numAgeGroups;
     int workerId = this->ageIndex2Worker.at(ageIndex);
     return workerId;
