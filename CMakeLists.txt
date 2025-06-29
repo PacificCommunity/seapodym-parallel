@@ -22,8 +22,9 @@ FetchContent_MakeAvailable(spdlog)
 find_package(MPI REQUIRED)
 find_program(VALGRIND_EXECUTABLE valgrind)
 
-option(SEAPODYM_FETCH "Whether to fetch data individually from each cohort and sum the result (ON), or just accumulate (OFF)" OFF)
-if (SEAPODYM_FETCH) 
+option(FETCH "Whether to fetch data individually from each cohort and sum the result (ON), or just accumulate (OFF)" OFF)
+if (FETCH)
+    message(STATUS "Fetching data individually from each cohort.")
     add_definitions(-DSEAPODYM_FETCH)
 endif ()
 
