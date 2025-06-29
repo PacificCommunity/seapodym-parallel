@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // Number of age groups, time steps, milliseconds per step, and number of doubles
+    // Number of age sworkerIdgroups, time steps, milliseconds per step, and number of doubles
     // These values are set by the command line arguments
     int numAgeGroups = cmdLine.get<int>("-na");
     int numTimeSteps = cmdLine.get<int>("-nt");
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     if (numAgeGroups <= 0 || numTimeSteps <= 0 || numMilliseconds <= 0 || dataSize <= 0) {
         if (workerId == 0) {
             // Print an error message only from the master worker
-            std::cerr << "Invalid command line arguments. All values must be positive integers." << std::endl;
+            std::cerr << "Invalid command line arguments. All values must be strictly positive integers." << std::endl;
         }
         cmdLine.help();
         MPI_Finalize();
@@ -78,8 +78,8 @@ int main(int argc, char** argv) {
     SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
     SeapodymCourier courier(MPI_COMM_WORLD);
 
-    // Set the data value to the workerId (for example)
-    std::vector<double> data(dataSize, workerId);
+    // Set the data value to the 100*workerId (for example)
+    std::vector<double> data(dataSize, 100*workerId);
     courier.expose(data.data(), dataSize);
 
     std::vector<int> cohortIds = cohortManager.getInitCohortIds(workerId);
@@ -111,9 +111,10 @@ int main(int argc, char** argv) {
             logger->info("starting processing cohort {} at time step {}...", cohortId, istep);  
             
             // Simulate the time taken for a step
-	        tic = MPI_Wtime();
+            tic = MPI_Wtime();
             cohortsPerWorker[icohort]->stepForward(dvar_vector());
-	        ttotStep += MPI_Wtime() - tic; 
+            ttotStep += MPI_Wtime() - tic;
+            data.assign(dataSize, 100*workerId + istep); // Update the data for this step
 
             logger->info("done processing cohort {} at time step {}", cohortId, istep);  
 
@@ -137,27 +138,29 @@ int main(int argc, char** argv) {
 
 #ifdef SEAPODYM_FETCH
         // Individual fetches
+        MPI_Barrier(MPI_COMM_WORLD); // Ensure all workers are synchronized before fetching
+        logger->info("starting fetching data from all workers at time step {}", istep);
         std::vector<double> sum_data(dataSize, 0);
         if (workerId == newCohortWorkerId) {
             for (auto iw = 0; iw < numWorkers; ++iw) {
-		tic = MPI_Wtime();
+                tic = MPI_Wtime();
                 std::vector<double> fetchedData = courier.fetch(iw);
                 logger->info("fetched data from worker {} at time step {}", iw, istep);
                 for (int i = 0; i < dataSize; ++i) {
                     sum_data[i] += fetchedData[i]; // Sum the data from all workers
                 }
-		ttotComm += MPI_Wtime() - tic;
+                ttotComm += MPI_Wtime() - tic;
             }
-	    logger->info("done fetching data after time step {}", istep);
+            logger->info("done fetching data after time step {}", istep);
         }
 #else
         // Accumulate
         //MPI_Barrier(MPI_COMM_WORLD); // Ensure all workers are synchronized before accumulating
         logger->info("starting accumulation of data from all workers at time step {}", istep);
 
-	    tic = MPI_Wtime();
+        tic = MPI_Wtime();
         std::vector<double> sum_data = courier.accumulate(newCohortWorkerId);
-	    ttotComm += MPI_Wtime() - tic;
+        ttotComm += MPI_Wtime() - tic;
         if (workerId == newCohortWorkerId) {
             logger->info("done accumulating data after time step {}", istep);
         }
@@ -183,10 +186,10 @@ int main(int argc, char** argv) {
     MPI_Reduce(&ttotComm, &ttotCommMin, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);                                                                                                                                    
     MPI_Reduce(&ttotComm, &ttotCommMax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD); 
     if (workerId == 0) {
-	std::cout << "Num workers: " << numWorkers << " num age groups: " << numAgeGroups << " num time steps: " << numTimeSteps << '\n';
-	std::cout << "milliseconds per step: " << numMilliseconds << " data size: " << dataSize << '\n';
-	std::cout << "Total times step: [" << ttotStepMin << ',' << ttotStepMax << 
-	    "] communication: [" << ttotCommMin << ',' << ttotCommMax << "]\n";
+    std::cout << "Num workers: " << numWorkers << " num age groups: " << numAgeGroups << " num time steps: " << numTimeSteps << '\n';
+    std::cout << "milliseconds per step: " << numMilliseconds << " data size: " << dataSize << '\n';
+    std::cout << "Total times step: [" << ttotStepMin << ',' << ttotStepMax << 
+        "] communication: [" << ttotCommMin << ',' << ttotCommMax << "]\n";
     }	    
 
     // clean up
