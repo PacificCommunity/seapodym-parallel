@@ -111,9 +111,9 @@ int main(int argc, char** argv) {
             logger->info("starting processing cohort {} at time step {}...", cohortId, istep);  
             
             // Simulate the time taken for a step
-	    tic = MPI_Wtime();
+	        tic = MPI_Wtime();
             cohortsPerWorker[icohort]->stepForward(dvar_vector());
-	    ttotStep += MPI_Wtime() - tic; 
+	        ttotStep += MPI_Wtime() - tic; 
 
             logger->info("done processing cohort {} at time step {}", cohortId, istep);  
 
@@ -152,9 +152,12 @@ int main(int argc, char** argv) {
         }
 #else
         // Accumulate
-	tic = MPI_Wtime();
+        //MPI_Barrier(MPI_COMM_WORLD); // Ensure all workers are synchronized before accumulating
+        logger->info("starting accumulation of data from all workers at time step {}", istep);
+
+	    tic = MPI_Wtime();
         std::vector<double> sum_data = courier.accumulate(newCohortWorkerId);
-	ttotComm += MPI_Wtime() - tic;
+	    ttotComm += MPI_Wtime() - tic;
         if (workerId == newCohortWorkerId) {
             logger->info("done accumulating data after time step {}", istep);
         }
