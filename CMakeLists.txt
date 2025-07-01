@@ -32,6 +32,24 @@ option(ADMB_HOME "Path to ADMB installation" "")
 # If ADMB_HOME is set, use it to configure include and library paths
 if(ADMB_HOME)
     message(STATUS "Using ADMB from: ${ADMB_HOME}")
+
+    # expand ~
+    set(HOME_DIR "$ENV{HOME}")
+    string(REGEX REPLACE "^~" "${HOME_DIR}" ADMB_HOME "${ADMB_HOME}")
+    message(STATUS "Using ADMB from: ${ADMB_HOME}")
+
+    # make sure we can find what we need
+    if(EXISTS "${ADMB_HOME}/include/admodel.h")
+        message(STATUS "${ADMB_HOME}/include/admodel.h found")
+    else()
+        message(FATAL_ERROR "Could not find ${ADMB_HOME}/include/admodel.h")
+    endif()
+    if (EXISTS "${ADMB_HOME}/lib/libadmb.a")
+        message(STATUS "${ADMB_HOME}/lib/libadmb.a found")
+    else()
+        message(FATAL_ERROR "Could not find ${ADMB_HOME}/lib/libadmb.a")
+    endif()
+
     include_directories(${ADMB_HOME}/include)
     link_directories(${ADMB_HOME}/lib)
 else()
