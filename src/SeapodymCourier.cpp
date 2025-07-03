@@ -75,7 +75,8 @@ SeapodymCourier::accumulate(int targetWorker) {
     //MPI_Win_fence(0, this->winRecv);
 
     // The result of the reduction operation will be in this->dataRecv
-    MPI_Accumulate(this->data, this->data_size, MPI_DOUBLE, targetWorker, 0, this->data_size, MPI_DOUBLE, MPI_SUM, this->winRecv);
+    MPI_Accumulate(this->data, this->data_size, MPI_DOUBLE, targetWorker, 0, 
+        this->data_size, MPI_DOUBLE, MPI_SUM, this->winRecv);
 
     // Complete the access to the window, no RMA calls after this point
     MPI_Win_fence(MPI_MODE_NOSUCCEED, this->winRecv);

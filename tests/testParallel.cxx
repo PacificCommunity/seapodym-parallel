@@ -114,7 +114,9 @@ int main(int argc, char** argv) {
             tic = MPI_Wtime();
             cohortsPerWorker[icohort]->stepForward(dvar_vector());
             ttotStep += MPI_Wtime() - tic;
-            data.assign(dataSize, 100*workerId + istep); // Update the data for this step
+
+            // Update the data for this step
+            data.assign(dataSize, 100*workerId + istep);
 
             logger->info("done processing cohort {} at time step {}", cohortId, istep);  
 
@@ -155,7 +157,6 @@ int main(int argc, char** argv) {
         }
 #else
         // Accumulate
-        //MPI_Barrier(MPI_COMM_WORLD); // Ensure all workers are synchronized before accumulating
         logger->info("starting accumulation of data from all workers at time step {}", istep);
 
         tic = MPI_Wtime();
