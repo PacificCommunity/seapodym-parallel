@@ -18,9 +18,9 @@ jobs:
       - uses: ssciwr/doxygen-install@v1
       - uses: tlylt/install-graphviz@v1
       - name: Download ADMB
-        run: "wget https://github.com/admb-project/admb/releases/download/admb-13.2/admb-13.2-linux.zip"
+        run: "wget https://github.com/admb-project/admb/releases/download/admb-13.1/admb-13.1-linux.zip"
       - name: Extract ADMB
-        run: "unzip admb-13.2-linux.zip"
+        run: "unzip admb-13.1-linux.zip"
       - name: ADMB lib names
         run: |
           ln -s libadmb-x86_64-linux-g++11.so libadmb.so
