@@ -92,8 +92,7 @@ int main(int argc, char** argv) {
     std::vector<SeapodymCohortFake*> cohortsPerWorker(cohortIds.size());
     for (auto i = 0; i < cohortIds.size(); ++i) {
         cohortNumSteps[i] = cohortManager.getNumSteps(cohortIds[i]);
-        SeapodymCohortFake* cohortPtr = new SeapodymCohortFake(numMilliseconds, dataSize, cohortIds[i]);
-        cohortsPerWorker[i] = cohortPtr;
+        cohortsPerWorker[i] = new SeapodymCohortFake(numMilliseconds, dataSize, cohortIds[i]);
     }
 
     // Iterate over the global time steps
