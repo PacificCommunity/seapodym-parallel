@@ -83,6 +83,7 @@ int main(int argc, char** argv) {
     courier.expose(data.data(), dataSize);
 
     std::vector<int> cohortIds = cohortManager.getInitCohortIds(workerId);
+    std::vector<int> ageIndices = cohortIds; // Initialially, the age indices are the same as the cohort IDs
 
     // Initialize the step counter for each cohort task
     std::vector<int> step_counter(cohortIds.size(), 0);
@@ -107,7 +108,8 @@ int main(int argc, char** argv) {
             // Get the number of steps for this cohort task
             int numSteps = cohortNumSteps[icohort];
 
-            logger->info("starting processing cohort {} at time step {}...", cohortId, istep);  
+            int ageAtBirth = (istep + ageIndices[icohort]) % numAgeGroups;
+            logger->info("starting processing cohort {} (age at birth {}) at time step {}...", cohortId, ageAtBirth, istep);  
             
             // Simulate the time taken for a step
             tic = MPI_Wtime();
