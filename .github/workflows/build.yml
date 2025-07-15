@@ -21,6 +21,8 @@ jobs:
         run: "wget https://github.com/admb-project/admb/releases/download/admb-13.1/admb-13.1-linux.zip"
       - name: Extract ADMB
         run: "unzip admb-13.1-linux.zip"
+      - name: Move AMB directory
+        run: mv admb-13.1 admb
       - name: ADMB lib names
         run: |
           ln -s libadmb-x86_64-linux-g++11.so libadmb.so
@@ -28,8 +30,8 @@ jobs:
           ln -s libadmb-contrib-x86_64-linux-g++11.so libadmb-contrib.so
           ln -s libadmb-contribo-x86_64-linux-g++11.so libadmb-contribo.so
           ls -l
-        working-directory: admb-13.1/lib
-      - run: mv admb-13.1 ~/
+        working-directory: admb/lib
+      - run: mv admb ~/
       - run: pwd
       - run: ls -l
       - run: mkdir build
