@@ -29,7 +29,7 @@ jobs:
           ln -s libadmb-contribo-x86_64-linux-g++11.so libadmb-contribo.so
           ls -l
         working-directory: admb-13.1/lib
-      - run: mv admb ~/
+      - run: mv admb-13.1 ~/
       - run: pwd
       - run: ls -l
       - run: mkdir build
