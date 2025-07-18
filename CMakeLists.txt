@@ -28,7 +28,7 @@ if (FETCH)
     add_definitions(-DSEAPODYM_FETCH)
 endif ()
 
-option(ADMB_HOME "Path to ADMB installation" "")
+set(ADMB_HOME "" CACHE PATH "Path to ADMB installation")
 # If ADMB_HOME is set, use it to configure include and library paths
 if(ADMB_HOME)
     message(STATUS "Using ADMB from: ${ADMB_HOME}")
