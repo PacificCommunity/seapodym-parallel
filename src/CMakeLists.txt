@@ -3,12 +3,14 @@ include_directories(
   ${MPI_CXX_INCLUDE_PATH}
 )
 set(SRCS
+   TaskWorker.cpp
    SeapodymCohortFake.cpp
    SeapodymCohortManager.cpp
    SeapodymCourier.cpp
    CmdLineArgParser.cpp
    )
 set(HEADERS
+   TaskWorker.h
    CmdLineArgParser.h
    SeapodymCohortFake.h
    SeapodymCourier.h
