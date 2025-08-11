@@ -24,16 +24,14 @@ class TaskWorker {
          * Constructor
          * @param comm MPI communicator
          * @param taskFunc task function
-         * @return success (0) or failure
          */
         TaskWorker(MPI_Comm comm, int (*taskFunc)(int));
 
         /**
          * Run the tasks assigned by the TaskManager
          * @param workerId worker ID
-         * @return list
          */
-        void run();
+        void run() const;
 
 };
 

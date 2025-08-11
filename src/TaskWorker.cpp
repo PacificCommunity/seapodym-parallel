@@ -6,7 +6,7 @@ TaskWorker::TaskWorker(MPI_Comm comm, int(*taskFunc)(int)) {
 }
         
 void
-TaskWorker::run() {
+TaskWorker::run() const {
 
     const int manager_rank = 0;
 
