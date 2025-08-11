@@ -20,9 +20,10 @@ TaskManager::run() const {
     
     // initial distribution of tasks
     for (int rank = 1; rank < numWorkers + 1; ++rank) {
-        task_id = rank - 1;
-        if (task_id >= 0 && task_id < this->numTasks) {
+        if (task_id >= 0 && task_id <= this->numTasks) {
+            std::cerr << "[0] sends task " << task_id << " to [" << rank << "]" << std::endl;
             ier = MPI_Send(&task_id, 1, MPI_INT, rank, startTaskTag, this->comm);
+            ++task_id;
         }  
     }
 
@@ -32,13 +33,14 @@ TaskManager::run() const {
 
         MPI_Status status;
         ier = MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, endTaskTag, this->comm, &status);
+        std::cerr << "[0] receives result " << res << " from [" << status.MPI_SOURCE << "]\n";
         results.push_back(res);
 
         // send the next task
+        std::cerr << "[0] sends next task " << task_id << " to [" << status.MPI_SOURCE << "]\n";
         ier = MPI_Send(&task_id, 1, MPI_INT, status.MPI_SOURCE, startTaskTag, this->comm);
 
-        task_id++;
-
+        ++task_id;
     }
 
     // finish up
@@ -46,6 +48,7 @@ TaskManager::run() const {
 
         MPI_Status status;
         ier = MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, endTaskTag, this->comm, &status);
+        std::cerr << "[0] receives final result " << res << " from [" << status.MPI_SOURCE << "]\n";
         results.push_back(res);
 
         // send shutdown signal

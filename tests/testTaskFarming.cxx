@@ -3,6 +3,7 @@
 #include <functional>
 #include <thread>
 #include <chrono>
+#include <algorithm>
 #include <CmdLineArgParser.h>
 #include "TaskManager.h"
 #include "TaskWorker.h"
@@ -16,7 +17,7 @@
  */
 int taskFunc2(int task_id, int ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-    return task_id * task_id;
+    return task_id;
 }
 
 int main(int argc, char** argv) {
@@ -65,6 +66,19 @@ int main(int argc, char** argv) {
         std::cout << "Execution time: " << toc - tic << 
             " Speedup: " << 0.001*double(numTasks * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
+
+        for (auto res : results) {
+            std::cout << res << ", ";
+        }
+        std::cout << std::endl;
+        
+        // sort to make the result clearer
+        std::sort(results.begin(), results.end());
+        for (auto res : results) {
+            std::cout << res << ", ";
+        }
+        std::cout << std::endl;
+
         std::cout << "Success\n";
 
     } else {
