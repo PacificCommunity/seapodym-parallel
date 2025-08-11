@@ -22,6 +22,7 @@ TaskManager::run() const {
     for (int rank = 1; rank < numWorkers + 1; ++rank) {
         task_id = rank - 1;
         if (task_id >= 0 && task_id < this->numTasks) {
+            std::cerr << "manager sends " << task_id << " to " << rank << '\n';
             ier = MPI_Send(&task_id, 1, MPI_INT, rank, startTaskTag, this->comm);
         }  
     }
@@ -49,7 +50,7 @@ TaskManager::run() const {
         results.push_back(res);
 
         // send shutdown signal
-        ier = MPI_Send(&shutdown, 1, MPI_INT, status.MPI_SOURCE, MPI_ANY_TAG, this->comm);
+        ier = MPI_Send(&shutdown, 1, MPI_INT, status.MPI_SOURCE, startTaskTag, this->comm);
     }
 
     return results;

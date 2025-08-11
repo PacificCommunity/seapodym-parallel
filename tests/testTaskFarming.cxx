@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
     } else {
         // Worker
         TaskWorker worker(MPI_COMM_WORLD, taskFunc);
+        worker.run();
     }
     
 
