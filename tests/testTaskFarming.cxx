@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include <algorithm>
+#include <cassert>
 #include <CmdLineArgParser.h>
 #include "TaskManager.h"
 #include "TaskWorker.h"
@@ -71,13 +72,19 @@ int main(int argc, char** argv) {
             std::cout << res << ", ";
         }
         std::cout << std::endl;
-        
+
         // sort to make the result clearer
         std::sort(results.begin(), results.end());
         for (auto res : results) {
             std::cout << res << ", ";
         }
         std::cout << std::endl;
+
+        // Make sure there are no duplicate tasks and all the tasks have been eceuted
+        assert(results.size() == numTasks);
+        for (auto i = 0; i < results.size(); ++i) {
+            assert(results[i] == i);
+        }
 
         std::cout << "Success\n";
 
