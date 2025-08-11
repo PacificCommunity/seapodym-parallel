@@ -1,4 +1,5 @@
 #include <mpi.h>
+#include <functional>
 
 #ifndef TASK_WORKER
 #define TASK_WORKER
@@ -16,7 +17,7 @@ class TaskWorker {
         MPI_Comm comm; 
 
         // number of workers 0...numWorkers-1
-        int (*taskFunc)(int);
+        std::function<int(int)> taskFunc;
 
     public:
 
@@ -25,7 +26,7 @@ class TaskWorker {
          * @param comm MPI communicator
          * @param taskFunc task function
          */
-        TaskWorker(MPI_Comm comm, int (*taskFunc)(int));
+        TaskWorker(MPI_Comm comm, std::function<int(int)> taskFunc);
 
         /**
          * Run the tasks assigned by the TaskManager

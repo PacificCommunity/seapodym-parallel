@@ -1,11 +1,15 @@
 #include <mpi.h>
 #include <iostream>
+#include <functional>
+#include <thread>
+#include <chrono>
 #include <CmdLineArgParser.h>
 #include "TaskManager.h"
 #include "TaskWorker.h"
 
 // Some function for the workers to execute
-int taskFunc(int task_id) {
+int taskFunc2(int task_id, int ms) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
     return task_id * task_id;
 }
 
@@ -20,6 +24,7 @@ int main(int argc, char** argv) {
     
     CmdLineArgParser cmdLine;
     cmdLine.set("-nT", 5, "Total number of tasks");
+    cmdLine.set("-nm", 100, "Sleep milliseconds");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
     if (!success) {
@@ -35,6 +40,8 @@ int main(int argc, char** argv) {
     }
 
     int numTasks = cmdLine.get<int>("-nT");
+    int milliseconds = cmdLine.get<int>("-nm");
+    auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
 
     if (workerId == 0) {
         // Manager
@@ -43,7 +50,7 @@ int main(int argc, char** argv) {
         std::cout << "Success\n";
     } else {
         // Worker
-        TaskWorker worker(MPI_COMM_WORLD, taskFunc);
+        TaskWorker worker(MPI_COMM_WORLD, taskFunc1);
         worker.run();
     }
     

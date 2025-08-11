@@ -1,8 +1,10 @@
 #include "TaskWorker.h"
 
-TaskWorker::TaskWorker(MPI_Comm comm, int(*taskFunc)(int)) {
+TaskWorker::TaskWorker(MPI_Comm comm, std::function<int(int)> taskFunc) {
     this->comm = comm;
     this->taskFunc = taskFunc;
+    // check that I can call the function
+    std::cerr << "this->taskFunc(5) = " << this->taskFunc(5) << '\n';
 }
         
 void
@@ -18,7 +20,7 @@ TaskWorker::run() const {
 
     while (true) {
 
-        // get thge assigned task
+        // get the assigned task
         int ier = MPI_Recv(&task_id, 1, MPI_INT, manager_rank, startTaskTag, this->comm, MPI_STATUS_IGNORE);
         std::cerr << "[" << workerId << "] recv'ed task " << task_id << '\n';
         
