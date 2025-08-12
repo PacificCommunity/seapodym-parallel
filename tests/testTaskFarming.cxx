@@ -60,6 +60,7 @@ int main(int argc, char** argv) {
         double tic = MPI_Wtime();
 
         // Manager
+        
         TaskManager manager(MPI_COMM_WORLD, numTasks);
         std::vector<int> results = manager.run();
 

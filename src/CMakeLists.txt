@@ -3,6 +3,7 @@ include_directories(
   ${MPI_CXX_INCLUDE_PATH}
 )
 set(SRCS
+   TaskScore.cpp
    TaskManager.cpp
    TaskWorker.cpp
    SeapodymCohortFake.cpp
@@ -11,6 +12,7 @@ set(SRCS
    CmdLineArgParser.cpp
    )
 set(HEADERS
+   TaskScore.h
    TaskManager.h
    TaskWorker.h
    CmdLineArgParser.h
