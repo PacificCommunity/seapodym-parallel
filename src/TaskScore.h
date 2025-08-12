@@ -47,6 +47,13 @@ class TaskScore {
         TaskScore(MPI_Comm comm, int numTasks);
 
         /**
+        * Destructor
+         */
+        ~TaskScore() {
+            MPI_Win_free(&this->win);
+        }
+
+        /**
          * Get the IDs of the tasks with status condition
          * @param status either PENDING, RUNNING, SUCCEEDED or FAILED
          * @return set of IDs
