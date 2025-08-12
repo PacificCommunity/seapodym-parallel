@@ -24,8 +24,8 @@ class TaskScore {
         std::vector<int> task_id;
         std::vector<int> status;
 
-        // the MPI window to receive the scores from remote processses
-        MPI_Win win;
+        // entry to scoreboard
+        int entry[2];
 
     public:
 
@@ -35,6 +35,9 @@ class TaskScore {
             SUCCEEDED = -3,
             FAILED = -4,
         };
+
+        // the MPI window to receive the score updates from remote processses
+        MPI_Win win;
 
         /**
          * Constructor

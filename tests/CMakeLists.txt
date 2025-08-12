@@ -24,7 +24,11 @@ target_link_libraries(testParallel PRIVATE seapodym_api spdlog::spdlog)
 add_executable(testTaskFarming testTaskFarming.cxx)
 target_link_libraries(testTaskFarming PRIVATE seapodym_api spdlog::spdlog)
 
-# Register the test
+add_executable(testTaskScore testTaskScore.cxx)
+target_link_libraries(testTaskScore PRIVATE seapodym_api spdlog::spdlog)
+
+# Register the tests
+
 add_test(NAME testSeapodymCohort COMMAND testSeapodymCohort)
 
 add_test(NAME testSeapodymCohortManager COMMAND testSeapodymCohortManager)
@@ -60,3 +64,6 @@ set_tests_properties(testParallel_nw3_na4_nt7 PROPERTIES
 
 add_test(NAME testTaskFarming10 COMMAND mpiexec -n 4 testTaskFarming -nT 10)
 set_tests_properties(testTaskFarming10 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+
+add_test(NAME testTaskScore COMMAND mpiexec -n 3 testTaskScore)
+set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "Success")
