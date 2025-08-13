@@ -47,10 +47,17 @@ class TaskScore {
         TaskScore(MPI_Comm comm, int numTasks);
 
         /**
+         * Free the MPI window
+         */
+        void free() {
+            MPI_Win_free(&this->win);
+        }
+
+        /**
         * Destructor
          */
         ~TaskScore() {
-            MPI_Win_free(&this->win);
+            this->free();
         }
 
         /**
