@@ -20,12 +20,14 @@ class TaskScore {
         // number of tasks
         int numTasks;
 
+        // local MPI rank
+        int me;
+
         // scoreboard 
-        std::vector<int> task_id;
         std::vector<int> status;
 
-        // entry to scoreboard
-        int entry[2];
+        // the MPI window to receive the score updates from remote processses
+        MPI_Win win;
 
     public:
 
@@ -36,8 +38,6 @@ class TaskScore {
             FAILED = -4,
         };
 
-        // the MPI window to receive the score updates from remote processses
-        MPI_Win win;
 
         /**
          * Constructor
@@ -47,10 +47,26 @@ class TaskScore {
         TaskScore(MPI_Comm comm, int numTasks);
 
         /**
+         * Store a score
+         * @param taskInd task Id
+         * @param status one of PENDING, RUNNING, SUCCEEDED or FAILED
+         * @note this should be called by the remote process
+         */
+        void store(int taskId, int status);
+
+        /**
+         * Print
+         * 
+         */
+         void print() const;
+
+        /**
          * Free the MPI window
          */
         void free() {
-            MPI_Win_free(&this->win);
+            if (this->win != MPI_WIN_NULL) {
+                MPI_Win_free(&this->win);
+            }
         }
 
         /**
@@ -62,7 +78,7 @@ class TaskScore {
 
         /**
          * Get the IDs of the tasks with status condition
-         * @param status either PENDING, RUNNING, SUCCEEDED or FAILED
+         * @param status one of PENDING, RUNNING, SUCCEEDED or FAILED
          * @return set of IDs
          */
         std::set<int> get(int status) const;

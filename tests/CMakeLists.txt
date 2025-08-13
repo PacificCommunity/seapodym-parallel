@@ -66,4 +66,4 @@ add_test(NAME testTaskFarming10 COMMAND mpiexec -n 4 testTaskFarming -nT 10)
 set_tests_properties(testTaskFarming10 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 
 add_test(NAME testTaskScore COMMAND mpiexec -n 3 testTaskScore)
-set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "SUCCEEDED")
