@@ -1,5 +1,6 @@
 #include "TaskScore.h"
 #include <map>
+#include <iostream>
 
 TaskScore::TaskScore(MPI_Comm comm, int numTasks) {
     this->comm = comm;
