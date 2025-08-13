@@ -96,6 +96,10 @@ Public Types</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:abaa2b416cfe328057559fe7e84296f15" id="r_abaa2b416cfe328057559fe7e84296f15"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abaa2b416cfe328057559fe7e84296f15">TaskScore</a> (MPI_Comm comm, int numTasks)</td></tr>
+<tr class="memitem:a34c41c46c370e5654e9c1e3f929d39cc" id="r_a34c41c46c370e5654e9c1e3f929d39cc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34c41c46c370e5654e9c1e3f929d39cc">store</a> (int taskId, int status)</td></tr>
+<tr class="memitem:a74646a8396d8bcfa82c197fee4770bcc" id="r_a74646a8396d8bcfa82c197fee4770bcc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a74646a8396d8bcfa82c197fee4770bcc">print</a> () const</td></tr>
+<tr class="memitem:af346c5fa4d3f5620ca094fdc4443c8be" id="r_af346c5fa4d3f5620ca094fdc4443c8be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af346c5fa4d3f5620ca094fdc4443c8be">free</a> ()</td></tr>
+<tr class="memitem:aad0eaa062c397e86b86cc474221846ae" id="r_aad0eaa062c397e86b86cc474221846ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad0eaa062c397e86b86cc474221846ae">~TaskScore</a> ()</td></tr>
 <tr class="memitem:a8b01de0e35679ef9c134abdff03801c7" id="r_a8b01de0e35679ef9c134abdff03801c7"><td class="memItemLeft" align="right" valign="top">std::set&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b01de0e35679ef9c134abdff03801c7">get</a> (int status) const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
@@ -130,7 +134,59 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aad0eaa062c397e86b86cc474221846ae" name="aad0eaa062c397e86b86cc474221846ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad0eaa062c397e86b86cc474221846ae">&#9670;&#160;</a></span>~TaskScore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TaskScore::~TaskScore </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Destructor </p>
+
+</div>
+</div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="af346c5fa4d3f5620ca094fdc4443c8be" name="af346c5fa4d3f5620ca094fdc4443c8be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af346c5fa4d3f5620ca094fdc4443c8be">&#9670;&#160;</a></span>free()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TaskScore::free </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Free the MPI window </p>
+
+</div>
+</div>
 <a id="a8b01de0e35679ef9c134abdff03801c7" name="a8b01de0e35679ef9c134abdff03801c7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8b01de0e35679ef9c134abdff03801c7">&#9670;&#160;</a></span>get()</h2>
 
@@ -147,11 +203,58 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Get the IDs of the tasks with status condition </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">status</td><td>either PENDING, RUNNING, SUCCEEDED or FAILED </td></tr>
+    <tr><td class="paramname">status</td><td>one of PENDING, RUNNING, SUCCEEDED or FAILED </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>set of IDs </dd></dl>
+
+</div>
+</div>
+<a id="a74646a8396d8bcfa82c197fee4770bcc" name="a74646a8396d8bcfa82c197fee4770bcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74646a8396d8bcfa82c197fee4770bcc">&#9670;&#160;</a></span>print()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TaskScore::print </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Print </p>
+
+</div>
+</div>
+<a id="a34c41c46c370e5654e9c1e3f929d39cc" name="a34c41c46c370e5654e9c1e3f929d39cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34c41c46c370e5654e9c1e3f929d39cc">&#9670;&#160;</a></span>store()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TaskScore::store </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>taskId</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>status</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Store a score </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">taskInd</td><td>task Id </td></tr>
+    <tr><td class="paramname">status</td><td>one of PENDING, RUNNING, SUCCEEDED or FAILED </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>this should be called by the remote process </dd></dl>
 
 </div>
 </div>
