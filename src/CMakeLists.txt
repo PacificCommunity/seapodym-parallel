@@ -4,6 +4,7 @@ include_directories(
 )
 set(SRCS
    TaskScore.cpp
+   TaskDependencyManager.cpp
    TaskManager.cpp
    TaskWorker.cpp
    SeapodymCohortFake.cpp
@@ -13,6 +14,7 @@ set(SRCS
    )
 set(HEADERS
    TaskScore.h
+   TaskDependencyManager.h
    TaskManager.h
    TaskWorker.h
    CmdLineArgParser.h

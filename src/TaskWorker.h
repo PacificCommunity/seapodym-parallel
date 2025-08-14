@@ -13,10 +13,10 @@ class TaskWorker {
 
     private:
 
-        // number of age groups for each time step, ideally matching the number of workers
+        // Communicator
         MPI_Comm comm; 
 
-        // number of workers 0...numWorkers-1
+        // Task function
         std::function<int(int)> taskFunc;
 
     public:
