@@ -12,22 +12,22 @@ TaskWorker::run() const {
     int workerId;
     MPI_Comm_rank(this->comm, &workerId);
 
-    int task_id;
+    int taskId;
     const int startTaskTag = 1;
     const int endTaskTag = 2;
 
     while (true) {
 
         // get the assigned task
-        int ier = MPI_Recv(&task_id, 1, MPI_INT, manager_rank, startTaskTag, this->comm, MPI_STATUS_IGNORE);
+        int ier = MPI_Recv(&taskId, 1, MPI_INT, manager_rank, startTaskTag, this->comm, MPI_STATUS_IGNORE);
         
-        if (task_id < 0) {
+        if (taskId < 0) {
             // No more tasks
             break;
         }
 
         // execute the task
-        int result = this->taskFunc(task_id);
+        int result = this->taskFunc(taskId);
 
         // send the result
         ier = MPI_Send(&result, 1, MPI_INT, manager_rank, endTaskTag,  this->comm);

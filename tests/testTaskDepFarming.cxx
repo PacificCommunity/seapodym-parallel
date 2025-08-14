@@ -8,6 +8,7 @@
 #include <CmdLineArgParser.h>
 #include "TaskDependencyManager.h"
 #include "TaskWorker.h"
+#include "SeapodymCohortManager.h"
 
 // Task for the workers to execute
 /**
@@ -33,7 +34,8 @@ int main(int argc, char** argv) {
     
     // Parse the command line arguments
     CmdLineArgParser cmdLine;
-    cmdLine.set("-nT", 5, "Total number of tasks");
+    cmdLine.set("-na", 5, "Number of age groups");
+    cmdLine.set("-nt", 5, "Total number of time steps");
     cmdLine.set("-nm", 100, "Sleep milliseconds");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
@@ -49,8 +51,12 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    int numTasks = cmdLine.get<int>("-nT");
+    int numAgeGroups = cmdLine.get<int>("-na");
+    int numTimeSteps = cmdLine.get<int>("-nt");
     int milliseconds = cmdLine.get<int>("-nm");
+    int numTasks = numTimeSteps - 1 + numAgeGroups;
+
+    SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
 
     // Workers expect a function that takes a single argument
     auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
@@ -62,6 +68,19 @@ int main(int argc, char** argv) {
         // Manager
         
         TaskDependencyManager manager(MPI_COMM_WORLD, numTasks);
+
+        // build the dependency table
+        for (int taskId = 0; taskId < numTasks; ++taskId) {
+            std::set<int> deps = cohortManager.getDependencies(taskId);
+            manager.addDependencies(taskId, deps);
+
+            std::cout << "Task " << taskId << " => ";
+            for (auto d : deps) {
+                std::cout << d << ", ";
+            }
+            std::cout << std::endl;
+        }
+
         std::vector<int> results = manager.run();
 
         double toc = MPI_Wtime();

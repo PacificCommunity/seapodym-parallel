@@ -1,15 +1,19 @@
 #include "TaskDependencyManager.h"
 #include <set>
 
-bool isReady(int taskId, const std::map<int, std::vector<int> >& dependencies, const std::set<int>& completed) {
+bool isReady(int taskId, const std::map<int, std::set<int> >& dependencies, const std::set<int>& completed) {
     for (int dep : dependencies.at(taskId)) {
-        if (completed.find(dep) == completed.end()) return false;
+        if (completed.find(dep) == completed.end()) {
+            std::cout << "Waiting for " << dep << " to complete before starting " << taskId << std::endl;
+            return false;
+        }
     }
+    std::cout << "Task " << taskId << " can start " << std::endl;
     return true;
 }
 
 std::vector<int>
-getReadyTasks(const std::map<int, std::vector<int> >& dependencies,
+getReadyTasks(const std::map<int, std::set<int> >& dependencies,
                             const std::set<int>& completed,
                             const std::set<int>& assigned) {
     std::vector<int> ready;
@@ -28,8 +32,8 @@ TaskDependencyManager::TaskDependencyManager(MPI_Comm comm, int numTasks) {
 }
 
 void
-TaskDependencyManager::addDependency(int taskId, const std::vector<int>& otherTaskIds) {
-    this->deps.insert( std::pair<int, std::vector<int> >(taskId, otherTaskIds) );
+TaskDependencyManager::addDependencies(int taskId, const std::set<int>& otherTaskIds) {
+    this->deps.insert( std::pair<int, std::set<int> >(taskId, otherTaskIds) );
 }
 
 
@@ -44,37 +48,56 @@ TaskDependencyManager::run() const {
     int ier = MPI_Comm_size(this->comm, &size);
     const int numWorkers = size - 1;
     int task_id = 0;
-    int res;
 
     std::set<int> completed;
     std::set<int> assigned;
     std::vector<int> results;
 
     std::vector<int> ready = getReadyTasks(this->deps, completed, assigned);
-    int activeWorkers = 0;
+    for (auto tid : ready) {
+        std::cout << tid << " is ready\n";
+    }
 
     // Initial assignment
     for (int workerId = 1; workerId < size && !ready.empty(); ++ workerId) {
-        int taskId = ready.back(); ready.pop_back();
-	MPI_Send(&taskId, 1, MPI_INT, workerId, startTaskTag, this->comm);
+        int taskId = ready.back(); 
+        ready.pop_back();
+        std::cout << "Initially send task " << taskId << " to worker " << workerId << std::endl;
+        MPI_Send(&taskId, 1, MPI_INT, workerId, startTaskTag, this->comm);
         assigned.insert(taskId);
-        activeWorkers++;
     }
 
     // Receive the results and reassign new tasks
-    while (completed.size() < this->deps.size()) {
+    int res;
+    while (completed.size() < this->numTasks) {
         int taskId;
         MPI_Status status;
-        int res;
-        MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, endTaskTag, this->comm, &status);
-        results.push_back(res);
+        MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, endTaskTag, MPI_COMM_WORLD, &status);
         int workerId = status.MPI_SOURCE;
-        completed.insert(taskId);
-        activeWorkers++;
+        std::cout << "Received result " << res << " from worker " << workerId << std::endl;
+        results.push_back(res);
+        completed.insert(res); // result == taskId
+        std::cout << "Tasks completed so far: ";
+        for (auto tid : completed) std::cout << tid << ", ";
+        std::cout << std::endl;
+
+        ready = getReadyTasks(this->deps, completed, assigned);
+        std::cout << "Next tasks: "; 
+        for (auto tid : ready) std::cout << tid << ", ";
+        std::cout << std::endl;
+
+        if (!ready.empty()) {
+            int nextTaskId = ready.back(); 
+            ready.pop_back();
+            std::cout << "Send next task " << nextTaskId << " to worker " << workerId << std::endl;
+            MPI_Send(&nextTaskId, 1, MPI_INT, workerId, startTaskTag, MPI_COMM_WORLD);
+            assigned.insert(nextTaskId);
+        }
     }
 
     // Shutdown
     for (int workerId = 1; workerId < size; ++workerId) {
+        std::cout << "Sending shutdown signal to worker " << workerId << std::endl;
         MPI_Send(&shutdown, 1, MPI_INT, workerId, startTaskTag, this->comm);
     } 
     

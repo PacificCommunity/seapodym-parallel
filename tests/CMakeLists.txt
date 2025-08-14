@@ -68,8 +68,8 @@ set_tests_properties(testParallel_nw3_na4_nt7 PROPERTIES
 add_test(NAME testTaskFarming10 COMMAND mpiexec -n 4 testTaskFarming -nT 10)
 set_tests_properties(testTaskFarming10 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 
-add_test(NAME testTaskDepFarming10 COMMAND mpiexec -n 4 testTaskDepFarming -nT 10)
-set_tests_properties(testTaskDepFarming10 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+add_test(NAME testTaskDepFarmingNa3Nt6 COMMAND mpiexec -n 4 testTaskDepFarming -na 3 -nt 6)
+set_tests_properties(testTaskDepFarmingNa3Nt6 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 
 add_test(NAME testTaskScore COMMAND mpiexec -n 3 testTaskScore)
 set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "SUCCEEDED")
