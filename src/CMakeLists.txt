@@ -3,6 +3,8 @@ include_directories(
   ${MPI_CXX_INCLUDE_PATH}
 )
 set(SRCS
+   TaskStepManager.cpp
+   TaskStepWorker.cpp
    TaskScore.cpp
    TaskDependencyManager.cpp
    TaskManager.cpp
@@ -13,6 +15,8 @@ set(SRCS
    CmdLineArgParser.cpp
    )
 set(HEADERS
+   TaskStepManager.h
+   TaskStepWorker.h
    TaskScore.h
    TaskDependencyManager.h
    TaskManager.h

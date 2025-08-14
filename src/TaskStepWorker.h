@@ -1,15 +1,15 @@
 #include <mpi.h>
 #include <functional>
 
-#ifndef TASK_WORKER
-#define TASK_WORKER
+#ifndef TASK_STEP_WORKER
+#define TASK_STEP_WORKER
 
 /**
- * Class TaskWorker
- * @brief The TaskWorker gets tasks assigned and executes them.
+ * Class TaskStepWorker
+ * @brief The TaskStepWorker gets tasks assigned and executes them.
  */
 
-class TaskWorker {
+class TaskStepWorker {
 
     private:
 
@@ -26,13 +26,14 @@ class TaskWorker {
          * @param comm MPI communicator
          * @param taskFunc task function
          */
-        TaskWorker(MPI_Comm comm, std::function<int(int)> taskFunc);
+        TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc);
 
         /**
          * Run the tasks assigned by the TaskManager
+         * @param numSteps number steps
          */
-        void run() const;
+        void run(int numSteps) const;
 
 };
 
-#endif // TASK_WORKER
+#endif // TASK_STEP_WORKER

@@ -1,9 +1,12 @@
-#include "TaskDependencyManager.h"
+#include "TaskStepManager.h"
 #include <set>
 #include <vector>
 
-bool isReady(int taskId, const std::map<int, std::set<int> >& dependencies, const std::set<int>& completed) {
-    for (int dep : dependencies.at(taskId)) {
+bool isReady(int taskId, 
+    const std::map< int, std::set<dep_type> >& dependencies, 
+    const std::set<dep_type>& completed) {
+
+    for (auto dep : dependencies.at(taskId)) {
         if (completed.find(dep) == completed.end()) {
             return false;
         }
@@ -12,9 +15,10 @@ bool isReady(int taskId, const std::map<int, std::set<int> >& dependencies, cons
 }
 
 std::vector<int>
-getReadyTasks(const std::map<int, std::set<int> >& dependencies,
-                            const std::set<int>& completed,
+getReadyTasks(const std::map< int, std::set<dep_type> >& dependencies,
+                            const std::set<dep_type>& completed,
                             const std::set<int>& assigned) {
+
     std::vector<int> ready;
     for (const auto& [taskId, deps] : dependencies) {
         if (assigned.find(taskId) == assigned.end() && isReady(taskId, dependencies, completed)) {
@@ -24,19 +28,19 @@ getReadyTasks(const std::map<int, std::set<int> >& dependencies,
     return ready;
 }
 
-TaskDependencyManager::TaskDependencyManager(MPI_Comm comm, int numTasks) {
+TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks) {
 
     this->comm = comm;
     this->numTasks = numTasks;
 }
 
 void
-TaskDependencyManager::addDependencies(int taskId, const std::set<int>& otherTaskIds) {
-    this->deps.insert( std::pair<int, std::set<int> >(taskId, otherTaskIds) );
+TaskStepManager::addDependencies(int taskId, const std::set<dep_type>& otherTaskIds) {
+    this->deps.insert( std::pair<int, std::set<dep_type> >(taskId, otherTaskIds) );
 }
 
-std::map<int, int>
-TaskDependencyManager::run() const {
+std::set< std::array<int, 3> >
+TaskStepManager::run() const {
 
     const int startTaskTag = 1;
     const int shutdown = -1;
@@ -44,9 +48,9 @@ TaskDependencyManager::run() const {
     int ier = MPI_Comm_size(this->comm, &size);
     const int numWorkers = size - 1;
 
-    std::set<int> completed;
+    std::set<dep_type> completed;
     std::set<int> assigned;
-    std::map<int, int> results;
+    std::set< std::array<int, 3> > results;
 
     std::vector<int> ready = getReadyTasks(this->deps, completed, assigned);
 
@@ -58,18 +62,22 @@ TaskDependencyManager::run() const {
         assigned.insert(taskId);
     }
 
-    // Receive the results and reassign new tasks
-    int res;
-    while (completed.size() < this->numTasks) {
-        MPI_Status status;
-        MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-        int workerId = status.MPI_SOURCE;
-        int taskId = status.MPI_TAG;
-        results.insert( std::pair<int, int>(taskId, res) );
-        completed.insert(taskId);
+    std::array<int, 3> output; // taskId, step, result
 
+    // Receive the results and reassign new tasks
+    while (completed.size() < this->numTasks) {
+
+        MPI_Status status;
+        MPI_Recv(output.data(), output.size(), MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        int workerId = status.MPI_SOURCE;
+        int taskId = output[0];
+        int step = output[1];
+
+        results.insert(output);
+        completed.insert( dep_type{taskId, step} );
+        
         std::cout << "Tasks completed so far: ";
-        for (auto tid : completed) std::cout << tid << ", ";
+        for (auto [tid, step] : completed) std::cout << tid << ":" << step << ", ";
         std::cout << std::endl;
 
         ready = getReadyTasks(this->deps, completed, assigned);
