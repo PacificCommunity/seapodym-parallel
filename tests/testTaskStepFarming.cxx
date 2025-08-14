@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <cassert>
 #include <CmdLineArgParser.h>
-#include "TaskDependencyManager.h"
-#include "TaskWorker.h"
+#include "TaskStepManager.h"
+#include "TaskStepWorker.h"
 #include "SeapodymCohortManager.h"
 
 // Task for the workers to execute
@@ -56,10 +56,13 @@ int main(int argc, char** argv) {
     int milliseconds = cmdLine.get<int>("-nm");
     int numTasks = numTimeSteps - 1 + numAgeGroups;
 
-    SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
-
     // Workers expect a function that takes a single argument
     auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
+
+    // Infer the dependency between tasks. In this version, the tasks depend on other
+    // tasks as well as their step.
+    SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
+
 
     if (workerId == 0) {
 
@@ -67,12 +70,22 @@ int main(int argc, char** argv) {
 
         // Manager
         
-        TaskDependencyManager manager(MPI_COMM_WORLD, numTasks);
+        TaskStepManager manager(MPI_COMM_WORLD, numTasks);
 
         // build the dependency table
         for (int taskId = 0; taskId < numTasks; ++taskId) {
+
             std::set<int> deps = cohortManager.getDependencies(taskId);
-            manager.addDependencies(taskId, deps);
+
+            // the cohort manager only returns the dependencies on tasks, not (task, step)
+            // we'll infer those..
+            std::set< std::array<int, 2> > depsTaskStep;
+            for (auto tid : deps) {
+                int step = taskId - tid - 1;
+                depsTaskStep.insert( std::array<int, 2>{tid, step} );
+            }
+
+            manager.addDependencies(taskId, depsTaskStep);
 
             std::cout << "Task " << taskId << " => ";
             for (auto d : deps) {
@@ -81,20 +94,20 @@ int main(int argc, char** argv) {
             std::cout << std::endl;
         }
 
-        std::map<int, int> results = manager.run();
+        std::set< std::array<int, 3> > results = manager.run();
 
         double toc = MPI_Wtime();
         std::cout << "Execution time: " << toc - tic << 
             " Speedup: " << 0.001*double(numTasks * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
 
-        for (auto [taskId, res] : results) {
-            std::cout << taskId << " => " << res << std::endl;
+        for (auto [taskId, step, res] : results) {
+            std::cout << taskId << ": step " << step << " => " << res << std::endl;
         }
 
         // Make sure there are no duplicate tasks and all the tasks have been eceuted
         assert(results.size() == numTasks);
-        for (auto [taskId, res] : results) {
+        for (auto [taskId, step, res] : results) {
             assert(taskId == res);
         }
 
@@ -103,8 +116,10 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        TaskWorker worker(MPI_COMM_WORLD, taskFunc1);
-        worker.run();
+        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1);
+        
+        // most cohorts will run for numAgeGroups steps, except at the beginning and end
+        worker.run(numAgeGroups);
 
     }
     
