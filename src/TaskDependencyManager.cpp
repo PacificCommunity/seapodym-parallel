@@ -45,7 +45,6 @@ TaskDependencyManager::run() const {
     int size;
     int ier = MPI_Comm_size(this->comm, &size);
     const int numWorkers = size - 1;
-    int task_id = 0;
 
     std::set<int> completed;
     std::set<int> assigned;
@@ -68,11 +67,10 @@ TaskDependencyManager::run() const {
     // Receive the results and reassign new tasks
     int res;
     while (completed.size() < this->numTasks) {
-        int taskId;
         MPI_Status status;
         MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         int workerId = status.MPI_SOURCE;
-        int taskIs = status.MPI_TAG;
+        int taskId = status.MPI_TAG;
         std::cout << "Received result " << res << " from worker " << workerId << std::endl;
         results.insert( std::pair<int, int>(taskId, res) );
         completed.insert(taskId);
@@ -82,7 +80,9 @@ TaskDependencyManager::run() const {
 
         ready = getReadyTasks(this->deps, completed, assigned);
         std::cout << "Next tasks: "; 
-        for (auto tid : ready) std::cout << tid << ", ";
+        for (auto tid : ready) {
+            std::cout << tid << ", ";
+        }
         std::cout << std::endl;
 
         if (!ready.empty()) {
