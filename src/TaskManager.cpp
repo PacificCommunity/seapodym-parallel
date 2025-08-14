@@ -10,7 +10,6 @@ std::map<int, int>
 TaskManager::run() const {
 
     const int startTaskTag = 1;
-    const int endTaskTag = 2;
     const int shutdown = -1;
     int size;
     int ier = MPI_Comm_size(this->comm, &size);

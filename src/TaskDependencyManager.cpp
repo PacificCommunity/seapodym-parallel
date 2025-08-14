@@ -1,5 +1,6 @@
 #include "TaskDependencyManager.h"
 #include <set>
+#include <vector>
 
 bool isReady(int taskId, const std::map<int, std::set<int> >& dependencies, const std::set<int>& completed) {
     for (int dep : dependencies.at(taskId)) {
@@ -36,13 +37,10 @@ TaskDependencyManager::addDependencies(int taskId, const std::set<int>& otherTas
     this->deps.insert( std::pair<int, std::set<int> >(taskId, otherTaskIds) );
 }
 
-
-
-std::vector<int>
+std::map<int, int>
 TaskDependencyManager::run() const {
 
     const int startTaskTag = 1;
-    const int endTaskTag = 2;
     const int shutdown = -1;
     int size;
     int ier = MPI_Comm_size(this->comm, &size);
@@ -51,7 +49,7 @@ TaskDependencyManager::run() const {
 
     std::set<int> completed;
     std::set<int> assigned;
-    std::vector<int> results;
+    std::map<int, int> results;
 
     std::vector<int> ready = getReadyTasks(this->deps, completed, assigned);
     for (auto tid : ready) {
@@ -62,7 +60,7 @@ TaskDependencyManager::run() const {
     for (int workerId = 1; workerId < size && !ready.empty(); ++ workerId) {
         int taskId = ready.back(); 
         ready.pop_back();
-        std::cout << "Initially send task " << taskId << " to worker " << workerId << std::endl;
+        std::cout << "Initially sending task " << taskId << " to worker " << workerId << std::endl;
         MPI_Send(&taskId, 1, MPI_INT, workerId, startTaskTag, this->comm);
         assigned.insert(taskId);
     }
@@ -72,11 +70,12 @@ TaskDependencyManager::run() const {
     while (completed.size() < this->numTasks) {
         int taskId;
         MPI_Status status;
-        MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, endTaskTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         int workerId = status.MPI_SOURCE;
+        int taskIs = status.MPI_TAG;
         std::cout << "Received result " << res << " from worker " << workerId << std::endl;
-        results.push_back(res);
-        completed.insert(res); // result == taskId
+        results.insert( std::pair<int, int>(taskId, res) );
+        completed.insert(taskId);
         std::cout << "Tasks completed so far: ";
         for (auto tid : completed) std::cout << tid << ", ";
         std::cout << std::endl;
