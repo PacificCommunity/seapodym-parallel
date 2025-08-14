@@ -30,6 +30,6 @@ TaskWorker::run() const {
         int result = this->taskFunc(taskId);
 
         // send the result
-        ier = MPI_Send(&result, 1, MPI_INT, manager_rank, endTaskTag,  this->comm);
+        ier = MPI_Send(&result, 1, MPI_INT, manager_rank, taskId,  this->comm);
     }
 }
