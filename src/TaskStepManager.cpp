@@ -7,10 +7,12 @@ bool isReady(int taskId,
     const std::set<dep_type>& completed) {
 
     for (auto dep : dependencies.at(taskId)) {
+
         if (completed.find(dep) == completed.end()) {
             return false;
         }
     }
+
     return true;
 }
 
@@ -81,6 +83,11 @@ TaskStepManager::run() const {
         std::cout << std::endl;
 
         ready = getReadyTasks(this->deps, completed, assigned);
+        std::cout << "Tasks ready to be executed: ";
+        for (auto tid : ready) {
+            std::cout << tid << ", ";
+        }
+        std::cout << std::endl;
 
         if (!ready.empty()) {
             int nextTaskId = ready.back(); 

@@ -81,7 +81,8 @@ int main(int argc, char** argv) {
             // we'll infer those..
             std::set< std::array<int, 2> > depsTaskStep;
             for (auto tid : deps) {
-                int step = taskId - tid - 1;
+                // This may not be the correct dependency for the first few tasks (to check!)
+                int step = std::min(taskId - tid - 1, numAgeGroups - 1);
                 depsTaskStep.insert( std::array<int, 2>{tid, step} );
             }
 
@@ -102,7 +103,7 @@ int main(int argc, char** argv) {
             " Ideal: " << numWorkers << std::endl;
 
         for (auto [taskId, step, res] : results) {
-            std::cout << taskId << ": step " << step << " => " << res << std::endl;
+            std::cout << "task " << taskId << "@step " << step << " => " << res << std::endl;
         }
 
         // Make sure there are no duplicate tasks and all the tasks have been eceuted
