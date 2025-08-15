@@ -87,9 +87,9 @@ int main(int argc, char** argv) {
 
             manager.addDependencies(taskId, depsTaskStep);
 
-            std::cout << "Task " << taskId << " => ";
-            for (auto d : deps) {
-                std::cout << d << ", ";
+            std::cout << "Task " << taskId << " depends on ";
+            for (auto d : depsTaskStep) {
+                std::cout << d[0] << ":" << d[1] << ", ";
             }
             std::cout << std::endl;
         }
