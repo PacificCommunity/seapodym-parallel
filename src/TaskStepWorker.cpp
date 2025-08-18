@@ -29,16 +29,16 @@ TaskStepWorker::run(int numSteps) const {
 
         // TaskId, step, result
         std::array<int, 3> output;
+        output[0] = taskId;
 
         for (output[1] = 0; output[1] < numSteps; ++output[1]) {
-
-            output[0] = taskId;
 
             // execute the task
             output[2] = this->taskFunc(taskId);
 
             // send the (taskId, step, result) back to the manager
             ier = MPI_Send(output.data(), output.size(), MPI_INT, manager_rank, endTaskTag,  this->comm);
+            std::cout << "Executed task " << taskId << "@step " << output[1] << std::endl;
         }
     }
 }

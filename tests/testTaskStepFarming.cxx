@@ -4,11 +4,11 @@
 #include <thread>
 #include <chrono>
 #include <algorithm>
+#include <cmath>
 #include <cassert>
 #include <CmdLineArgParser.h>
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
-#include "SeapodymCohortManager.h"
 
 // Task for the workers to execute
 /**
@@ -54,19 +54,14 @@ int main(int argc, char** argv) {
     int numAgeGroups = cmdLine.get<int>("-na");
     int numTimeSteps = cmdLine.get<int>("-nt");
     int milliseconds = cmdLine.get<int>("-nm");
-    int numTasks = numTimeSteps - 1 + numAgeGroups;
+    int numTasks = numAgeGroups * int( std::ceil( float(numTimeSteps) / float(numAgeGroups) ) );
 
     // Workers expect a function that takes a single argument
     auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
 
-    // Infer the dependency between tasks. In this version, the tasks depend on other
-    // tasks as well as their step.
-    SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
-
+    // Infer the dependency taskId => {[taskId, step], ...}
 
     if (workerId == 0) {
-
-        double tic = MPI_Wtime();
 
         // Manager
         
@@ -74,30 +69,26 @@ int main(int argc, char** argv) {
 
         // build the dependency table
         for (int taskId = 0; taskId < numTasks; ++taskId) {
-
-            std::set<int> deps = cohortManager.getDependencies(taskId);
-
-            // the cohort manager only returns the dependencies on tasks, not (task, step)
-            // we'll infer those..
-            std::set< std::array<int, 2> > depsTaskStep;
-            for (auto tid : deps) {
-                // This may not be the correct dependency for the first few tasks (to check!)
-                int step = std::min(taskId - tid - 1, numAgeGroups - 1);
-                depsTaskStep.insert( std::array<int, 2>{tid, step} );
+            std::set<dep_type> deps;
+            for (int tid = std::max(0, taskId - numAgeGroups); tid < taskId; ++tid) {
+                deps.insert( std::array{tid, taskId - tid - 1});
             }
-
-            manager.addDependencies(taskId, depsTaskStep);
+            manager.addDependencies(taskId, deps);
 
             std::cout << "Task " << taskId << " depends on ";
-            for (auto d : depsTaskStep) {
+            for (auto d : deps) {
                 std::cout << d[0] << ":" << d[1] << ", ";
             }
             std::cout << std::endl;
         }
 
+        double tic = MPI_Wtime();
+
+        // container stores the results TaskId, step, result
         std::set< std::array<int, 3> > results = manager.run();
 
         double toc = MPI_Wtime();
+
         std::cout << "Execution time: " << toc - tic << 
             " Speedup: " << 0.001*double(numTasks * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
@@ -119,7 +110,7 @@ int main(int argc, char** argv) {
         // Worker
         TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1);
         
-        // most cohorts will run for numAgeGroups steps, except at the beginning and end
+        // most cohorts will run for numAgeGroups steps, except at the beginning and at the end
         worker.run(numAgeGroups);
 
     }

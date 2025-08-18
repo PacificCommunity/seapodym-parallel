@@ -45,6 +45,7 @@ std::set< std::array<int, 3> >
 TaskStepManager::run() const {
 
     const int startTaskTag = 1;
+    const int endTaskTag = 2;
     const int shutdown = -1;
     int size;
     int ier = MPI_Comm_size(this->comm, &size);
@@ -70,7 +71,7 @@ TaskStepManager::run() const {
     while (completed.size() < this->numTasks) {
 
         MPI_Status status;
-        MPI_Recv(output.data(), output.size(), MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(output.data(), output.size(), MPI_INT, MPI_ANY_SOURCE, endTaskTag, this->comm, &status);
         int workerId = status.MPI_SOURCE;
         int taskId = output[0];
         int step = output[1];
