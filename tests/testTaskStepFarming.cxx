@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
             " Ideal: " << numWorkers << std::endl;
 
         for (auto [taskId, step, res] : results) {
-            std::cout << "task " << taskId << "@step " << step << " => " << res << std::endl;
+            std::cout << "task " << taskId << "@step " << step << " result: " << res << std::endl;
         }
 
         // Make sure there are no duplicate tasks and all the tasks have been eceuted

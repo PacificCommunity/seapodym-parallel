@@ -8,7 +8,7 @@
 
 /**
  * Generate the cohort dependencies
- * @param this->numTasks number of cohorts
+ * vim param this->numTasks number of cohorts
  * @param numSteps number of steps
  * @return map {task_id: (task_id, step), ...}
  */
@@ -92,7 +92,6 @@ TaskStepManager::run() {
             // step_count[task_id]++;
             // if (step_count[task_id] == this->numSteps) {
             if (step == this->numSteps - 1) {
-                std::cout << "[Manager] removing task " << task_id << " from assigned\n";
                 assigned.erase(task_id);
             }
         }
@@ -135,16 +134,6 @@ TaskStepManager::run() {
         if (active_workers.empty() && assigned.empty()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
-
-        std::cout << "[Manager] task_queue: ";
-        for (auto tid : task_queue) {
-            std::cout << tid << ", ";
-        }
-        std::cout << " assigned: ";
-        for (auto worker : assigned) {
-            std::cout << worker << ", ";
-        }
-        std::cout << std::endl;
     }
 
     // Send stop signal
