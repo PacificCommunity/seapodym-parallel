@@ -67,7 +67,7 @@ TaskStepManager::run() {
         active_workers.insert(i);
     }
 
-    std::map<int, int> step_count;
+    // std::map<int, int> step_count;
 
     while (!task_queue.empty() || !assigned.empty()) {
 
@@ -75,6 +75,7 @@ TaskStepManager::run() {
 
         // Drain all step-complete messages (tag 1)
         while (true) {
+
             int flag = 0;
             // Probe for messages from workers
             MPI_Iprobe(MPI_ANY_SOURCE, 1, this->comm, &flag, &status);
@@ -84,11 +85,14 @@ TaskStepManager::run() {
 
             // Store the result
             results.insert(output);
-            completed.insert(std::array<int,2>{output[0], output[1]});
-
             int task_id = output[0];
-            step_count[task_id]++;
-            if (step_count[task_id] == this->numSteps) {
+            int step = output[1];
+            completed.insert(std::array<int,2>{task_id, step});
+
+            // step_count[task_id]++;
+            // if (step_count[task_id] == this->numSteps) {
+            if (step == this->numSteps - 1) {
+                std::cout << "[Manager] removing task " << task_id << " from assigned\n";
                 assigned.erase(task_id);
             }
         }
@@ -121,6 +125,7 @@ TaskStepManager::run() {
             MPI_Iprobe(worker, 2, this->comm, &flag, &status);
             if (flag) {
                 int dummy;
+                std::cout << "[Manager] listening to availability signal from worker " << worker << std::endl;
                 MPI_Recv(&dummy, 1, MPI_INT, worker, workerAvailableTag, this->comm, MPI_STATUS_IGNORE);
                 active_workers.insert(worker);
             }
@@ -130,11 +135,22 @@ TaskStepManager::run() {
         if (active_workers.empty() && assigned.empty()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
+
+        std::cout << "[Manager] task_queue: ";
+        for (auto tid : task_queue) {
+            std::cout << tid << ", ";
+        }
+        std::cout << " assigned: ";
+        for (auto worker : assigned) {
+            std::cout << worker << ", ";
+        }
+        std::cout << std::endl;
     }
 
     // Send stop signal
-    int stop = -1;
+    const int stop = -1;
     for (int worker = 1; worker < size; ++worker) {
+        std::cout << "[Manager] shutting down worker " << worker << std::endl;
         MPI_Send(&stop, 1, MPI_INT, worker, startTaskTag, this->comm);
     }
 

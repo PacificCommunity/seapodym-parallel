@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
     
     // Parse the command line arguments
     CmdLineArgParser cmdLine;
-    cmdLine.set("-na", 5, "Number of age groups");
-    cmdLine.set("-nt", 5, "Total number of time steps");
+    cmdLine.set("-nT", 5, "Number of tasks/cohorts");
+    cmdLine.set("-ns", 5, "Number of steps for each task");
     cmdLine.set("-nm", 100, "Sleep milliseconds");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
@@ -51,10 +51,9 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    int numAgeGroups = cmdLine.get<int>("-na");
-    int numTimeSteps = cmdLine.get<int>("-nt");
+    int numTasks = cmdLine.get<int>("-nT");
+    int numSteps = cmdLine.get<int>("-ns");
     int milliseconds = cmdLine.get<int>("-nm");
-    int numTasks = numAgeGroups * int( std::ceil( float(numTimeSteps) / float(numAgeGroups) ) );
 
     // Workers expect a function that takes a single argument
     auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
@@ -65,21 +64,21 @@ int main(int argc, char** argv) {
 
         // Manager
         
-        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numTimeSteps);
+        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numSteps);
 
-        // build the dependency table
-        for (int taskId = 0; taskId < numTasks; ++taskId) {
-            std::set<dep_type> deps;
-            for (int tid = std::max(0, taskId - numAgeGroups); tid < taskId; ++tid) {
-                deps.insert( std::array{tid, taskId - tid - 1});
+        for (int task_id = 0; task_id < numTasks; ++task_id) {
+            std::set< std::array<int, 2>> dep_set;
+            for (int i = 0; i < numSteps; ++i) {
+            if (task_id - i - 1 >= 0) {
+                dep_set.insert(std::array<int, 2>{task_id - i - 1, i});
             }
-            manager.addDependencies(taskId, deps);
-
-            std::cout << "Task " << taskId << " depends on ";
-            for (auto d : deps) {
-                std::cout << d[0] << ":" << d[1] << ", ";
+            manager.addDependencies(task_id, dep_set);
             }
-            std::cout << std::endl;
+            std::cout << "Task " << task_id << " depends on ";
+            for (auto d : dep_set) {
+                std::cout << d[0] << ":" << d[1] << ", "; 
+            }
+            std::cout << std::endl;  
         }
 
         double tic = MPI_Wtime();
@@ -109,9 +108,7 @@ int main(int argc, char** argv) {
 
         // Worker
         TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1);
-        
-        // most cohorts will run for numAgeGroups steps, except at the beginning and at the end
-        worker.run(numAgeGroups);
+        worker.run(numSteps);
 
     }
     
