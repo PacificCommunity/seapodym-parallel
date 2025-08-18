@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 
         // Manager
         
-        TaskStepManager manager(MPI_COMM_WORLD, numTasks);
+        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numTimeSteps);
 
         // build the dependency table
         for (int taskId = 0; taskId < numTasks; ++taskId) {

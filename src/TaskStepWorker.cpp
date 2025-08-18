@@ -13,32 +13,41 @@ TaskStepWorker::run(int numSteps) const {
     int workerId;
     MPI_Comm_rank(this->comm, &workerId);
 
-    int taskId;
-    const int startTaskTag = 1;
-    const int endTaskTag = 2;
+    const int startTaskTag = 0;
+    const int endTaskTag = 1;
+    const int workerAvailableTag = 2;
+    const int managerRank = 0;
 
     while (true) {
 
-        // get the assigned task
-        int ier = MPI_Recv(&taskId, 1, MPI_INT, manager_rank, startTaskTag, this->comm, MPI_STATUS_IGNORE);
-        
-        if (taskId < 0) {
-            // No more tasks
+        // Get the task_id to operate on
+        int task_id;
+        MPI_Recv(&task_id, 1, MPI_INT, managerRank, startTaskTag, this->comm, MPI_STATUS_IGNORE);
+
+        if (task_id == -1) {
+            // Shutdown
             break;
         }
 
-        // TaskId, step, result
+        // task_id, step, result
         std::array<int, 3> output;
-        output[0] = taskId;
+        output[0] = task_id;
 
-        for (output[1] = 0; output[1] < numSteps; ++output[1]) {
+        // Execute each step
+        for (int step = 0; step < numSteps; ++step) {
+            std::cout << "Worker " << workerId << " processing task " << task_id << " step " << step << std::endl;
 
-            // execute the task
-            output[2] = this->taskFunc(taskId);
+            // Execute the task
+            output[1] = step;
+            output[2] = this->taskFunc(task_id);
 
-            // send the (taskId, step, result) back to the manager
-            ier = MPI_Send(output.data(), output.size(), MPI_INT, manager_rank, endTaskTag,  this->comm);
-            std::cout << "Executed task " << taskId << "@step " << output[1] << std::endl;
+            // Send the result 
+            MPI_Send(output.data(), 3, MPI_INT, managerRank, endTaskTag, this->comm);
         }
+
+        // Notify the manager that this worker is available again
+        int done = 1;
+        MPI_Send(&done, 1, MPI_INT, managerRank, workerAvailableTag, MPI_COMM_WORLD);
     }
+ 
 }

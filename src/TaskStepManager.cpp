@@ -1,40 +1,37 @@
 #include "TaskStepManager.h"
 #include <set>
 #include <vector>
+#include <map>
+#include <chrono>
+#include <thread>
 
-bool isReady(int taskId, 
-    const std::map< int, std::set<dep_type> >& dependencies, 
-    const std::set<dep_type>& completed) {
 
-    for (auto dep : dependencies.at(taskId)) {
-
-        if (completed.find(dep) == completed.end()) {
-            return false;
+/**
+ * Generate the cohort dependencies
+ * @param this->numTasks number of cohorts
+ * @param numSteps number of steps
+ * @return map {task_id: (task_id, step), ...}
+ */
+std::map<int, std::set<std::pair<int, int>>> generateCohortDependencies(int numTasks, int numSteps) {
+    std::map<int, std::set<std::pair<int, int>>> deps;
+    for (int task_id = 0; task_id < numTasks; ++task_id) {
+        std::set<std::pair<int, int>> dep_set;
+        for (int i = 0; i < numSteps; ++i) {
+            if (task_id - i - 1 >= 0) {
+                dep_set.insert({task_id - i - 1, i});
+            }
         }
+        deps[task_id] = dep_set;
     }
-
-    return true;
+    return deps;
 }
 
-std::vector<int>
-getReadyTasks(const std::map< int, std::set<dep_type> >& dependencies,
-                            const std::set<dep_type>& completed,
-                            const std::set<int>& assigned) {
-
-    std::vector<int> ready;
-    for (const auto& [taskId, deps] : dependencies) {
-        if (assigned.find(taskId) == assigned.end() && isReady(taskId, dependencies, completed)) {
-            ready.push_back(taskId);
-        }
-    }
-    return ready;
-}
-
-TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks) {
-
+TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, int numSteps) {
     this->comm = comm;
     this->numTasks = numTasks;
+    this->numSteps = numSteps;
 }
+
 
 void
 TaskStepManager::addDependencies(int taskId, const std::set<dep_type>& otherTaskIds) {
@@ -42,66 +39,104 @@ TaskStepManager::addDependencies(int taskId, const std::set<dep_type>& otherTask
 }
 
 std::set< std::array<int, 3> >
-TaskStepManager::run() const {
+TaskStepManager::run() {
 
-    const int startTaskTag = 1;
-    const int endTaskTag = 2;
-    const int shutdown = -1;
+    const int startTaskTag = 0;
+    const int endTaskTag = 1;
+    const int workerAvailableTag = 2;
+    const int managerRank = 0;
+
     int size;
-    int ier = MPI_Comm_size(this->comm, &size);
-    const int numWorkers = size - 1;
+    MPI_Comm_size(this->comm, &size);
 
-    std::set<dep_type> completed;
+    std::set<std::array<int,3>> results;
+    std::set<std::array<int,2>> completed;
+
     std::set<int> assigned;
-    std::set< std::array<int, 3> > results;
+    std::vector<int> task_queue(this->numTasks);
+    for (int i = 0; i < this->numTasks; ++i) {
+        task_queue[i] = i;
+    }
+    std::set<int> active_workers;
 
-    std::vector<int> ready = getReadyTasks(this->deps, completed, assigned);
+    // task_id, step, result
+    std::array<int, 3> output;
 
-    // Initial assignment
-    for (int workerId = 1; workerId < size && !ready.empty(); ++ workerId) {
-        int taskId = ready.back(); 
-        ready.pop_back();
-        MPI_Send(&taskId, 1, MPI_INT, workerId, startTaskTag, this->comm);
-        assigned.insert(taskId);
+    // Declare all workers to be active initially
+    for (int i = 1; i < size; ++i) {
+        active_workers.insert(i);
     }
 
-    std::array<int, 3> output; // taskId, step, result
+    std::map<int, int> step_count;
 
-    // Receive the results and reassign new tasks
-    while (completed.size() < this->numTasks) {
+    while (!task_queue.empty() || !assigned.empty()) {
 
         MPI_Status status;
-        MPI_Recv(output.data(), output.size(), MPI_INT, MPI_ANY_SOURCE, endTaskTag, this->comm, &status);
-        int workerId = status.MPI_SOURCE;
-        int taskId = output[0];
-        int step = output[1];
 
-        results.insert(output);
-        completed.insert( dep_type{taskId, step} );
-        
-        std::cout << "Tasks completed so far: ";
-        for (auto [tid, step] : completed) std::cout << tid << ":" << step << ", ";
-        std::cout << std::endl;
+        // Drain all step-complete messages (tag 1)
+        while (true) {
+            int flag = 0;
+            // Probe for messages from workers
+            MPI_Iprobe(MPI_ANY_SOURCE, 1, this->comm, &flag, &status);
+            if (!flag) break;
 
-        ready = getReadyTasks(this->deps, completed, assigned);
-        std::cout << "Tasks ready to be executed: ";
-        for (auto tid : ready) {
-            std::cout << tid << ", ";
+            MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, endTaskTag, this->comm, MPI_STATUS_IGNORE);
+
+            // Store the result
+            results.insert(output);
+            completed.insert(std::array<int,2>{output[0], output[1]});
+
+            int task_id = output[0];
+            step_count[task_id]++;
+            if (step_count[task_id] == this->numSteps) {
+                assigned.erase(task_id);
+            }
         }
-        std::cout << std::endl;
 
-        if (!ready.empty()) {
-            int nextTaskId = ready.back(); 
-            ready.pop_back();
-            MPI_Send(&nextTaskId, 1, MPI_INT, workerId, startTaskTag, MPI_COMM_WORLD);
-            assigned.insert(nextTaskId);
+        // Assign ready tasks to any available worker
+        for (auto it = task_queue.begin(); it != task_queue.end();) {
+            int task_id = *it;
+            const auto& deps = this->deps[task_id];
+            bool ready = true;
+            for (auto& dep : deps) {
+                if (completed.find(dep) == completed.end()) {
+                    ready = false;
+                    break;
+                }
+            }
+            if (ready && !active_workers.empty()) {
+                int worker = *active_workers.begin();
+                active_workers.erase(worker);
+                MPI_Send(&task_id, 1, MPI_INT, worker, startTaskTag, this->comm);
+                assigned.insert(task_id);
+                it = task_queue.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        // Drain all worker-available messages (tag 2)
+        for (int worker = 1; worker < size; ++worker) {
+            int flag = 0;
+            MPI_Iprobe(worker, 2, this->comm, &flag, &status);
+            if (flag) {
+                int dummy;
+                MPI_Recv(&dummy, 1, MPI_INT, worker, workerAvailableTag, this->comm, MPI_STATUS_IGNORE);
+                active_workers.insert(worker);
+            }
+        }
+
+        // (optional) avoid hot-spinning if nothing to do
+        if (active_workers.empty() && assigned.empty()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 
-    // Shutdown
-    for (int workerId = 1; workerId < size; ++workerId) {
-        MPI_Send(&shutdown, 1, MPI_INT, workerId, startTaskTag, this->comm);
-    } 
-    
+    // Send stop signal
+    int stop = -1;
+    for (int worker = 1; worker < size; ++worker) {
+        MPI_Send(&stop, 1, MPI_INT, worker, startTaskTag, this->comm);
+    }
+
     return results;
 }

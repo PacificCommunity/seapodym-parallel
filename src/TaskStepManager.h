@@ -25,6 +25,9 @@ class TaskStepManager {
         // number of tasks
         int numTasks;
 
+        // number of steps
+        int numSteps;
+
         // dependencies
         std::map<int, std::set<dep_type> > deps;
 
@@ -34,8 +37,9 @@ class TaskStepManager {
          * Constructor
          * @param comm communicator
          * @param numTasks number of tasks
+         * @param numSteps number of steps for each task
          */
-        TaskStepManager(MPI_Comm comm, int numTasks);
+        TaskStepManager(MPI_Comm comm, int numTasks, int numSteps);
 
         /**
          * Add dependencies
@@ -48,7 +52,7 @@ class TaskStepManager {
          * Run the manager
          * @return (taskId, step, result) tuples for each task
          */
-        std::set< std::array<int, 3> > run() const;
+        std::set< std::array<int, 3> > run();
 
 };
 
