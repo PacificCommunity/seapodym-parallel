@@ -35,7 +35,7 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, int numSteps,
 }
 
 std::set< std::array<int, 3> >
-TaskStepManager::run() {
+TaskStepManager::run() const {
 
     const int startTaskTag = 0;
     const int endTaskTag = 1;
@@ -95,7 +95,7 @@ TaskStepManager::run() {
         // Assign ready tasks to any available worker
         for (auto it = task_queue.begin(); it != task_queue.end();) {
             int task_id = *it;
-            const auto& deps = this->deps[task_id];
+            const auto& deps = this->deps.at(task_id);
             bool ready = true;
             for (auto& dep : deps) {
                 if (completed.find(dep) == completed.end()) {

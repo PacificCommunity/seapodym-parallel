@@ -47,7 +47,7 @@ class TaskStepManager {
          * Run the manager
          * @return (taskId, step, result) tuples for each task
          */
-        std::set< std::array<int, 3> > run();
+        std::set< std::array<int, 3> > run() const;
 
 };
 
