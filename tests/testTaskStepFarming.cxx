@@ -58,6 +58,13 @@ int main(int argc, char** argv) {
     // Workers expect a function that takes a single argument
     auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
 
+    // set the number of steps for each task
+    std::map<int, int> numStepsMap;
+    for (int task_id = 0; task_id < numTasks; ++task_id) {
+        // in this case the same for each task
+        numStepsMap[task_id] = numSteps;
+    }
+
     // infer the dependency taskId => {[taskId, step], ...}
     std::map<int, std::set<std::array<int, 2>>> dependencyMap;
     for (int task_id = 0; task_id < numTasks; ++task_id) {
@@ -68,19 +75,15 @@ int main(int argc, char** argv) {
             }
         }
         dependencyMap[task_id] = dep_set;
-        std::cout << "Task " << task_id << " depends on ";
-        for (auto d : dep_set) {
-            std::cout << d[0] << ":" << d[1] << ", "; 
+
+        if(workerId == 0) {
+            std::cout << "Task " << task_id << " has " << numStepsMap[task_id] << " steps and depends on ";
+            for (auto d : dep_set) {
+                std::cout << d[0] << ":" << d[1] << ", "; 
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;  
     }
-
-    // set the number of steps for each task
-    std::map<int, int> numStepsMap;
-    for (int task_id = 0; task_id < numTasks; ++task_id) {
-        numStepsMap[task_id] = numSteps;
-    }
-
 
     if (workerId == 0) {
 
