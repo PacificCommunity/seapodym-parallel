@@ -89,12 +89,12 @@ int main(int argc, char** argv) {
         double toc = MPI_Wtime();
 
         std::cout << "Execution time: " << toc - tic << 
-            " Speedup: " << 0.001*double(numTasks * milliseconds)/(toc - tic) << 
+            " Speedup: " << 0.001*double(numTasks*numSteps * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
 
-        for (auto [taskId, step, res] : results) {
-            std::cout << "task " << taskId << "@step " << step << " result: " << res << std::endl;
-        }
+        // for (auto [taskId, step, res] : results) {
+        //     std::cout << "task " << taskId << "@step " << step << " result: " << res << std::endl;
+        // }
 
         // Make sure there are no duplicate tasks and all the tasks have been eceuted
         assert(results.size() == numTasks);
@@ -112,7 +112,6 @@ int main(int argc, char** argv) {
 
     }
     
-
     // Clean up
     MPI_Finalize();
     return 0;
