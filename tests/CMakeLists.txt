@@ -27,6 +27,12 @@ target_link_libraries(testTaskFarming PRIVATE seapodym_api spdlog::spdlog)
 add_executable(testTaskDepFarming testTaskDepFarming.cxx)
 target_link_libraries(testTaskDepFarming PRIVATE seapodym_api spdlog::spdlog)
 
+add_executable(testTaskStepFarming testTaskStepFarming.cxx)
+target_link_libraries(testTaskStepFarming PRIVATE seapodym_api spdlog::spdlog)
+
+add_executable(testTaskStepFarmingCohort testTaskStepFarmingCohort.cxx)
+target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog::spdlog)
+
 add_executable(testTaskScore testTaskScore.cxx)
 target_link_libraries(testTaskScore PRIVATE seapodym_api spdlog::spdlog)
 
@@ -70,6 +76,12 @@ set_tests_properties(testTaskFarming10 PROPERTIES PASS_REGULAR_EXPRESSION "Succe
 
 add_test(NAME testTaskDepFarmingNa3Nt6 COMMAND mpiexec -n 4 testTaskDepFarming -na 3 -nt 6)
 set_tests_properties(testTaskDepFarmingNa3Nt6 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+
+add_test(NAME testTaskStepFarmingNT16Ns10 COMMAND mpiexec -n 5 testTaskStepFarming -nT 16 -ns 10)
+set_tests_properties(testTaskStepFarmingNT16Ns10 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+
+add_test(NAME testTaskStepFarmingCohortNa3Nt5 COMMAND mpiexec -n 5 testTaskStepFarmingCohort -na 3 -nt 5)
+set_tests_properties(testTaskStepFarmingCohortNa3Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 
 add_test(NAME testTaskScore COMMAND mpiexec -n 3 testTaskScore)
 set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "SUCCEEDED")

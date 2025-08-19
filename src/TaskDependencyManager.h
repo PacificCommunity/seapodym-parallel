@@ -1,5 +1,4 @@
 #include <mpi.h>
-#include <vector>
 #include <map>
 #include <set>
 
@@ -44,7 +43,7 @@ class TaskDependencyManager {
          * Run the manager
          * @return the result of each task
          */
-        std::vector<int> run() const;
+        std::map<int, int> run() const;
 
 };
 

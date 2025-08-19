@@ -14,7 +14,6 @@ TaskWorker::run() const {
 
     int taskId;
     const int startTaskTag = 1;
-    const int endTaskTag = 2;
 
     while (true) {
 
@@ -29,7 +28,7 @@ TaskWorker::run() const {
         // execute the task
         int result = this->taskFunc(taskId);
 
-        // send the result
-        ier = MPI_Send(&result, 1, MPI_INT, manager_rank, endTaskTag,  this->comm);
+        // send the result, use the taskId as tag
+        ier = MPI_Send(&result, 1, MPI_INT, manager_rank, taskId,  this->comm);
     }
 }

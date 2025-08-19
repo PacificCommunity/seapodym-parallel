@@ -30,7 +30,6 @@ class TaskWorker {
 
         /**
          * Run the tasks assigned by the TaskManager
-         * @param workerId worker ID
          */
         void run() const;
 

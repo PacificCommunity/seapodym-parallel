@@ -81,29 +81,21 @@ int main(int argc, char** argv) {
             std::cout << std::endl;
         }
 
-        std::vector<int> results = manager.run();
+        std::map<int, int> results = manager.run();
 
         double toc = MPI_Wtime();
         std::cout << "Execution time: " << toc - tic << 
             " Speedup: " << 0.001*double(numTasks * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
 
-        for (auto res : results) {
-            std::cout << res << ", ";
+        for (auto [taskId, res] : results) {
+            std::cout << taskId << " => " << res << std::endl;
         }
-        std::cout << std::endl;
-
-        // sort to make the result clearer
-        std::sort(results.begin(), results.end());
-        for (auto res : results) {
-            std::cout << res << ", ";
-        }
-        std::cout << std::endl;
 
         // Make sure there are no duplicate tasks and all the tasks have been eceuted
         assert(results.size() == numTasks);
-        for (auto i = 0; i < results.size(); ++i) {
-            assert(results[i] == i);
+        for (auto [taskId, res] : results) {
+            assert(taskId == res);
         }
 
         std::cout << "Success\n";

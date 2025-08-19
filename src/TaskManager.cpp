@@ -6,11 +6,10 @@ TaskManager::TaskManager(MPI_Comm comm, int numTasks) {
     this->numTasks = numTasks;
 }
 
-std::vector<int>
+std::map<int, int>
 TaskManager::run() const {
 
     const int startTaskTag = 1;
-    const int endTaskTag = 2;
     const int shutdown = -1;
     int size;
     int ier = MPI_Comm_size(this->comm, &size);
@@ -27,12 +26,13 @@ TaskManager::run() const {
     }
 
     // collect and reassign tasks
-    std::vector<int> results;
+    std::map<int, int> results;
     while (task_id < this->numTasks) {
 
         MPI_Status status;
-        ier = MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, endTaskTag, this->comm, &status);
-        results.push_back(res);
+        ier = MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, this->comm, &status);
+        int taskId = status.MPI_TAG;
+        results.insert( std::pair<int, int>(taskId, res) );
 
         // send the next task
         ier = MPI_Send(&task_id, 1, MPI_INT, status.MPI_SOURCE, startTaskTag, this->comm);
@@ -44,8 +44,9 @@ TaskManager::run() const {
     for (int rank = 1; rank < numWorkers + 1; ++rank) {
 
         MPI_Status status;
-        ier = MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, endTaskTag, this->comm, &status);
-        results.push_back(res);
+        ier = MPI_Recv(&res, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, this->comm, &status);
+        int taskId = status.MPI_TAG;
+        results.insert( std::pair<int, int>(taskId, res) );
 
         // send shutdown signal
         ier = MPI_Send(&shutdown, 1, MPI_INT, status.MPI_SOURCE, startTaskTag, this->comm);

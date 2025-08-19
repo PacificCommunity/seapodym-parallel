@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include <vector>
+#include <map>
 
 #ifndef TASK_MANAGER
 #define TASK_MANAGER
@@ -32,7 +32,7 @@ class TaskManager {
          * Run the manager
          * @return results of each task
          */
-        std::vector<int> run() const;
+        std::map<int, int> run() const;
 
 };
 
