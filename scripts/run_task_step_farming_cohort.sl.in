@@ -1,0 +1,12 @@
+#!/bin/bash -e
+#SBATCH --job-name=run_test_step_farming_cohort
+#SBATCH --ntasks=5
+#SBATCH --time=00:10:00
+#SBATCH --hint=nomultithread
+
+module purge
+module load gimkl CMake
+
+nw=$((SLURM_NTASKS - 1))
+nt=$((nw * 2))
+srun @CMAKE_BINARY_DIR@/tests/testTaskStepFarmingCohort -na $nw -nt $nt >& logNw${nw}.txt
