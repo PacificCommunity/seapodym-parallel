@@ -19,8 +19,9 @@ git clone  git@github.com:PacificCommunity/seapodym-parallel
 cd seapodym-parallel
 mkdir build
 cd build
-cmake -DADMB_HOME=path ..
+cmake -DADMB_HOME=<path to admb> -D CMAKE_INSTALL_PREFIX=<install dir> ..
 cmake --build .
+cmake --install .
 ```
 
 ## How to build the documention
