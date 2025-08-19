@@ -4,6 +4,7 @@
 #include <map>
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 
 TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
