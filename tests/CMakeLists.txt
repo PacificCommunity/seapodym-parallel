@@ -30,6 +30,9 @@ target_link_libraries(testTaskDepFarming PRIVATE seapodym_api spdlog::spdlog)
 add_executable(testTaskStepFarming testTaskStepFarming.cxx)
 target_link_libraries(testTaskStepFarming PRIVATE seapodym_api spdlog::spdlog)
 
+add_executable(testTaskStepFarmingCohort testTaskStepFarmingCohort.cxx)
+target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog::spdlog)
+
 add_executable(testTaskScore testTaskScore.cxx)
 target_link_libraries(testTaskScore PRIVATE seapodym_api spdlog::spdlog)
 
