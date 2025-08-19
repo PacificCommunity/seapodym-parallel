@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <functional>
+#include <map>
 
 #ifndef TASK_STEP_WORKER
 #define TASK_STEP_WORKER
