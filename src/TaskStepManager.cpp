@@ -6,31 +6,13 @@
 #include <thread>
 
 
-/**
- * Generate the cohort dependencies
- * vim param this->numTasks number of cohorts
- * @param numSteps number of steps
- * @return map {task_id: (task_id, step), ...}
- */
-std::map<int, std::set<std::pair<int, int>>> generateCohortDependencies(int numTasks, int numSteps) {
-    std::map<int, std::set<std::pair<int, int>>> deps;
-    for (int task_id = 0; task_id < numTasks; ++task_id) {
-        std::set<std::pair<int, int>> dep_set;
-        for (int i = 0; i < numSteps; ++i) {
-            if (task_id - i - 1 >= 0) {
-                dep_set.insert({task_id - i - 1, i});
-            }
-        }
-        deps[task_id] = dep_set;
-    }
-    return deps;
-}
+TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
+      const std::map<int, int>& numStepsMap, 
+      const std::map<int, std::set<dep_type>>& dependencyMap) {
 
-TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, int numSteps, 
-      std::map<int, std::set<dep_type>> dependencyMap) {
     this->comm = comm;
     this->numTasks = numTasks;
-    this->numSteps = numSteps;
+    this->numStepsMap = numStepsMap;
     this->deps = dependencyMap;
 }
 
@@ -85,9 +67,7 @@ TaskStepManager::run() const {
             int step = output[1];
             completed.insert(std::array<int,2>{task_id, step});
 
-            // step_count[task_id]++;
-            // if (step_count[task_id] == this->numSteps) {
-            if (step == this->numSteps - 1) {
+            if (step == this->numStepsMap.at(task_id) - 1) {
                 assigned.erase(task_id);
             }
         }

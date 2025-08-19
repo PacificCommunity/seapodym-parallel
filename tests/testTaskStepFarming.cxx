@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 
         // Manager
         
-        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numSteps, dependencyMap);
+        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numStepsMap, dependencyMap);
 
         double tic = MPI_Wtime();
 
