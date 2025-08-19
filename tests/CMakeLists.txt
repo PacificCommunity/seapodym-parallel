@@ -80,5 +80,8 @@ set_tests_properties(testTaskDepFarmingNa3Nt6 PROPERTIES PASS_REGULAR_EXPRESSION
 add_test(NAME testTaskStepFarmingNT16Ns10 COMMAND mpiexec -n 5 testTaskStepFarming -nT 16 -ns 10)
 set_tests_properties(testTaskStepFarmingNT16Ns10 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 
+add_test(NAME testTaskStepFarmingCohortNa3Nt5 COMMAND mpiexec -n 5 testTaskStepFarmingCohort -na 3 -nt 5)
+set_tests_properties(testTaskStepFarmingCohortNa3Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+
 add_test(NAME testTaskScore COMMAND mpiexec -n 3 testTaskScore)
 set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "SUCCEEDED")
