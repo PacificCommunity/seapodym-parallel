@@ -38,7 +38,6 @@ TaskStepWorker::run() const {
 
         // Execute each step
         for (int step = 0; step < numSteps; ++step) {
-            std::cout << "Worker " << workerId << " processing task " << task_id << " step " << step << std::endl;
 
             // Execute the task
             output[1] = step;

@@ -100,7 +100,6 @@ TaskStepManager::run() const {
             MPI_Iprobe(worker, 2, this->comm, &flag, &status);
             if (flag) {
                 int dummy;
-                std::cout << "[Manager] listening to availability signal from worker " << worker << std::endl;
                 MPI_Recv(&dummy, 1, MPI_INT, worker, workerAvailableTag, this->comm, MPI_STATUS_IGNORE);
                 active_workers.insert(worker);
             }
