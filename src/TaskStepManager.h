@@ -38,15 +38,10 @@ class TaskStepManager {
          * @param comm communicator
          * @param numTasks number of tasks
          * @param numSteps number of steps for each task
+         * @param dependencyMap map of task dependencies {taskId: {taskId, step}, ...}
          */
-        TaskStepManager(MPI_Comm comm, int numTasks, int numSteps);
-
-        /**
-         * Add dependencies
-         * @param taskId Id of the task
-         * @param otherTaskIds Dependencies of the above task { [taskId, step],  ...}
-         */
-        void addDependencies(int taskId, const std::set< dep_type >& otherTaskIds);
+        TaskStepManager(MPI_Comm comm, int numTasks, int numSteps, 
+            std::map<int, std::set<dep_type> > dependencyMap);
 
         /**
          * Run the manager

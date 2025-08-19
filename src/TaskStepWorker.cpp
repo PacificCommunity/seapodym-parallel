@@ -1,13 +1,14 @@
 #include "TaskStepWorker.h"
 #include <array>
 
-TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc) {
+TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc, std::map<int, int> numStepsMap) {
     this->comm = comm;
     this->taskFunc = taskFunc;
+    this->numStepsMap = numStepsMap;
 }
         
 void
-TaskStepWorker::run(int numSteps) const {
+TaskStepWorker::run() const {
 
     const int manager_rank = 0;
     int workerId;
@@ -28,6 +29,8 @@ TaskStepWorker::run(int numSteps) const {
             // Shutdown
             break;
         }
+
+        int numSteps = this->numStepsMap.at(task_id);
 
         // task_id, step, result
         std::array<int, 3> output;

@@ -26,16 +26,12 @@ std::map<int, std::set<std::pair<int, int>>> generateCohortDependencies(int numT
     return deps;
 }
 
-TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, int numSteps) {
+TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, int numSteps, 
+      std::map<int, std::set<dep_type>> dependencyMap) {
     this->comm = comm;
     this->numTasks = numTasks;
     this->numSteps = numSteps;
-}
-
-
-void
-TaskStepManager::addDependencies(int taskId, const std::set<dep_type>& otherTaskIds) {
-    this->deps.insert( std::pair<int, std::set<dep_type> >(taskId, otherTaskIds) );
+    this->deps = dependencyMap;
 }
 
 std::set< std::array<int, 3> >

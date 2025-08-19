@@ -13,11 +13,14 @@ class TaskStepWorker {
 
     private:
 
-        // Communicator
+        // communicator
         MPI_Comm comm; 
 
-        // Task function
+        // task function
         std::function<int(int)> taskFunc;
+
+        // task to number of steps map
+        std::map<int, int> numStepsMap;
 
     public:
 
@@ -25,14 +28,15 @@ class TaskStepWorker {
          * Constructor
          * @param comm MPI communicator
          * @param taskFunc task function
+         * @param numStepsMap map of task to number of steps
          */
-        TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc);
+        TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc, std::map<int, int> numStepsMap);
 
         /**
          * Run the tasks assigned by the TaskManager
          * @param numSteps number steps
          */
-        void run(int numSteps) const;
+        void run() const;
 
 };
 

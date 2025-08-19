@@ -58,33 +58,40 @@ int main(int argc, char** argv) {
     // Workers expect a function that takes a single argument
     auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
 
-    // Infer the dependency taskId => {[taskId, step], ...}
+    // infer the dependency taskId => {[taskId, step], ...}
+    std::map<int, std::set<std::array<int, 2>>> dependencyMap;
+    for (int task_id = 0; task_id < numTasks; ++task_id) {
+        std::set< std::array<int, 2>> dep_set;
+        for (int i = 0; i < numSteps; ++i) {
+            if (task_id - i - 1 >= 0) {
+                dep_set.insert(std::array<int, 2>{task_id - i - 1, i});
+            }
+        }
+        dependencyMap[task_id] = dep_set;
+        std::cout << "Task " << task_id << " depends on ";
+        for (auto d : dep_set) {
+            std::cout << d[0] << ":" << d[1] << ", "; 
+        }
+        std::cout << std::endl;  
+    }
+
+    // set the number of steps for each task
+    std::map<int, int> numStepsMap;
+    for (int task_id = 0; task_id < numTasks; ++task_id) {
+        numStepsMap[task_id] = numSteps;
+    }
+
 
     if (workerId == 0) {
 
         // Manager
         
-        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numSteps);
-
-        for (int task_id = 0; task_id < numTasks; ++task_id) {
-            std::set< std::array<int, 2>> dep_set;
-            for (int i = 0; i < numSteps; ++i) {
-            if (task_id - i - 1 >= 0) {
-                dep_set.insert(std::array<int, 2>{task_id - i - 1, i});
-            }
-            manager.addDependencies(task_id, dep_set);
-            }
-            std::cout << "Task " << task_id << " depends on ";
-            for (auto d : dep_set) {
-                std::cout << d[0] << ":" << d[1] << ", "; 
-            }
-            std::cout << std::endl;  
-        }
+        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numSteps, dependencyMap);
 
         double tic = MPI_Wtime();
 
         // container stores the results TaskId, step, result
-        std::set< std::array<int, 3> > results = manager.run();
+        auto results = manager.run();
 
         double toc = MPI_Wtime();
 
@@ -96,7 +103,7 @@ int main(int argc, char** argv) {
         //     std::cout << "task " << taskId << "@step " << step << " result: " << res << std::endl;
         // }
 
-        // Make sure there are no duplicate tasks and all the tasks have been eceuted
+        // make sure there are no duplicate tasks and all the tasks have been executed
         assert(results.size() == numTasks);
         for (auto [taskId, step, res] : results) {
             assert(taskId == res);
@@ -107,8 +114,8 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1);
-        worker.run(numSteps);
+        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, numStepsMap);
+        worker.run();
 
     }
     
