@@ -90,13 +90,18 @@ int main(int argc, char** argv) {
 
         double tic = MPI_Wtime();
 
-        // container stores the results TaskId, step, result
+        // container stores the results (taskId, step, result)
         auto results = manager.run();
 
         double toc = MPI_Wtime();
 
+        int numTotalSteps = 0;
+        for (const auto& [taskId, step, res] : results) {
+            numTotalSteps++;
+        }
+
         std::cout << "Execution time: " << toc - tic << 
-            " Speedup: " << 0.001*double(numTasks*numSteps * milliseconds)/(toc - tic) << 
+            " Speedup: " << 0.001*double(numTotalSteps * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
 
         // for (auto [taskId, step, res] : results) {
