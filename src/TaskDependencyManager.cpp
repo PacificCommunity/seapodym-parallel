@@ -1,6 +1,7 @@
 #include "TaskDependencyManager.h"
 #include <set>
 #include <vector>
+#include <iostream>
 
 bool isReady(int taskId, const std::map<int, std::set<int> >& dependencies, const std::set<int>& completed) {
     for (int dep : dependencies.at(taskId)) {
