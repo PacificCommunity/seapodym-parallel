@@ -87,8 +87,8 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa59d2288cd1afc48a7b5de77d62250be" id="r_aa59d2288cd1afc48a7b5de77d62250be"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa59d2288cd1afc48a7b5de77d62250be">TaskDependencyManager</a> (MPI_Comm comm, int numTasks)</td></tr>
-<tr class="memitem:a611a261092327fe408894b7c345a8259" id="r_a611a261092327fe408894b7c345a8259"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a611a261092327fe408894b7c345a8259">addDependency</a> (int taskId, const std::vector&lt; int &gt; &amp;otherTaskIds)</td></tr>
-<tr class="memitem:a00c22a14d43cccc18657fcbcfa006915" id="r_a00c22a14d43cccc18657fcbcfa006915"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00c22a14d43cccc18657fcbcfa006915">run</a> () const</td></tr>
+<tr class="memitem:ac6c593329a2284338ab9b2b63a29c9ce" id="r_ac6c593329a2284338ab9b2b63a29c9ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6c593329a2284338ab9b2b63a29c9ce">addDependencies</a> (int taskId, const std::set&lt; int &gt; &amp;otherTaskIds)</td></tr>
+<tr class="memitem:af9de15f42e017370d1d33db9f9399882" id="r_af9de15f42e017370d1d33db9f9399882"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9de15f42e017370d1d33db9f9399882">run</a> () const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The <a class="el" href="classTaskDependencyManager.html" title="The TaskDependencyManager assigns tasks with dependencies to TaskDependencyWorkers.">TaskDependencyManager</a> assigns tasks with dependencies to TaskDependencyWorkers. </p>
@@ -123,25 +123,25 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a611a261092327fe408894b7c345a8259" name="a611a261092327fe408894b7c345a8259"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a611a261092327fe408894b7c345a8259">&#9670;&#160;</a></span>addDependency()</h2>
+<a id="ac6c593329a2284338ab9b2b63a29c9ce" name="ac6c593329a2284338ab9b2b63a29c9ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6c593329a2284338ab9b2b63a29c9ce">&#9670;&#160;</a></span>addDependencies()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void TaskDependencyManager::addDependency </td>
+          <td class="memname">void TaskDependencyManager::addDependencies </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>taskId</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>otherTaskIds</em></span>&#160;)</td>
+          <td class="paramtype">const std::set&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>otherTaskIds</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Add a dependency </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Add dependencies </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">taskId</td><td>Id of the dependent task </td></tr>
     <tr><td class="paramname">otherTaskIds</td><td>Dependencies </td></tr>
@@ -151,14 +151,14 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a00c22a14d43cccc18657fcbcfa006915" name="a00c22a14d43cccc18657fcbcfa006915"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a00c22a14d43cccc18657fcbcfa006915">&#9670;&#160;</a></span>run()</h2>
+<a id="af9de15f42e017370d1d33db9f9399882" name="af9de15f42e017370d1d33db9f9399882"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9de15f42e017370d1d33db9f9399882">&#9670;&#160;</a></span>run()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt; int &gt; TaskDependencyManager::run </td>
+          <td class="memname">std::map&lt; int, int &gt; TaskDependencyManager::run </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>

@@ -80,7 +80,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &lt;mpi.h&gt;</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &lt;map&gt;</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#ifndef TASK_MANAGER</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#define TASK_MANAGER</span></div>
@@ -101,14 +101,14 @@ $(function() {
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <a class="code hl_function" href="classTaskManager.html#a66eb9bd536b771b3ac1ce81b62c4053f">TaskManager</a>(MPI_Comm comm, <span class="keywordtype">int</span> numTasks);</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        std::vector&lt;int&gt; <a class="code hl_function" href="classTaskManager.html#ab78a84ea09f04ac1d36def6ac57e1580">run</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        std::map&lt;int, int&gt; <a class="code hl_function" href="classTaskManager.html#a22ee1cb298cca2832acf38f89e0cd56b">run</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>};</div>
 </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#endif </span><span class="comment">// TASK_MANAGER</span></div>
+<div class="ttc" id="aclassTaskManager_html_a22ee1cb298cca2832acf38f89e0cd56b"><div class="ttname"><a href="classTaskManager.html#a22ee1cb298cca2832acf38f89e0cd56b">TaskManager::run</a></div><div class="ttdeci">std::map&lt; int, int &gt; run() const</div><div class="ttdef"><b>Definition</b> TaskManager.cpp:10</div></div>
 <div class="ttc" id="aclassTaskManager_html_a66eb9bd536b771b3ac1ce81b62c4053f"><div class="ttname"><a href="classTaskManager.html#a66eb9bd536b771b3ac1ce81b62c4053f">TaskManager::TaskManager</a></div><div class="ttdeci">TaskManager(MPI_Comm comm, int numTasks)</div><div class="ttdef"><b>Definition</b> TaskManager.cpp:3</div></div>
-<div class="ttc" id="aclassTaskManager_html_ab78a84ea09f04ac1d36def6ac57e1580"><div class="ttname"><a href="classTaskManager.html#ab78a84ea09f04ac1d36def6ac57e1580">TaskManager::run</a></div><div class="ttdeci">std::vector&lt; int &gt; run() const</div><div class="ttdef"><b>Definition</b> TaskManager.cpp:10</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
