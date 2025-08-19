@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
             }
         }
         dependencyMap[task_id] = dep_set;
-
+        // print the dependencies for debugging
         if(workerId == 0) {
             std::cout << "Task " << task_id << " has " << numStepsMap[task_id] << " steps and depends on ";
             for (auto d : dep_set) {
