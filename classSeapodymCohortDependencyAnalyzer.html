@@ -78,6 +78,11 @@ $(function() {
   <div class="headertitle"><div class="title">SeapodymCohortDependencyAnalyzer Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>A class to compute the task dependencies of multiple fish cohort tasks.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="SeapodymCohortDependencyAnalyzer_8h_source.html">SeapodymCohortDependencyAnalyzer.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -87,7 +92,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad60c30f85b8b33ba496205a3fbbb1327" id="r_ad60c30f85b8b33ba496205a3fbbb1327"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad60c30f85b8b33ba496205a3fbbb1327">getNumStepsMap</a> () const</td></tr>
 <tr class="memitem:a2c28c7ab585875a208343926f9da35ed" id="r_a2c28c7ab585875a208343926f9da35ed"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::set&lt; std::array&lt; int, 2 &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c28c7ab585875a208343926f9da35ed">getDependencyMap</a> () const</td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A class to compute the task dependencies of multiple fish cohort tasks. </p>
+<p>A fish cohort is a population of fish that were born in the same interval of time. A task evolves a fish cohort over multiple time steps. After some time steps, the cohort is removed from the population and a new cohort is being born by combining the biomass of the cohorts from the previous time step. For instance, let there be 3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time steps. This can be represented as: </p><pre class="fragment">2 1 0
+2 1 3
+2 4 3
+5 4 3
+5 4 6
+</pre><p> where the numbers are the cohort Ids. The horizontal axis represents the different age groups and the vertical axis time. A each time step a new cohort is born. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ac854aebd45e9821a8b632a7aa4443470" name="ac854aebd45e9821a8b632a7aa4443470"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac854aebd45e9821a8b632a7aa4443470">&#9670;&#160;</a></span>SeapodymCohortDependencyAnalyzer()</h2>
 
@@ -107,16 +120,10 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Constructor</p>
-<p>For example, the number of age groups is 3 and the number of time steps is 5 below. Each integer represents a cohort Id.</p>
-<pre class="fragment">2 1 0
-2 1 3
-2 4 3
-5 4 3
-5 4 6
-</pre> <dl class="params"><dt>Parameters</dt><dd>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">numAgeGroups</td><td>number of age groups </td></tr>
-    <tr><td class="paramname">numTimeSteps</td><td>number of tiem steps </td></tr>
+    <tr><td class="paramname">numAgeGroups</td><td>number of age groups (e.g. 3 in the above example) </td></tr>
+    <tr><td class="paramname">numTimeSteps</td><td>number of tiem steps (e.g. 5 in the above example) </td></tr>
   </table>
   </dd>
 </dl>
