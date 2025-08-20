@@ -5,6 +5,25 @@
 #ifndef SEAPODYM_COHORT_DEPENDENCY_ANALYZER
 #define SEAPODYM_COHORT_DEPENDENCY_ANALYZER
 
+/**
+ * @brief A class to compute the task dependencies of multiple fish cohort tasks
+ * 
+ * @details A fish cohort is a population of fish that were born in the same interval of time. 
+ *          A task evolves a fish cohort over multiple time steps. After some time steps, the 
+ *          cohort is removed from the population and a new cohort is being born by combining 
+ *          the biomass of the cohorts from the previous time step. For instance, let there be 
+ *          3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time 
+ *          steps. This can be represented as:
+\verbatim
+2 1 0
+2 1 3
+2 4 3
+5 4 3
+5 4 6
+\endverbatim
+ *          where the numbers are the cohort Ids. The horizontal axis represents the different
+ *          age groups and the vertical axis time. A each time step a new cohort is born. 
+ */
 class SeapodymCohortDependencyAnalyzer {
 
 private:
@@ -29,18 +48,8 @@ public:
     /**
      * Constructor
      * 
-     * For example, the number of age groups is 3 and the number of
-     * time steps is 5 below. Each integer represents a cohort Id. 
-     * 
-     \verbatim
-     2 1 0
-     2 1 3
-     2 4 3
-     5 4 3
-     5 4 6
-     \endverbatim
-     * @param numAgeGroups number of age groups
-     * @param numTimeSteps number of tiem steps
+     * @param numAgeGroups number of age groups (e.g. 3 in the above example)
+     * @param numTimeSteps number of tiem steps (e.g. 5 in the above example)
      */
     SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps);
 

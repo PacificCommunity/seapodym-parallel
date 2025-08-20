@@ -7,7 +7,12 @@
 
 /**
  * Class TaskStepWorker
- * @brief The TaskStepWorker gets tasks assigned and executes them.
+ * @brief The TaskStepWorker gets tasks assigned from the TaskStepManager and executes them.
+ * 
+ * @details A task involves running multiple steps and the worker will inform the manager once 
+ *          once various steps have been accomplished. 
+ * 
+ * @see TaskStepManager
  */
 
 class TaskStepWorker {

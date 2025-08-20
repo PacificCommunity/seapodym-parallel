@@ -8,7 +8,16 @@
 
 /**
  * Class TaskStepManager
- * @brief The TaskStepManager assigns tasks with dependencies to TaskDependencyWorkers.
+ * @brief The TaskStepManager assigns tasks with (task, step) dependencies to TaskStepWorkers.
+ * 
+ * @details This manager should be used when each task involves multiple steps and task
+ *          depend not only on other tasks, but on particular steps performed by the 
+ *          tasks. The manager must know how many steps to execute for each task. After each step, 
+ *          workers will inform the manager that the step has been executed and the manager
+ *          will assign the next step to the worker if it is available. The manager will also
+ *          ensure that the dependencies are satisfied before assigning a task to a worker.
+ * 
+ * @see TaskStepWorker
  */
 
 // TaskId 
