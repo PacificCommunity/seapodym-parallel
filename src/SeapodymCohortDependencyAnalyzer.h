@@ -1,5 +1,6 @@
 #include <map>
 #include <set>
+#include <array>
 
 #ifndef SEAPODYM_COHORT_DEPENDENCY_ANALYZER
 #define SEAPODYM_COHORT_DEPENDENCY_ANALYZER
@@ -31,9 +32,9 @@ public:
      * For example, the number of age groups is 3 and the number of
      * time steps is 5 below. Each integer represents a cohort Id. 
      *  
-     * 0 1 2
-     * 0 1 3
-     * 0 4 3
+     * 2 1 0
+     * 2 1 3
+     * 2 4 3
      * 5 4 3
      * 5 4 6
      * 

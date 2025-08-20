@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     // Parse the command line arguments
     CmdLineArgParser cmdLine;
     cmdLine.set("-na", 5, "Number of age groups");
-    cmdLine.set("-nt", 5, "Total number umber of steps");
+    cmdLine.set("-nt", 5, "Total number number of steps");
     cmdLine.set("-nm", 100, "Sleep milliseconds");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");

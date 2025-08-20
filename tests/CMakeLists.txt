@@ -9,6 +9,9 @@ configure_file(testSeapodymCohort.cpp testSeapodymCohort.cxx)
 add_executable(testSeapodymCohort testSeapodymCohort.cxx)
 target_link_libraries(testSeapodymCohort PRIVATE seapodym_api)
 
+add_executable(testSeapodymCohortDependencyAnalyzer testSeapodymCohortDependencyAnalyzer.cxx)
+target_link_libraries(testSeapodymCohortDependencyAnalyzer PRIVATE seapodym_api)
+
 add_executable(testSeapodymCohortManager testSeapodymCohortManager.cxx)
 target_link_libraries(testSeapodymCohortManager PRIVATE seapodym_api)
 
@@ -85,3 +88,9 @@ set_tests_properties(testTaskStepFarmingCohortNa3Nt5 PROPERTIES PASS_REGULAR_EXP
 
 add_test(NAME testTaskScore COMMAND mpiexec -n 3 testTaskScore)
 set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "SUCCEEDED")
+
+add_test(NAME testSeapodymCohortDependencyAnalyzerNa3Nt5 COMMAND testSeapodymCohortDependencyAnalyzer -na 3 -nt 5)
+set_tests_properties(testSeapodymCohortDependencyAnalyzerNa3Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+
+add_test(NAME testSeapodymCohortDependencyAnalyzerNa4Nt5 COMMAND testSeapodymCohortDependencyAnalyzer -na 4 -nt 5)
+set_tests_properties(testSeapodymCohortDependencyAnalyzerNa4Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "Success")

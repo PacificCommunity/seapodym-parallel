@@ -19,9 +19,10 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
     // no dependency for task_id 0 ... numAgeGroups - 1 but still need to 
     // have a key for those tasks
     for (int task_id = 0; task_id < this->numAgeGroups; ++task_id) {
-        std::set< std::array<int, 2>> dep_set;
-        this->dependencyMap[task_id] = dep_set;
+        // empty
+        this->dependencyMap[task_id] = std::set< std::array<int, 2>>();
     }
+
     for (int task_id = this->numAgeGroups; task_id < this->numTasks; ++task_id) {
 
         std::set< std::array<int, 2>> dep_set;
@@ -32,7 +33,7 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
             int otherTaskId = task_id - i - 1;
 
             if (otherTaskId < this->numAgeGroups - 1) {
-                // special for the first row
+                // special case for the first row
                 step = task_id - this->numAgeGroups;
             } else {
                 // regular case
