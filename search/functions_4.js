@@ -9,6 +9,7 @@ var searchData=
   ['getnewcohortworker_6',['getNewCohortWorker',['../classSeapodymCohortManager.html#af7c1590afbfa2a86e5e1384a98dc3443',1,'SeapodymCohortManager']]],
   ['getnextcohort_7',['getNextCohort',['../classSeapodymCohortManager.html#a5df2ede3e48e612d6673338dfdd5b796',1,'SeapodymCohortManager']]],
   ['getnumberofcohorts_8',['getNumberOfCohorts',['../classSeapodymCohortDependencyAnalyzer.html#ac04d9d679a683db23a43dfddf9125660',1,'SeapodymCohortDependencyAnalyzer']]],
-  ['getnumsteps_9',['getNumSteps',['../classSeapodymCohortManager.html#ae34f18f3427e70e294759cffa82850a9',1,'SeapodymCohortManager']]],
-  ['getnumstepsmap_10',['getNumStepsMap',['../classSeapodymCohortDependencyAnalyzer.html#ad60c30f85b8b33ba496205a3fbbb1327',1,'SeapodymCohortDependencyAnalyzer']]]
+  ['getnumberofcohortsteps_9',['getNumberOfCohortSteps',['../classSeapodymCohortDependencyAnalyzer.html#af235e3d52e21539b8291bda27e23da7b',1,'SeapodymCohortDependencyAnalyzer']]],
+  ['getnumsteps_10',['getNumSteps',['../classSeapodymCohortManager.html#ae34f18f3427e70e294759cffa82850a9',1,'SeapodymCohortManager']]],
+  ['getnumstepsmap_11',['getNumStepsMap',['../classSeapodymCohortDependencyAnalyzer.html#ad60c30f85b8b33ba496205a3fbbb1327',1,'SeapodymCohortDependencyAnalyzer']]]
 ];
