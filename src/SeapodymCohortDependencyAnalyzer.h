@@ -16,7 +16,7 @@ private:
     int numTimeSteps;
 
     // total number of cohorts
-    int numTasks;
+    int numIds;
 
     // cohort Id: number of steps
     std::map<int, int> numStepsMap;
@@ -51,6 +51,14 @@ public:
      * @return number
      */
     int getNumberOfCohorts() const;
+
+    /**
+     * Get the number of cohort steps
+     * 
+     * In the above example, there are 15 cohort-steps
+     * @return number
+     */
+    int getNumberOfCohortSteps() const;
 
     /**
      * Get the cohort Id to number of steps map

@@ -4,10 +4,10 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
 
     this->numAgeGroups = numAgeGroups;
     this->numTimeSteps = numTimeSteps;
-    this->numTasks = numAgeGroups + numTimeSteps - 1;
+    this->numIds = numAgeGroups + numTimeSteps - 1;
 
     // set the number of steps for each task
-    for (int task_id = 0; task_id < this->numTasks; ++task_id) {
+    for (int task_id = 0; task_id < this->numIds; ++task_id) {
         this->numStepsMap[task_id] = std::min(
             std::min(numAgeGroups, task_id + 1),
             numTimeSteps + numAgeGroups - task_id - 1
@@ -23,7 +23,7 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
         this->dependencyMap[task_id] = std::set< std::array<int, 2>>();
     }
 
-    for (int task_id = this->numAgeGroups; task_id < this->numTasks; ++task_id) {
+    for (int task_id = this->numAgeGroups; task_id < this->numIds; ++task_id) {
 
         std::set< std::array<int, 2>> dep_set;
         int step;
@@ -49,7 +49,12 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
 
 int 
 SeapodymCohortDependencyAnalyzer::getNumberOfCohorts() const {
-    return this->numTasks;
+    return this->numIds;
+}
+
+int 
+SeapodymCohortDependencyAnalyzer::getNumberOfCohortSteps() const {
+    return this->numAgeGroups * this->numTimeSteps;
 }
 
 std::map<int, int>

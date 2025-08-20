@@ -9,13 +9,14 @@
 #include <CmdLineArgParser.h>
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
+#include "SeapodymCohortDependencyAnalyzer.h"
 
 // Task for the workers to execute
 /**
  * Task
  * @param task_id index 0.. numTasks - 1
  * @param ms Sleep # milliseconds
- * @return result
+ * @return result (could be an error flag)
  */
 int taskFunc2(int task_id, int ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
@@ -54,73 +55,40 @@ int main(int argc, char** argv) {
     int numAgeGroups = cmdLine.get<int>("-na");
     int numTimeSteps = cmdLine.get<int>("-nt");
     int milliseconds = cmdLine.get<int>("-nm");
-    int numTasks = numAgeGroups + numTimeSteps - 1;
 
-    // Workers expect a function that takes a single argument
+    // workers expect a function that takes a single argument
     auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
 
-    // set the number of steps for each task
-    std::map<int, int> numStepsMap;
-    for (int task_id = 0; task_id < numTasks; ++task_id) {
-        numStepsMap[task_id] = std::min(
-            std::min(numAgeGroups, task_id + 1),
-            numTimeSteps + numAgeGroups - task_id - 1
-        );
-    }
+    // analyze the conhort Id task dependencies
+    SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps);
+    int numCohorts = taskDeps.getNumberOfCohorts();
+    int numCohortSteps = taskDeps.getNumberOfCohortSteps();
+    std::map<int, int> numStepsMap = taskDeps.getNumStepsMap();
+    std::map<int, std::set<std::array<int, 2>>> dependencyMap = taskDeps.getDependencyMap();
 
-    // infer the dependency taskId => {[taskId, step], ...}
-    std::map<int, std::set<std::array<int, 2>>> dependencyMap;
-
-    // no dependency for task_id 0 ... numAgeGroups - 1 but still need to 
-    // have a key for those tasks
-    for (int task_id = 0; task_id < numAgeGroups; ++task_id) {
-        std::set< std::array<int, 2>> dep_set;
-        dependencyMap[task_id] = dep_set;
-    }
-    for (int task_id = numAgeGroups; task_id < numTasks; ++task_id) {
-
-        std::set< std::array<int, 2>> dep_set;
-        int step;
-
-
-        for (int i = 0; i < numAgeGroups; ++i) {
-
-            int otherTaskId = task_id - i - 1;
-
-            if (otherTaskId < numAgeGroups - 1) {
-                // special
-                step = task_id - numAgeGroups;
-            } else {
-                // regular
-                step = i;
-            }
-            dep_set.insert(std::array<int, 2>{otherTaskId, step});
-        }
-    
-        dependencyMap[task_id] = dep_set;
-
-        // print the dependencies for debugging
-        if (workerId == 0) {
-            std::cout << "Task " << task_id << " has " << numStepsMap[task_id] << " steps and depends on ";
-            for (auto d : dep_set) {
-                std::cout << d[0] << ":" << d[1] << ", ";
+    // print the dependencies for debugging
+    if (workerId == 0) {
+        for (const auto& [task_id, nstep] : numStepsMap) {
+            std::cout << "Task " << task_id << " has " << nstep << " steps and depends on: ";
+            for (const auto& [task_id2, step] : dependencyMap.at(task_id)) {
+                std::cout << task_id2 << ":" << step << ", ";
             }
             std::cout << std::endl;
         }
     }
+    
 
     if (workerId == 0) {
 
         // Manager
         
-        std::cout << "Setting up the manager...\n";
-        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numStepsMap, dependencyMap);
+        // note: the number of tasks is the number of cohorts, each task involves multiple steps
+        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, numStepsMap, dependencyMap);
 
         double tic = MPI_Wtime();
 
         // container stores the results TaskId, step, result
-        std::cout << "Running the manager...\n";
-        auto results = manager.run();
+        const auto results = manager.run();
 
         double toc = MPI_Wtime();
 
@@ -133,13 +101,11 @@ int main(int argc, char** argv) {
             " Speedup: " << 0.001*double(numTotalSteps * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
 
-        // for (auto [taskId, step, res] : results) {
-        //     std::cout << "task " << taskId << "@step " << step << " result: " << res << std::endl;
-        // }
 
         // make sure there are no duplicate tasks and all the tasks have been executed
-        assert(results.size() == numTasks);
+        assert(results.size() == numCohortSteps);
         for (auto [taskId, step, res] : results) {
+            // in this test we return the task_id when we're finished
             assert(taskId == res);
         }
 
