@@ -31,13 +31,14 @@ public:
      * 
      * For example, the number of age groups is 3 and the number of
      * time steps is 5 below. Each integer represents a cohort Id. 
-     *  
-     * 2 1 0
-     * 2 1 3
-     * 2 4 3
-     * 5 4 3
-     * 5 4 6
      * 
+     \verbatim
+     2 1 0
+     2 1 3
+     2 4 3
+     5 4 3
+     5 4 6
+     \endverbatim
      * @param numAgeGroups number of age groups
      * @param numTimeSteps number of tiem steps
      */
