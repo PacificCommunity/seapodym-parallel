@@ -79,7 +79,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The SeapodymTaskManager knows how to distribute task cohorts across workers, how many times a cohort task needs to be executed and what the next cohort task should be given to a worker. Use this task in conjunction with <a class="el" href="classTaskStepWorker.html" title="The TaskStepWorker gets tasks assigned from the TaskStepManager and executes them.">TaskStepWorker</a>.  
+<p>The SeapodymTaskManager knows how to distribute task cohorts across workers. After each time step, the workers are synchronized. This approach does not involve task farming &ndash; the task are pre-assigned at the beginning of the simulation.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="SeapodymCohortManager_8h_source.html">SeapodymCohortManager.h</a>&gt;</code></p>
@@ -94,8 +94,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af7c1590afbfa2a86e5e1384a98dc3443" id="r_af7c1590afbfa2a86e5e1384a98dc3443"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7c1590afbfa2a86e5e1384a98dc3443">getNewCohortWorker</a> (int timeStep) const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The SeapodymTaskManager knows how to distribute task cohorts across workers, how many times a cohort task needs to be executed and what the next cohort task should be given to a worker. Use this task in conjunction with <a class="el" href="classTaskStepWorker.html" title="The TaskStepWorker gets tasks assigned from the TaskStepManager and executes them.">TaskStepWorker</a>. </p>
-<p>Class <a class="el" href="classSeapodymCohortManager.html" title="The SeapodymTaskManager knows how to distribute task cohorts across workers, how many times a cohort ...">SeapodymCohortManager</a> </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classTaskStepWorker.html" title="The TaskStepWorker gets tasks assigned from the TaskStepManager and executes them.">TaskStepWorker</a> </dd></dl>
+<div class="textblock"><p>The SeapodymTaskManager knows how to distribute task cohorts across workers. After each time step, the workers are synchronized. This approach does not involve task farming &ndash; the task are pre-assigned at the beginning of the simulation. </p>
+<p>Class <a class="el" href="classSeapodymCohortManager.html" title="The SeapodymTaskManager knows how to distribute task cohorts across workers. After each time step,...">SeapodymCohortManager</a> </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a2c122d88a79633f504866db9dce7f3c3" name="a2c122d88a79633f504866db9dce7f3c3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2c122d88a79633f504866db9dce7f3c3">&#9670;&#160;</a></span>SeapodymCohortManager()</h2>

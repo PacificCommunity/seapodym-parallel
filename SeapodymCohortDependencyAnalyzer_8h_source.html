@@ -100,33 +100,39 @@ $(function() {
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// total number of cohorts</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">int</span> numIds;</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="comment">// cohort Id: number of steps</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    std::map&lt;int, int&gt; numStepsMap;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="comment">// cohort Id: starting step index</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    std::map&lt;int, int&gt; stepBegMap;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// cohort Id: {(taskId, step), ...}</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    std::map&lt;int, std::set&lt;std::array&lt;int, 2&gt;&gt;&gt; dependencyMap;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// cohort Id: ending step index + 1</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    std::map&lt;int, int&gt; stepEndMap;</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#ac854aebd45e9821a8b632a7aa4443470">SeapodymCohortDependencyAnalyzer</a>(<span class="keywordtype">int</span> numAgeGroups, <span class="keywordtype">int</span> numTimeSteps);</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#ac04d9d679a683db23a43dfddf9125660">getNumberOfCohorts</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#af235e3d52e21539b8291bda27e23da7b">getNumberOfCohortSteps</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    std::map&lt;int, int&gt; <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#ad60c30f85b8b33ba496205a3fbbb1327">getNumStepsMap</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    std::map&lt;int, std::set&lt;std::array&lt;int, 2&gt;&gt;&gt;  <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#a2c28c7ab585875a208343926f9da35ed">getDependencyMap</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>};</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="comment">// cohort Id: {(taskId, step), ...}</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    std::map&lt;int, std::set&lt;std::array&lt;int, 2&gt;&gt;&gt; dependencyMap;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#ac854aebd45e9821a8b632a7aa4443470">SeapodymCohortDependencyAnalyzer</a>(<span class="keywordtype">int</span> numAgeGroups, <span class="keywordtype">int</span> numTimeSteps);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#ac04d9d679a683db23a43dfddf9125660">getNumberOfCohorts</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#af235e3d52e21539b8291bda27e23da7b">getNumberOfCohortSteps</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    std::map&lt;int, int&gt; <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#af759705b4a84ccd0edbf29060e401791">getStepBegMap</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    std::map&lt;int, int&gt; <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#ad7b6a3e2efb1059aad833c1449f9e53a">getStepEndMap</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    std::map&lt;int, std::set&lt;std::array&lt;int, 2&gt;&gt;&gt;  <a class="code hl_function" href="classSeapodymCohortDependencyAnalyzer.html#a2c28c7ab585875a208343926f9da35ed">getDependencyMap</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>};</div>
 </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#endif </span><span class="comment">// SEAPODYM_COHORT_DEPENDENCY_ANALYZER</span></div>
-<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_a2c28c7ab585875a208343926f9da35ed"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#a2c28c7ab585875a208343926f9da35ed">SeapodymCohortDependencyAnalyzer::getDependencyMap</a></div><div class="ttdeci">std::map&lt; int, std::set&lt; std::array&lt; int, 2 &gt; &gt; &gt; getDependencyMap() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:66</div></div>
-<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_ac04d9d679a683db23a43dfddf9125660"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#ac04d9d679a683db23a43dfddf9125660">SeapodymCohortDependencyAnalyzer::getNumberOfCohorts</a></div><div class="ttdeci">int getNumberOfCohorts() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:51</div></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#endif </span><span class="comment">// SEAPODYM_COHORT_DEPENDENCY_ANALYZER</span></div>
+<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_a2c28c7ab585875a208343926f9da35ed"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#a2c28c7ab585875a208343926f9da35ed">SeapodymCohortDependencyAnalyzer::getDependencyMap</a></div><div class="ttdeci">std::map&lt; int, std::set&lt; std::array&lt; int, 2 &gt; &gt; &gt; getDependencyMap() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:64</div></div>
+<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_ac04d9d679a683db23a43dfddf9125660"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#ac04d9d679a683db23a43dfddf9125660">SeapodymCohortDependencyAnalyzer::getNumberOfCohorts</a></div><div class="ttdeci">int getNumberOfCohorts() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:44</div></div>
 <div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_ac854aebd45e9821a8b632a7aa4443470"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#ac854aebd45e9821a8b632a7aa4443470">SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer</a></div><div class="ttdeci">SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps)</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:3</div></div>
-<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_ad60c30f85b8b33ba496205a3fbbb1327"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#ad60c30f85b8b33ba496205a3fbbb1327">SeapodymCohortDependencyAnalyzer::getNumStepsMap</a></div><div class="ttdeci">std::map&lt; int, int &gt; getNumStepsMap() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:61</div></div>
-<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_af235e3d52e21539b8291bda27e23da7b"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#af235e3d52e21539b8291bda27e23da7b">SeapodymCohortDependencyAnalyzer::getNumberOfCohortSteps</a></div><div class="ttdeci">int getNumberOfCohortSteps() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:56</div></div>
+<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_ad7b6a3e2efb1059aad833c1449f9e53a"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#ad7b6a3e2efb1059aad833c1449f9e53a">SeapodymCohortDependencyAnalyzer::getStepEndMap</a></div><div class="ttdeci">std::map&lt; int, int &gt; getStepEndMap() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:59</div></div>
+<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_af235e3d52e21539b8291bda27e23da7b"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#af235e3d52e21539b8291bda27e23da7b">SeapodymCohortDependencyAnalyzer::getNumberOfCohortSteps</a></div><div class="ttdeci">int getNumberOfCohortSteps() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:49</div></div>
+<div class="ttc" id="aclassSeapodymCohortDependencyAnalyzer_html_af759705b4a84ccd0edbf29060e401791"><div class="ttname"><a href="classSeapodymCohortDependencyAnalyzer.html#af759705b4a84ccd0edbf29060e401791">SeapodymCohortDependencyAnalyzer::getStepBegMap</a></div><div class="ttdeci">std::map&lt; int, int &gt; getStepBegMap() const</div><div class="ttdef"><b>Definition</b> SeapodymCohortDependencyAnalyzer.cpp:54</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -89,17 +89,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac854aebd45e9821a8b632a7aa4443470" id="r_ac854aebd45e9821a8b632a7aa4443470"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac854aebd45e9821a8b632a7aa4443470">SeapodymCohortDependencyAnalyzer</a> (int numAgeGroups, int numTimeSteps)</td></tr>
 <tr class="memitem:ac04d9d679a683db23a43dfddf9125660" id="r_ac04d9d679a683db23a43dfddf9125660"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac04d9d679a683db23a43dfddf9125660">getNumberOfCohorts</a> () const</td></tr>
 <tr class="memitem:af235e3d52e21539b8291bda27e23da7b" id="r_af235e3d52e21539b8291bda27e23da7b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af235e3d52e21539b8291bda27e23da7b">getNumberOfCohortSteps</a> () const</td></tr>
-<tr class="memitem:ad60c30f85b8b33ba496205a3fbbb1327" id="r_ad60c30f85b8b33ba496205a3fbbb1327"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad60c30f85b8b33ba496205a3fbbb1327">getNumStepsMap</a> () const</td></tr>
+<tr class="memitem:af759705b4a84ccd0edbf29060e401791" id="r_af759705b4a84ccd0edbf29060e401791"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af759705b4a84ccd0edbf29060e401791">getStepBegMap</a> () const</td></tr>
+<tr class="memitem:ad7b6a3e2efb1059aad833c1449f9e53a" id="r_ad7b6a3e2efb1059aad833c1449f9e53a"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7b6a3e2efb1059aad833c1449f9e53a">getStepEndMap</a> () const</td></tr>
 <tr class="memitem:a2c28c7ab585875a208343926f9da35ed" id="r_a2c28c7ab585875a208343926f9da35ed"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::set&lt; std::array&lt; int, 2 &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c28c7ab585875a208343926f9da35ed">getDependencyMap</a> () const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A class to compute the task dependencies of multiple fish cohort tasks. </p>
-<p>A fish cohort is a population of fish that were born in the same interval of time. A task evolves a fish cohort over multiple time steps. After some time steps, the cohort is removed from the population and a new cohort is being born by combining the biomass of the cohorts from the previous time step. For instance, let there be 3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time steps. This can be represented as: </p><pre class="fragment">2 1 0
-2 1 3
-2 4 3
-5 4 3
-5 4 6
-</pre><p> where the numbers are the cohort Ids. The horizontal axis represents the different age groups and the vertical axis time. A each time step a new cohort is born. </p>
+<p>A fish cohort is a population of fish that were born in the same interval of time. A task evolves a fish cohort over multiple time steps. After some time steps, the cohort is removed from the population and a new cohort is being born by combining the biomass of the cohorts from the previous time step. For instance, let there be 3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time steps. This can be represented as: </p><pre class="fragment">0 1 2
+3 1 2
+3 4 2
+3 4 5
+6 4 5
+</pre><p> where the numbers are the cohort Ids. The horizontal axis represents the different age groups and the vertical axis is time. A each time step a new cohort is born. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ac854aebd45e9821a8b632a7aa4443470" name="ac854aebd45e9821a8b632a7aa4443470"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac854aebd45e9821a8b632a7aa4443470">&#9670;&#160;</a></span>SeapodymCohortDependencyAnalyzer()</h2>
@@ -184,26 +185,45 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get the number of cohort steps</p>
-<p>In the above example, there are 15 cohort-steps </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
+<p>In the above example, there are 5*315 cohort-steps </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
 
 </div>
 </div>
-<a id="ad60c30f85b8b33ba496205a3fbbb1327" name="ad60c30f85b8b33ba496205a3fbbb1327"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad60c30f85b8b33ba496205a3fbbb1327">&#9670;&#160;</a></span>getNumStepsMap()</h2>
+<a id="af759705b4a84ccd0edbf29060e401791" name="af759705b4a84ccd0edbf29060e401791"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af759705b4a84ccd0edbf29060e401791">&#9670;&#160;</a></span>getStepBegMap()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::map&lt; int, int &gt; SeapodymCohortDependencyAnalyzer::getNumStepsMap </td>
+          <td class="memname">std::map&lt; int, int &gt; SeapodymCohortDependencyAnalyzer::getStepBegMap </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the cohort Id to number of steps map</p>
-<p>In the above example, cohort 0 has 3 steps, cohort 1 has 2 steps, cohort 2 has 1 step, etc. </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
+<p>Get the cohort Id: starting index map</p>
+<p>In the above example, 0-&gt;2, 1-&gt;1, 2-&gt;0, 3-&gt;0...4-&gt;0, 5-&gt;0, 6-&gt;0 </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
+
+</div>
+</div>
+<a id="ad7b6a3e2efb1059aad833c1449f9e53a" name="ad7b6a3e2efb1059aad833c1449f9e53a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7b6a3e2efb1059aad833c1449f9e53a">&#9670;&#160;</a></span>getStepEndMap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt; int, int &gt; SeapodymCohortDependencyAnalyzer::getStepEndMap </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the cohort Id: last index + 1 map</p>
+<p>In the above example, 0-&gt;3, 1-&gt;3, ....4-&gt;3, 5-&gt;2, 6-&gt;1 </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
 
 </div>
 </div>

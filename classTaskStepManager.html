@@ -81,12 +81,12 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa424c47864d9d8de3ee48abe35192ada" id="r_aa424c47864d9d8de3ee48abe35192ada"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa424c47864d9d8de3ee48abe35192ada">TaskStepManager</a> (MPI_Comm comm, int numTasks, const std::map&lt; int, int &gt; &amp;numStepsMap, const std::map&lt; int, std::set&lt; dep_type &gt; &gt; &amp;dependencyMap)</td></tr>
+<tr class="memitem:a47340250e977e7d7eee34582ea92bd3e" id="r_a47340250e977e7d7eee34582ea92bd3e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a47340250e977e7d7eee34582ea92bd3e">TaskStepManager</a> (MPI_Comm comm, int numTasks, const std::map&lt; int, int &gt; &amp;stepBegMap, const std::map&lt; int, int &gt; &amp;stepEndMap, const std::map&lt; int, std::set&lt; dep_type &gt; &gt; &amp;dependencyMap)</td></tr>
 <tr class="memitem:ab1134cade599eafe76b18c64cce62b93" id="r_ab1134cade599eafe76b18c64cce62b93"><td class="memItemLeft" align="right" valign="top">std::set&lt; std::array&lt; int, 3 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1134cade599eafe76b18c64cce62b93">run</a> () const</td></tr>
 </table>
 <a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aa424c47864d9d8de3ee48abe35192ada" name="aa424c47864d9d8de3ee48abe35192ada"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa424c47864d9d8de3ee48abe35192ada">&#9670;&#160;</a></span>TaskStepManager()</h2>
+<a id="a47340250e977e7d7eee34582ea92bd3e" name="a47340250e977e7d7eee34582ea92bd3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47340250e977e7d7eee34582ea92bd3e">&#9670;&#160;</a></span>TaskStepManager()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -104,7 +104,12 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::map&lt; int, int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>numStepsMap</em></span>, </td>
+          <td class="paramtype">const std::map&lt; int, int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>stepBegMap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::map&lt; int, int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>stepEndMap</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -117,7 +122,8 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">comm</td><td>communicator </td></tr>
     <tr><td class="paramname">numTasks</td><td>number of tasks </td></tr>
-    <tr><td class="paramname">numSteps</td><td>number of steps for each task </td></tr>
+    <tr><td class="paramname">stepBegMap</td><td>taskId -&gt; first step map </td></tr>
+    <tr><td class="paramname">stepEndMap</td><td>taskId -&gt; last step + 1 map </td></tr>
     <tr><td class="paramname">dependencyMap</td><td>map of task dependencies {taskId: {taskId, step}, ...} </td></tr>
   </table>
   </dd>
