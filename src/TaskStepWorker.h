@@ -45,7 +45,6 @@ class TaskStepWorker {
 
         /**
          * Run the tasks assigned by the TaskManager
-         * @param numSteps number steps
          */
         void run() const;
 
