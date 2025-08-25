@@ -70,7 +70,8 @@ int main(int argc, char** argv) {
     // print the dependencies for debugging
     if (workerId == 0) {
         for (const auto& [task_id, stepBeg] : stepBegMap) {
-            std::cout << "Task " << task_id << " has steps " << stepBeg << "..." << stepEndMap.at(task_id) - 1 << " and depends on: ";
+            int globalTimeIndex = std::max(0, task_id - numAgeGroups + 1);
+            std::cout << "At time " << globalTimeIndex << " Task " << task_id << " has steps " << stepBeg << "..." << stepEndMap.at(task_id) - 1 << " and depends on: ";
             for (const auto& [task_id2, step] : dependencyMap.at(task_id)) {
                 std::cout << task_id2 << ":" << step << ", ";
             }
