@@ -86,48 +86,48 @@ $(function() {
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#ifndef SEAPODYM_COHORT_MANAGER</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#define SEAPODYM_COHORT_MANAGER</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="foldopen" id="foldopen00014" data-start="{" data-end="};">
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="classSeapodymCohortManager.html">   14</a></span><span class="keyword">class </span><a class="code hl_function" href="classSeapodymCohortManager.html#a2c122d88a79633f504866db9dce7f3c3">SeapodymCohortManager</a> {</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <span class="comment">// number of age groups for each time step, ideally matching the number of workers</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <span class="keywordtype">int</span> numAgeGroups; </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        <span class="comment">// number of workers 0...numWorkers-1</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="keywordtype">int</span> numWorkers;</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        <span class="comment">// total number of time steps across all cohorts</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="keywordtype">int</span> numTimeSteps;</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        <span class="comment">// number of cohorts</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="keywordtype">int</span> numCohorts = this-&gt;numAgeGroups + this-&gt;numTimeSteps - 1;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="comment">// assign cohort Ids to workers</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        std::map&lt;int, std::vector&lt;int&gt; &gt; worker2cohort;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="comment">// map age index to worker ID</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        std::map&lt;int, int&gt; ageIndex2Worker;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <a class="code hl_function" href="classSeapodymCohortManager.html#a2c122d88a79633f504866db9dce7f3c3">SeapodymCohortManager</a>(<span class="keywordtype">int</span> numAgeGroups, <span class="keywordtype">int</span> numWorkers, <span class="keywordtype">int</span> numTimeSteps);</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        std::vector&lt;int&gt; <a class="code hl_function" href="classSeapodymCohortManager.html#a8d90c24a146c23af511eb06fbc942c6a">getInitCohortIds</a>(<span class="keywordtype">int</span> workerId) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortManager.html#ae34f18f3427e70e294759cffa82850a9">getNumSteps</a>(<span class="keywordtype">int</span> cohortId) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        std::set&lt;int&gt; <a class="code hl_function" href="classSeapodymCohortManager.html#ae15701826cfb8393928ca0d0d2af49f5">getDependencies</a>(<span class="keywordtype">int</span> cohortId) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortManager.html#a5df2ede3e48e612d6673338dfdd5b796">getNextCohort</a>(<span class="keywordtype">int</span> cohortId) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortManager.html#af7c1590afbfa2a86e5e1384a98dc3443">getNewCohortWorker</a>(<span class="keywordtype">int</span> timeStep) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>};</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="foldopen" id="foldopen00015" data-start="{" data-end="};">
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="classSeapodymCohortManager.html">   15</a></span><span class="keyword">class </span><a class="code hl_function" href="classSeapodymCohortManager.html#a2c122d88a79633f504866db9dce7f3c3">SeapodymCohortManager</a> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <span class="comment">// number of age groups for each time step, ideally matching the number of workers</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        <span class="keywordtype">int</span> numAgeGroups; </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="comment">// number of workers 0...numWorkers-1</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="keywordtype">int</span> numWorkers;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="comment">// total number of time steps across all cohorts</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="keywordtype">int</span> numTimeSteps;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="comment">// number of cohorts</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keywordtype">int</span> numCohorts = this-&gt;numAgeGroups + this-&gt;numTimeSteps - 1;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="comment">// assign cohort Ids to workers</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        std::map&lt;int, std::vector&lt;int&gt; &gt; worker2cohort;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="comment">// map age index to worker ID</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        std::map&lt;int, int&gt; ageIndex2Worker;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <a class="code hl_function" href="classSeapodymCohortManager.html#a2c122d88a79633f504866db9dce7f3c3">SeapodymCohortManager</a>(<span class="keywordtype">int</span> numAgeGroups, <span class="keywordtype">int</span> numWorkers, <span class="keywordtype">int</span> numTimeSteps);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        std::vector&lt;int&gt; <a class="code hl_function" href="classSeapodymCohortManager.html#a8d90c24a146c23af511eb06fbc942c6a">getInitCohortIds</a>(<span class="keywordtype">int</span> workerId) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortManager.html#ae34f18f3427e70e294759cffa82850a9">getNumSteps</a>(<span class="keywordtype">int</span> cohortId) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        std::set&lt;int&gt; <a class="code hl_function" href="classSeapodymCohortManager.html#ae15701826cfb8393928ca0d0d2af49f5">getDependencies</a>(<span class="keywordtype">int</span> cohortId) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortManager.html#a5df2ede3e48e612d6673338dfdd5b796">getNextCohort</a>(<span class="keywordtype">int</span> cohortId) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keywordtype">int</span> <a class="code hl_function" href="classSeapodymCohortManager.html#af7c1590afbfa2a86e5e1384a98dc3443">getNewCohortWorker</a>(<span class="keywordtype">int</span> timeStep) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>};</div>
 </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#endif </span><span class="comment">// SEAPODYM_COHORT_MANAGER</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#endif </span><span class="comment">// SEAPODYM_COHORT_MANAGER</span></div>
 <div class="ttc" id="aclassSeapodymCohortManager_html_a2c122d88a79633f504866db9dce7f3c3"><div class="ttname"><a href="classSeapodymCohortManager.html#a2c122d88a79633f504866db9dce7f3c3">SeapodymCohortManager::SeapodymCohortManager</a></div><div class="ttdeci">SeapodymCohortManager(int numAgeGroups, int numWorkers, int numTimeSteps)</div><div class="ttdef"><b>Definition</b> SeapodymCohortManager.cpp:5</div></div>
 <div class="ttc" id="aclassSeapodymCohortManager_html_a5df2ede3e48e612d6673338dfdd5b796"><div class="ttname"><a href="classSeapodymCohortManager.html#a5df2ede3e48e612d6673338dfdd5b796">SeapodymCohortManager::getNextCohort</a></div><div class="ttdeci">int getNextCohort(int cohortId) const</div><div class="ttdef"><b>Definition</b> SeapodymCohortManager.cpp:77</div></div>
 <div class="ttc" id="aclassSeapodymCohortManager_html_a8d90c24a146c23af511eb06fbc942c6a"><div class="ttname"><a href="classSeapodymCohortManager.html#a8d90c24a146c23af511eb06fbc942c6a">SeapodymCohortManager::getInitCohortIds</a></div><div class="ttdeci">std::vector&lt; int &gt; getInitCohortIds(int workerId) const</div><div class="ttdef"><b>Definition</b> SeapodymCohortManager.cpp:28</div></div>

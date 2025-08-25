@@ -86,33 +86,33 @@ $(function() {
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#ifndef TASK_DEPENDENCY_MANAGER</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#define TASK_DEPENDENCY_MANAGER</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="foldopen" id="foldopen00013" data-start="{" data-end="};">
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="classTaskDependencyManager.html">   13</a></span><span class="keyword">class </span><a class="code hl_function" href="classTaskDependencyManager.html#aa59d2288cd1afc48a7b5de77d62250be">TaskDependencyManager</a> {</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    <span class="keyword">private</span>:</div>
+<div class="foldopen" id="foldopen00015" data-start="{" data-end="};">
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="classTaskDependencyManager.html">   15</a></span><span class="keyword">class </span><a class="code hl_function" href="classTaskDependencyManager.html#aa59d2288cd1afc48a7b5de77d62250be">TaskDependencyManager</a> {</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        <span class="comment">// Communicator</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        MPI_Comm comm; </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        <span class="comment">// number of tasks</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        <span class="keywordtype">int</span> numTasks;</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="comment">// dependencies</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        std::map&lt;int, std::set&lt;int&gt; &gt; deps;</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <a class="code hl_function" href="classTaskDependencyManager.html#aa59d2288cd1afc48a7b5de77d62250be">TaskDependencyManager</a>(MPI_Comm comm, <span class="keywordtype">int</span> numTasks);</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classTaskDependencyManager.html#ac6c593329a2284338ab9b2b63a29c9ce">addDependencies</a>(<span class="keywordtype">int</span> taskId, <span class="keyword">const</span> std::set&lt;int&gt;&amp; otherTaskIds);</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        std::map&lt;int, int&gt; <a class="code hl_function" href="classTaskDependencyManager.html#af9de15f42e017370d1d33db9f9399882">run</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>};</div>
-</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <span class="comment">// Communicator</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        MPI_Comm comm; </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="comment">// number of tasks</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="keywordtype">int</span> numTasks;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="comment">// dependencies</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        std::map&lt;int, std::set&lt;int&gt; &gt; deps;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <a class="code hl_function" href="classTaskDependencyManager.html#aa59d2288cd1afc48a7b5de77d62250be">TaskDependencyManager</a>(MPI_Comm comm, <span class="keywordtype">int</span> numTasks);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classTaskDependencyManager.html#ac6c593329a2284338ab9b2b63a29c9ce">addDependencies</a>(<span class="keywordtype">int</span> taskId, <span class="keyword">const</span> std::set&lt;int&gt;&amp; otherTaskIds);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        std::map&lt;int, int&gt; <a class="code hl_function" href="classTaskDependencyManager.html#af9de15f42e017370d1d33db9f9399882">run</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#endif </span><span class="comment">// TASK_DEPENDENCY_MANAGER</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>};</div>
+</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#endif </span><span class="comment">// TASK_DEPENDENCY_MANAGER</span></div>
 <div class="ttc" id="aclassTaskDependencyManager_html_aa59d2288cd1afc48a7b5de77d62250be"><div class="ttname"><a href="classTaskDependencyManager.html#aa59d2288cd1afc48a7b5de77d62250be">TaskDependencyManager::TaskDependencyManager</a></div><div class="ttdeci">TaskDependencyManager(MPI_Comm comm, int numTasks)</div><div class="ttdef"><b>Definition</b> TaskDependencyManager.cpp:28</div></div>
 <div class="ttc" id="aclassTaskDependencyManager_html_ac6c593329a2284338ab9b2b63a29c9ce"><div class="ttname"><a href="classTaskDependencyManager.html#ac6c593329a2284338ab9b2b63a29c9ce">TaskDependencyManager::addDependencies</a></div><div class="ttdeci">void addDependencies(int taskId, const std::set&lt; int &gt; &amp;otherTaskIds)</div><div class="ttdef"><b>Definition</b> TaskDependencyManager.cpp:35</div></div>
 <div class="ttc" id="aclassTaskDependencyManager_html_af9de15f42e017370d1d33db9f9399882"><div class="ttname"><a href="classTaskDependencyManager.html#af9de15f42e017370d1d33db9f9399882">TaskDependencyManager::run</a></div><div class="ttdeci">std::map&lt; int, int &gt; run() const</div><div class="ttdef"><b>Definition</b> TaskDependencyManager.cpp:40</div></div>
