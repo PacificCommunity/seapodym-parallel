@@ -34,8 +34,11 @@ class TaskStepManager {
         // number of tasks
         int numTasks;
 
-        // number of steps
-        std::map<int, int> numStepsMap;
+        // taskId to first step index map
+        std::map<int, int> stepBegMap;
+
+        // taskId to last step index + 1 map
+        std::map<int, int> stepEndMap;
 
         // dependencies
         std::map<int, std::set<dep_type> > deps;
@@ -46,11 +49,13 @@ class TaskStepManager {
          * Constructor
          * @param comm communicator
          * @param numTasks number of tasks
-         * @param numSteps number of steps for each task
+         * @param stepBegMap taskId -> first step map
+         * @param stepEndMap taskId -> last step + 1 map
          * @param dependencyMap map of task dependencies {taskId: {taskId, step}, ...}
          */
         TaskStepManager(MPI_Comm comm, int numTasks, 
-            const std::map<int, int>& numStepsMap, 
+            const std::map<int, int>& stepBegMap,
+            const std::map<int, int>& stepEndMap,
             const std::map<int, std::set<dep_type> >& dependencyMap);
 
         /**

@@ -15,14 +15,14 @@
  *          3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time 
  *          steps. This can be represented as:
 \verbatim
-2 1 0
-2 1 3
-2 4 3
-5 4 3
-5 4 6
+0 1 2
+3 1 2
+3 4 2
+3 4 5
+6 4 5
 \endverbatim
  *          where the numbers are the cohort Ids. The horizontal axis represents the different
- *          age groups and the vertical axis time. A each time step a new cohort is born. 
+ *          age groups and the vertical axis is time. A each time step a new cohort is born. 
  */
 class SeapodymCohortDependencyAnalyzer {
 
@@ -37,8 +37,11 @@ private:
     // total number of cohorts
     int numIds;
 
-    // cohort Id: number of steps
-    std::map<int, int> numStepsMap;
+    // cohort Id: starting step index
+    std::map<int, int> stepBegMap;
+
+    // cohort Id: ending step index + 1
+    std::map<int, int> stepEndMap;
 
     // cohort Id: {(taskId, step), ...}
     std::map<int, std::set<std::array<int, 2>>> dependencyMap;
@@ -64,19 +67,26 @@ public:
     /**
      * Get the number of cohort steps
      * 
-     * In the above example, there are 15 cohort-steps
+     * In the above example, there are 5*315 cohort-steps
      * @return number
      */
     int getNumberOfCohortSteps() const;
 
     /**
-     * Get the cohort Id to number of steps map
+     * Get the cohort Id: starting index map
      * 
-     * In the above example, cohort 0 has 3 steps, cohort 1 has 2 steps, 
-     * cohort 2 has 1 step, etc.
+     * In the above example, 0->2, 1->1, 2->0, 3->0...4->0, 5->0, 6->0
      * @return Id to number map
      */
-    std::map<int, int> getNumStepsMap() const;
+    std::map<int, int> getStepBegMap() const;
+
+    /**
+     * Get the cohort Id: last index + 1 map
+     * 
+     * In the above example, 0->3, 1->3, ....4->3, 5->2, 6->1
+     * @return Id to number map
+     */
+    std::map<int, int> getStepEndMap() const;
 
     /**
      * Get the dependency map

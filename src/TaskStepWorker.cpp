@@ -1,10 +1,12 @@
 #include "TaskStepWorker.h"
 #include <array>
 
-TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc, std::map<int, int> numStepsMap) {
+TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc,
+  std::map<int, int> stepBegMap, std::map<int, int> stepEndMap) {
     this->comm = comm;
     this->taskFunc = taskFunc;
-    this->numStepsMap = numStepsMap;
+    this->stepBegMap = stepBegMap;
+    this->stepEndMap = stepEndMap;
 }
         
 void
@@ -30,14 +32,15 @@ TaskStepWorker::run() const {
             break;
         }
 
-        int numSteps = this->numStepsMap.at(task_id);
+        int stepBeg = this->stepBegMap.at(task_id);
+        int stepEnd = this->stepEndMap.at(task_id);
 
         // task_id, step, result
         std::array<int, 3> output;
         output[0] = task_id;
 
         // Execute each step
-        for (int step = 0; step < numSteps; ++step) {
+        for (int step = stepBeg; step < stepEnd; ++step) {
 
             // Execute the task
             output[1] = step;

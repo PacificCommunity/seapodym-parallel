@@ -63,13 +63,15 @@ int main(int argc, char** argv) {
     SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps);
     int numCohorts = taskDeps.getNumberOfCohorts();
     int numCohortSteps = taskDeps.getNumberOfCohortSteps();
-    std::map<int, int> numStepsMap = taskDeps.getNumStepsMap();
+    std::map<int, int> stepBegMap = taskDeps.getStepBegMap();
+    std::map<int, int> stepEndMap = taskDeps.getStepEndMap();
     std::map<int, std::set<std::array<int, 2>>> dependencyMap = taskDeps.getDependencyMap();
 
     // print the dependencies for debugging
     if (workerId == 0) {
-        for (const auto& [task_id, nstep] : numStepsMap) {
-            std::cout << "Task " << task_id << " has " << nstep << " steps and depends on: ";
+        for (const auto& [task_id, stepBeg] : stepBegMap) {
+            int globalTimeIndex = std::max(0, task_id - numAgeGroups + 1);
+            std::cout << "At time " << globalTimeIndex << " Task " << task_id << " has steps " << stepBeg << "..." << stepEndMap.at(task_id) - 1 << " and depends on: ";
             for (const auto& [task_id2, step] : dependencyMap.at(task_id)) {
                 std::cout << task_id2 << ":" << step << ", ";
             }
@@ -83,7 +85,7 @@ int main(int argc, char** argv) {
         // Manager
         
         // note: the number of tasks is the number of cohorts, each task involves multiple steps
-        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, numStepsMap, dependencyMap);
+        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap);
 
         double tic = MPI_Wtime();
 
@@ -114,7 +116,7 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, numStepsMap);
+        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, stepBegMap, stepEndMap);
         worker.run();
 
     }
