@@ -7,9 +7,9 @@
 
 /**
  * Class SeapodymCohortManager
- * @brief The SeapodymTaskManager knows how to distribute task cohorts across workers, how many times a cohort task needs to be executed 
- *        and what the next cohort task should be given to a worker. Use this task in conjunction with TaskStepWorker.
- * @see TaskStepWorker
+ * @brief The SeapodymTaskManager knows how to distribute task cohorts across workers. After each time step, 
+ *        the workers are synchronized. This approach does not involve task farming -- the task are pre-assigned
+ *        at the beginning of the simulation.
  */
 
 class SeapodymCohortManager {

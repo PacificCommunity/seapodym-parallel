@@ -6,12 +6,13 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
     this->numTimeSteps = numTimeSteps;
     this->numIds = numAgeGroups + numTimeSteps - 1;
 
-    // set the number of steps for each task
+    // set the min/mas step indices
     for (int task_id = 0; task_id < this->numIds; ++task_id) {
-        this->numStepsMap[task_id] = std::min(
-            std::min(numAgeGroups, task_id + 1),
-            numTimeSteps + numAgeGroups - task_id - 1
-        );
+
+        this->stepBegMap[task_id] = std::max(0, this->numAgeGroups - 1 - task_id);
+
+        this->stepEndMap[task_id] = std::min(this->numAgeGroups, this->numTimeSteps + this->numAgeGroups - 1 - task_id);
+
     }
 
     // infer the dependency taskId => {[taskId, step], ...}
@@ -26,20 +27,12 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
     for (int task_id = this->numAgeGroups; task_id < this->numIds; ++task_id) {
 
         std::set< std::array<int, 2>> dep_set;
-        int step;
 
-        for (int i = 0; i < this->numAgeGroups; ++i) {
+        for (int step = 0; step < this->numAgeGroups; ++step) {
 
-            int otherTaskId = task_id - i - 1;
-
-            if (otherTaskId < this->numAgeGroups - 1) {
-                // special case for the first row
-                step = task_id - this->numAgeGroups;
-            } else {
-                // regular case
-                step = i;
-            }
+            int otherTaskId = task_id - step - 1;
             dep_set.insert(std::array<int, 2>{otherTaskId, step});
+
         }
     
         this->dependencyMap[task_id] = dep_set;
@@ -58,8 +51,13 @@ SeapodymCohortDependencyAnalyzer::getNumberOfCohortSteps() const {
 }
 
 std::map<int, int>
-SeapodymCohortDependencyAnalyzer::getNumStepsMap() const {
-    return this->numStepsMap;
+SeapodymCohortDependencyAnalyzer::getStepBegMap() const {
+    return this->stepBegMap;
+}
+
+std::map<int, int>
+SeapodymCohortDependencyAnalyzer::getStepEndMap() const {
+    return this->stepEndMap;
 }
 
 std::map<int, std::set<std::array<int, 2>>> 

@@ -26,10 +26,11 @@ int main(int argc, char** argv) {
     SeapodymCohortDependencyAnalyzer depAnalyzer(numAgeGroups, numTimeSteps);
     int numCohorts = depAnalyzer.getNumberOfCohorts();
     std::map<int, std::set<std::array<int,2>>> dependencyMap = depAnalyzer.getDependencyMap();
-    std::map<int, int> numStepsMap = depAnalyzer.getNumStepsMap();
+    std::map<int, int> stepBegMap = depAnalyzer.getStepBegMap();
+    std::map<int, int> stepEndMap = depAnalyzer.getStepEndMap();
 
     for (auto id = 0; id < numCohorts; ++id) {
-        std::cout << "Cohort " << id << " has " << numStepsMap.at(id) << " steps and depends on: ";
+        std::cout << "Cohort " << id << " has steps " << stepBegMap.at(id) << "... " << stepEndMap.at(id) - 1 << " and depends on: ";
         auto depSet = dependencyMap.at(id);
         for (const auto& [id2, step] : depSet) {
             std::cout << "(" << id2 << ", " << step << ") ";
