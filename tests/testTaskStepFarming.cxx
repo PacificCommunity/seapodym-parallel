@@ -59,10 +59,12 @@ int main(int argc, char** argv) {
     auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
 
     // set the number of steps for each task
-    std::map<int, int> numStepsMap;
+    std::map<int, int> stepBegMap;
+    std::map<int, int> stepEndMap;
     for (int task_id = 0; task_id < numTasks; ++task_id) {
-        // in this case the same for each task
-        numStepsMap[task_id] = numSteps;
+        // in this version it is the same for each task
+        stepBegMap[task_id] = 0;
+        stepEndMap[task_id] = numSteps;
     }
 
     // infer the dependency taskId => {[taskId, step], ...}
@@ -77,7 +79,8 @@ int main(int argc, char** argv) {
         dependencyMap[task_id] = dep_set;
         // print the dependencies for debugging
         if(workerId == 0) {
-            std::cout << "Task " << task_id << " has " << numStepsMap[task_id] << " steps and depends on ";
+            std::cout << "Task " << task_id << " has steps " << stepBegMap[task_id] << "..." <<  stepEndMap[task_id] - 1 
+                << " and depends on ";
             for (auto d : dep_set) {
                 std::cout << d[0] << ":" << d[1] << ", "; 
             }
@@ -89,7 +92,7 @@ int main(int argc, char** argv) {
 
         // Manager
         
-        TaskStepManager manager(MPI_COMM_WORLD, numTasks, numStepsMap, dependencyMap);
+        TaskStepManager manager(MPI_COMM_WORLD, numTasks, stepBegMap, stepEndMap, dependencyMap);
 
         double tic = MPI_Wtime();
 
@@ -122,7 +125,7 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, numStepsMap);
+        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, stepBegMap, stepEndMap);
         worker.run();
 
     }

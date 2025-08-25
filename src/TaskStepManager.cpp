@@ -8,12 +8,14 @@
 
 
 TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
-      const std::map<int, int>& numStepsMap, 
+      const std::map<int, int>& stepBegMap, 
+      const std::map<int, int>& stepEndMap,
       const std::map<int, std::set<dep_type>>& dependencyMap) {
 
     this->comm = comm;
     this->numTasks = numTasks;
-    this->numStepsMap = numStepsMap;
+    this->stepBegMap = stepBegMap;
+    this->stepEndMap = stepEndMap;
     this->deps = dependencyMap;
 }
 
@@ -46,8 +48,6 @@ TaskStepManager::run() const {
         active_workers.insert(i);
     }
 
-    // std::map<int, int> step_count;
-
     while (!task_queue.empty() || !assigned.empty()) {
 
         MPI_Status status;
@@ -68,7 +68,7 @@ TaskStepManager::run() const {
             int step = output[1];
             completed.insert(std::array<int,2>{task_id, step});
 
-            if (step == this->numStepsMap.at(task_id) - 1) {
+            if (step == this->stepEndMap.at(task_id) - 1) {
                 assigned.erase(task_id);
             }
         }

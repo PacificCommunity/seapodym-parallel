@@ -25,8 +25,11 @@ class TaskStepWorker {
         // task function
         std::function<int(int)> taskFunc;
 
-        // task to number of steps map
-        std::map<int, int> numStepsMap;
+        // task Id to first step index map
+        std::map<int, int> stepBegMap;
+
+        // task Id to last step index + 1 map
+        std::map<int, int> stepEndMap;
 
     public:
 
@@ -34,9 +37,11 @@ class TaskStepWorker {
          * Constructor
          * @param comm MPI communicator
          * @param taskFunc task function
-         * @param numStepsMap map of task to number of steps
+         * @param stepBegMap map of task Id to first step index
+         * @param stepEndMap map of task Id to last step index + 1
          */
-        TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc, std::map<int, int> numStepsMap);
+        TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc, 
+            std::map<int, int> stepBegMap, std::map<int, int> stepEndMap);
 
         /**
          * Run the tasks assigned by the TaskManager
