@@ -23,7 +23,12 @@
 // TaskId 
 using dep_type = std::array<int, 2>;
 
-
+/**
+ * @brief The TaskStepManager orchestrates tasks that depend on other tasks' steps. Use 
+ *        this in conjunction with TaskStepWorker.
+ * 
+ * @see TaskStepWorker
+ */
 class TaskStepManager {
 
     private:
