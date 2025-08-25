@@ -8,7 +8,8 @@
 /**
  * Class SeapodymCohortManager
  * @brief The SeapodymTaskManager knows how to distribute task cohorts across workers, how many times a cohort task needs to be executed 
- *        and what the next cohort task should be given to a worker.
+ *        and what the next cohort task should be given to a worker. Use this task in conjunction with TaskStepWorker.
+ * @see TaskStepWorker
  */
 
 class SeapodymCohortManager {

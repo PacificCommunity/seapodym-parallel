@@ -7,7 +7,9 @@
 
 /**
  * Class TaskDependencyManager
- * @brief The TaskDependencyManager assigns tasks with dependencies to TaskDependencyWorkers.
+ * @brief The TaskDependencyManager assigns tasks with dependencies to TaskDependencyWorkers. The dependencies are arbitrary but do not
+ *        involve any internal steps. Use this in conjunction with TaskWorker when the tasks have dependencies.
+ * @see TaskWorker
  */
 
 class TaskDependencyManager {

@@ -6,7 +6,9 @@
 
 /**
  * Class TaskManager
- * @brief The TaskManager assigns tasks to TaskWorkers.
+ * @brief The TaskManager assigns tasks to TaskWorkers. In this simple version of task farming, there are no dependencies 
+ *        between tasks. Use this in conjunction with TaskWorker when the tasks can be performed in any order. 
+ * @see TaskWorker
  */
 
 class TaskManager {
