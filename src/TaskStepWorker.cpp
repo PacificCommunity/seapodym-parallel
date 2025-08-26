@@ -1,7 +1,7 @@
 #include "TaskStepWorker.h"
 #include <array>
 
-TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc,
+TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<int(int, int, int, int)> taskFunc,
   std::map<int, int> stepBegMap, std::map<int, int> stepEndMap) {
     this->comm = comm;
     this->taskFunc = taskFunc;
@@ -44,7 +44,7 @@ TaskStepWorker::run() const {
 
             // Execute the task
             output[1] = step;
-            output[2] = this->taskFunc(task_id);
+            output[2] = this->taskFunc(task_id, step, stepBeg, stepEnd);
 
             // Send the result 
             MPI_Send(output.data(), 3, MPI_INT, managerRank, endTaskTag, this->comm);

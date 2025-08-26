@@ -23,7 +23,7 @@ class TaskStepWorker {
         MPI_Comm comm; 
 
         // task function
-        std::function<int(int)> taskFunc;
+        std::function<int(int, int, int, int)> taskFunc;
 
         // task Id to first step index map
         std::map<int, int> stepBegMap;
@@ -40,7 +40,7 @@ class TaskStepWorker {
          * @param stepBegMap map of task Id to first step index
          * @param stepEndMap map of task Id to last step index + 1
          */
-        TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc, 
+        TaskStepWorker(MPI_Comm comm, std::function<int(int, int, int, int)> taskFunc, 
             std::map<int, int> stepBegMap, std::map<int, int> stepEndMap);
 
         /**
