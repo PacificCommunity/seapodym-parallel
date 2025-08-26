@@ -32,7 +32,7 @@ Courier::expose(double* data, const std::vector<int>& dims) {
 }
 
 void
-Courier::get(int source_worker) {
+Courier::get(int offset, int source_worker) {
 
     // Ensure the window is ready for access
     // MPI_LOCK_SHARED allows multiple processes to read from the window simultaneously
@@ -41,14 +41,14 @@ Courier::get(int source_worker) {
     MPI_Win_lock(MPI_LOCK_SHARED, source_worker, MPI_MODE_NOCHECK, this->win);
     
     // Fetch the data from the remote process
-    MPI_Get(this->data, this->numElems, MPI_DOUBLE, source_worker, 0, this->numElems, MPI_DOUBLE, this->win);
+    MPI_Get(this->data, this->numElems, MPI_DOUBLE, source_worker, offset, this->numElems, MPI_DOUBLE, this->win);
 
     // Complete the access to the window
     MPI_Win_unlock(source_worker, this->win);
 }
 
 void
-Courier::put(int target_worker) {
+Courier::put(int offset, int target_worker) {
 
     // Ensure the window is ready for access
     // MPI_LOCK_SHARED allows multiple processes to read from the window simultaneously
@@ -57,8 +57,8 @@ Courier::put(int target_worker) {
     // with MPI_LOCK_EXCLUSIVE if exclusive access is needed
     MPI_Win_lock(MPI_LOCK_EXCLUSIVE, target_worker, MPI_MODE_NOCHECK, this->win);
 
-    // Fetch the data from the remote process
-    MPI_Put(this->data, this->numElems, MPI_DOUBLE, target_worker, 0, this->numElems, MPI_DOUBLE, this->win);
+    // Push the data to the target worker
+    MPI_Put(this->data, this->numElems, MPI_DOUBLE, target_worker, offset, this->numElems, MPI_DOUBLE, this->win);
 
     // Complete the access to the window
     MPI_Win_unlock(target_worker, this->win);

@@ -36,6 +36,9 @@ target_link_libraries(testTaskStepFarming PRIVATE seapodym_api spdlog::spdlog)
 add_executable(testTaskStepFarmingCohort testTaskStepFarmingCohort.cxx)
 target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog::spdlog)
 
+add_executable(testCourier testCourier.cxx)
+target_link_libraries(testCourier PRIVATE seapodym_api spdlog::spdlog)
+
 add_executable(testTaskScore testTaskScore.cxx)
 target_link_libraries(testTaskScore PRIVATE seapodym_api spdlog::spdlog)
 
@@ -94,3 +97,6 @@ set_tests_properties(testSeapodymCohortDependencyAnalyzerNa3Nt5 PROPERTIES PASS_
 
 add_test(NAME testSeapodymCohortDependencyAnalyzerNa4Nt5 COMMAND testSeapodymCohortDependencyAnalyzer -na 4 -nt 5)
 set_tests_properties(testSeapodymCohortDependencyAnalyzerNa4Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+
+add_test(NAME testCourier COMMAND mpiexec -n 2 testCourier)
+set_tests_properties(testCourier PROPERTIES PASS_REGULAR_EXPRESSION "Success")

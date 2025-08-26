@@ -64,17 +64,19 @@ class Courier {
 
     /**
      * @brief Get the data from a remote process and store it in the local data array
+     * @param offset Displacement (in number of elements) in the target data array
      * @param source_worker Rank of the process from which to get data
      * @note this should be executed on the target process
      */
-    void get(int source_worker);
+    void get(int offset, int source_worker);
 
     /**
      * @brief Put the data to a remote process and store it in the local data array
+     * @param offset Displacement (in number of elements) in the target data array
      * @param target_worker Rank of the process that will receive the data
      * @note this should be executed on the source process
      */
-    void put(int target_worker);
+    void put(int offset, int target_worker);
 
     /**
      * @brief Free the MPI window and reset the data pointer
