@@ -12,16 +12,18 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) 
 
     this->numChunks = numChunks;
     this->numSize = numSize;
-    // allocate the data on rank 0
+
     if (rank == 0) {
+        // allocate the collected data on rank 0
         this->collectedData.resize(numChunks * numSize);
-    } else {
-        this->collectedData.clear();
     }
 
-    // set up the MPI window
-    MPI_Win_create(this->collectedData.data(), 
-        this->collectedData.size() * sizeof(double), 
+    // set up the MPI window. Only rank 0 requests storage
+    void* basePtr = this->collectedData.empty() ? nullptr : this->collectedData.data();
+    MPI_Aint winSize = this->collectedData.size() * sizeof(double);
+
+    // This fails with OpenMPI if one only has a single rank (should not)
+    MPI_Win_create(basePtr, winSize, 
         sizeof(double), MPI_INFO_NULL, comm, &this->win);
 }
 

@@ -26,6 +26,7 @@ void test(int numSize, int numChunksPerRank) {
             }
             std::cout << std::endl;
         }
+        std::cout << "Success\n";
     }
 
     ddc.free();
