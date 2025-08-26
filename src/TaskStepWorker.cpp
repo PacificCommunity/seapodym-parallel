@@ -44,9 +44,11 @@ TaskStepWorker::run() const {
 
             // Execute the task
             output[1] = step;
+
+            // Perform the work
             output[2] = this->taskFunc(task_id);
 
-            // Send the result 
+            // Send the result
             MPI_Send(output.data(), 3, MPI_INT, managerRank, endTaskTag, this->comm);
         }
 

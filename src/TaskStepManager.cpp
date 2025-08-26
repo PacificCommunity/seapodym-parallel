@@ -22,6 +22,7 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
 std::set< std::array<int, 3> >
 TaskStepManager::run() const {
 
+    // tags the worker will use when communicating with the manager
     const int startTaskTag = 0;
     const int endTaskTag = 1;
     const int workerAvailableTag = 2;
