@@ -86,7 +86,7 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7f1e1f895c5ceb275c4d93a66aad2683" id="r_a7f1e1f895c5ceb275c4d93a66aad2683"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7f1e1f895c5ceb275c4d93a66aad2683">TaskStepWorker</a> (MPI_Comm comm, std::function&lt; int(int)&gt; taskFunc, std::map&lt; int, int &gt; stepBegMap, std::map&lt; int, int &gt; stepEndMap)</td></tr>
+<tr class="memitem:ac9aa0c5570d25b3fa2d695ae6124a33f" id="r_ac9aa0c5570d25b3fa2d695ae6124a33f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9aa0c5570d25b3fa2d695ae6124a33f">TaskStepWorker</a> (MPI_Comm comm, std::function&lt; void(int, int, int, MPI_Comm)&gt; taskFunc, std::map&lt; int, int &gt; stepBegMap, std::map&lt; int, int &gt; stepEndMap)</td></tr>
 <tr class="memitem:a2d349e14799434f9b428b4d316920bcf" id="r_a2d349e14799434f9b428b4d316920bcf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d349e14799434f9b428b4d316920bcf">run</a> () const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
@@ -95,8 +95,8 @@ Public Member Functions</h2></td></tr>
 <p>A task involves running multiple steps and the worker will inform the manager once once various steps have been accomplished.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classTaskStepManager.html" title="The TaskStepManager orchestrates tasks that depend on other tasks&#39; steps. Use this in conjunction wit...">TaskStepManager</a> </dd></dl>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a7f1e1f895c5ceb275c4d93a66aad2683" name="a7f1e1f895c5ceb275c4d93a66aad2683"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7f1e1f895c5ceb275c4d93a66aad2683">&#9670;&#160;</a></span>TaskStepWorker()</h2>
+<a id="ac9aa0c5570d25b3fa2d695ae6124a33f" name="ac9aa0c5570d25b3fa2d695ae6124a33f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9aa0c5570d25b3fa2d695ae6124a33f">&#9670;&#160;</a></span>TaskStepWorker()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -109,7 +109,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::function&lt; int(int)&gt;</td>          <td class="paramname"><span class="paramname"><em>taskFunc</em></span>, </td>
+          <td class="paramtype">std::function&lt; void(int, int, int, MPI_Comm)&gt;</td>          <td class="paramname"><span class="paramname"><em>taskFunc</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -126,7 +126,7 @@ Public Member Functions</h2></td></tr>
 <p>Constructor </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">comm</td><td>MPI communicator </td></tr>
-    <tr><td class="paramname">taskFunc</td><td>task function </td></tr>
+    <tr><td class="paramname">taskFunc</td><td>task function takes task_id, stepBeg and stepEnd as input. This function should include a call notifying the manager at the end of each step, ie MPI_Send({task_id, step, result}, 3, MPI_INT, managerRank, endTaskTag, comm); </td></tr>
     <tr><td class="paramname">stepBegMap</td><td>map of task Id to first step index </td></tr>
     <tr><td class="paramname">stepEndMap</td><td>map of task Id to last step index + 1 </td></tr>
   </table>

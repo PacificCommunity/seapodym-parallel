@@ -88,35 +88,36 @@ $(function() {
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
 <div class="foldopen" id="foldopen00018" data-start="{" data-end="};">
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classTaskStepWorker.html">   18</a></span><span class="keyword">class </span><a class="code hl_function" href="classTaskStepWorker.html#a7f1e1f895c5ceb275c4d93a66aad2683">TaskStepWorker</a> {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classTaskStepWorker.html">   18</a></span><span class="keyword">class </span><a class="code hl_function" href="classTaskStepWorker.html#ac9aa0c5570d25b3fa2d695ae6124a33f">TaskStepWorker</a> {</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="comment">// communicator</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        MPI_Comm comm; </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="comment">// task function</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        std::function&lt;int(<span class="keywordtype">int</span>)&gt; taskFunc;</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="comment">// task Id to first step index map</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        std::map&lt;int, int&gt; stepBegMap;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="comment">// task Id to last step index + 1 map</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        std::map&lt;int, int&gt; stepEndMap;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <a class="code hl_function" href="classTaskStepWorker.html#a7f1e1f895c5ceb275c4d93a66aad2683">TaskStepWorker</a>(MPI_Comm comm, std::function&lt;<span class="keywordtype">int</span>(<span class="keywordtype">int</span>)&gt; taskFunc, </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            std::map&lt;int, int&gt; stepBegMap, std::map&lt;int, int&gt; stepEndMap);</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classTaskStepWorker.html#a2d349e14799434f9b428b4d316920bcf">run</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>};</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="comment">// task function, takes task_id, stepBeg and stepEnd as input </span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="comment">// and returns a code/result</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        std::function&lt;void(<span class="keywordtype">int</span>, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>, MPI_Comm)&gt; taskFunc;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="comment">// task Id to first step index map</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        std::map&lt;int, int&gt; stepBegMap;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="comment">// task Id to last step index + 1 map</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        std::map&lt;int, int&gt; stepEndMap;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <a class="code hl_function" href="classTaskStepWorker.html#ac9aa0c5570d25b3fa2d695ae6124a33f">TaskStepWorker</a>(MPI_Comm comm, std::function&lt;<span class="keywordtype">void</span>(<span class="keywordtype">int</span>, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>, MPI_Comm)&gt; taskFunc, </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            std::map&lt;int, int&gt; stepBegMap, std::map&lt;int, int&gt; stepEndMap);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classTaskStepWorker.html#a2d349e14799434f9b428b4d316920bcf">run</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>};</div>
 </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#endif </span><span class="comment">// TASK_STEP_WORKER</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif </span><span class="comment">// TASK_STEP_WORKER</span></div>
 <div class="ttc" id="aclassTaskStepWorker_html_a2d349e14799434f9b428b4d316920bcf"><div class="ttname"><a href="classTaskStepWorker.html#a2d349e14799434f9b428b4d316920bcf">TaskStepWorker::run</a></div><div class="ttdeci">void run() const</div><div class="ttdef"><b>Definition</b> TaskStepWorker.cpp:13</div></div>
-<div class="ttc" id="aclassTaskStepWorker_html_a7f1e1f895c5ceb275c4d93a66aad2683"><div class="ttname"><a href="classTaskStepWorker.html#a7f1e1f895c5ceb275c4d93a66aad2683">TaskStepWorker::TaskStepWorker</a></div><div class="ttdeci">TaskStepWorker(MPI_Comm comm, std::function&lt; int(int)&gt; taskFunc, std::map&lt; int, int &gt; stepBegMap, std::map&lt; int, int &gt; stepEndMap)</div><div class="ttdef"><b>Definition</b> TaskStepWorker.cpp:4</div></div>
+<div class="ttc" id="aclassTaskStepWorker_html_ac9aa0c5570d25b3fa2d695ae6124a33f"><div class="ttname"><a href="classTaskStepWorker.html#ac9aa0c5570d25b3fa2d695ae6124a33f">TaskStepWorker::TaskStepWorker</a></div><div class="ttdeci">TaskStepWorker(MPI_Comm comm, std::function&lt; void(int, int, int, MPI_Comm)&gt; taskFunc, std::map&lt; int, int &gt; stepBegMap, std::map&lt; int, int &gt; stepEndMap)</div><div class="ttdef"><b>Definition</b> TaskStepWorker.cpp:4</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
