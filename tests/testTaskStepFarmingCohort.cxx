@@ -25,7 +25,9 @@ void taskFunc2(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, int ms) {
     for (auto i = stepBeg; i < stepEnd; ++i) {
         // Perform the work
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-        int success = 1;
+
+        // E.g.
+        int success = task_id;
 
         // Notify the manager at the end of each step
         int output[3] = {task_id, i, success};
@@ -101,7 +103,7 @@ int main(int argc, char** argv) {
 
         // Manager
         
-        // note: the number of tasks is the number of cohorts, each task involves multiple steps
+        // note: the number of tasks is the number of cohorts
         TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap);
 
         double tic = MPI_Wtime();
@@ -111,18 +113,14 @@ int main(int argc, char** argv) {
 
         double toc = MPI_Wtime();
 
-        int numTotalSteps = 0;
-        for (const auto& [taskId, step, res] : results) {
-            numTotalSteps++;
-        }
-
+        auto numTotalSteps = results.size();
         std::cout << "Execution time: " << toc - tic << 
             " Speedup: " << 0.001*double(numTotalSteps * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
 
 
         // make sure there are no duplicate tasks and all the tasks have been executed
-        assert(results.size() == numCohortSteps);
+        assert(numTotalSteps == numCohortSteps);
         for (auto [taskId, step, res] : results) {
             // in this test we return the task_id when we're finished
             assert(taskId == res);
