@@ -21,8 +21,10 @@
  * @param ms Sleep # milliseconds
  */
 void taskFunc2(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, int ms) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+
+    // step through...
     for (auto i = stepBeg; i < stepEnd; ++i) {
+
         // Perform the work
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 
