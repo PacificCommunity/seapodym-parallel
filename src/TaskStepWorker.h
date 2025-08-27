@@ -22,8 +22,9 @@ class TaskStepWorker {
         // communicator
         MPI_Comm comm; 
 
-        // task function
-        std::function<int(int)> taskFunc;
+        // task function, takes task_id, stepBeg and stepEnd as input 
+        // and returns a code/result
+        std::function<void(int, int, int, MPI_Comm)> taskFunc;
 
         // task Id to first step index map
         std::map<int, int> stepBegMap;
@@ -36,11 +37,13 @@ class TaskStepWorker {
         /**
          * Constructor
          * @param comm MPI communicator
-         * @param taskFunc task function
+         * @param taskFunc task function takes task_id, stepBeg and stepEnd as input. This function should include a call 
+         *                 notifying the manager at the end of each step, ie 
+         *                 MPI_Send({task_id, step, result}, 3, MPI_INT, managerRank, endTaskTag, comm);
          * @param stepBegMap map of task Id to first step index
          * @param stepEndMap map of task Id to last step index + 1
          */
-        TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc, 
+        TaskStepWorker(MPI_Comm comm, std::function<void(int, int, int, MPI_Comm)> taskFunc, 
             std::map<int, int> stepBegMap, std::map<int, int> stepEndMap);
 
         /**

@@ -14,12 +14,22 @@
 /**
  * Task
  * @param task_id index 0.. numTasks - 1
+ * @param stepBeg first step index (inclusive)
+ * @param stepEnd last step index (exclusive)
+ * @param comm MPI communicator
  * @param ms Sleep # milliseconds
- * @return result
  */
-int taskFunc2(int task_id, int ms) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-    return task_id;
+void taskFunc2(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, int ms) {
+
+    for (auto i = stepBeg; i < stepEnd; ++i) {
+        // Perform the work
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+
+        // Notify the manager at the end of each step
+        int output[3] = {task_id, i, task_id};
+        const int endTaskTag = 1;
+        MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
+    }
 }
 
 int main(int argc, char** argv) {
@@ -56,7 +66,12 @@ int main(int argc, char** argv) {
     int milliseconds = cmdLine.get<int>("-nm");
 
     // Workers expect a function that takes a single argument
-    auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
+    auto taskFunc1 = std::bind(taskFunc2, 
+        std::placeholders::_1, // task_id
+        std::placeholders::_2, // stepBeg
+        std::placeholders::_3, // stepEnd
+        std::placeholders::_4, // comm
+        milliseconds);
 
     // set the number of steps for each task
     std::map<int, int> stepBegMap;
