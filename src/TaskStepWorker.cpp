@@ -1,7 +1,7 @@
 #include "TaskStepWorker.h"
 #include <array>
 
-TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<int(int)> taskFunc,
+TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<void(int, int, int, MPI_Comm)> taskFunc,
   std::map<int, int> stepBegMap, std::map<int, int> stepEndMap) {
     this->comm = comm;
     this->taskFunc = taskFunc;
@@ -35,22 +35,9 @@ TaskStepWorker::run() const {
         int stepBeg = this->stepBegMap.at(task_id);
         int stepEnd = this->stepEndMap.at(task_id);
 
-        // task_id, step, result
-        std::array<int, 3> output;
-        output[0] = task_id;
-
-        // Execute each step
-        for (int step = stepBeg; step < stepEnd; ++step) {
-
-            // Execute the task
-            output[1] = step;
-
-            // Perform the work
-            output[2] = this->taskFunc(task_id);
-
-            // Send the result
-            MPI_Send(output.data(), 3, MPI_INT, managerRank, endTaskTag, this->comm);
-        }
+        // Perform the task, which includes stepping from stepBeg to stepEnd - 1.
+        // This function should notify the manager at the end of each step
+        this->taskFunc(task_id, stepBeg, stepEnd, this->comm);
 
         // Notify the manager that this worker is available again
         int done = 1;

@@ -15,12 +15,27 @@
 /**
  * Task
  * @param task_id index 0.. numTasks - 1
+ * @param stepBeg first step index (inclusive)
+ * @param stepEnd last step index (exclusive)
+ * @param comm MPI communicator
  * @param ms Sleep # milliseconds
- * @return result (could be an error flag)
  */
-int taskFunc2(int task_id, int ms) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-    return task_id;
+void taskFunc2(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, int ms) {
+
+    // step through...
+    for (auto i = stepBeg; i < stepEnd; ++i) {
+
+        // Perform the work
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+
+        // E.g.
+        int success = task_id;
+
+        // Notify the manager at the end of each step
+        int output[3] = {task_id, i, success};
+        const int endTaskTag = 1;
+        MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
+    }
 }
 
 int main(int argc, char** argv) {
@@ -36,7 +51,7 @@ int main(int argc, char** argv) {
     // Parse the command line arguments
     CmdLineArgParser cmdLine;
     cmdLine.set("-na", 5, "Number of age groups");
-    cmdLine.set("-nt", 5, "Total number number of steps");
+    cmdLine.set("-nt", 5, "Total number of steps");
     cmdLine.set("-nm", 100, "Sleep milliseconds");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
@@ -56,8 +71,14 @@ int main(int argc, char** argv) {
     int numTimeSteps = cmdLine.get<int>("-nt");
     int milliseconds = cmdLine.get<int>("-nm");
 
-    // workers expect a function that takes a single argument
-    auto taskFunc1 = std::bind(taskFunc2, std::placeholders::_1, milliseconds);
+    // workers expect a function that takes a 4 arguments. We bind the last
+    // argument to milliseconds
+    auto taskFunc1 = std::bind(taskFunc2, 
+        std::placeholders::_1, // task_id
+        std::placeholders::_2, // stepBeg
+        std::placeholders::_3, // stepEnd
+        std::placeholders::_4, // comm
+        milliseconds);
 
     // analyze the conhort Id task dependencies
     SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps);
@@ -84,7 +105,7 @@ int main(int argc, char** argv) {
 
         // Manager
         
-        // note: the number of tasks is the number of cohorts, each task involves multiple steps
+        // note: the number of tasks is the number of cohorts
         TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap);
 
         double tic = MPI_Wtime();
@@ -94,18 +115,14 @@ int main(int argc, char** argv) {
 
         double toc = MPI_Wtime();
 
-        int numTotalSteps = 0;
-        for (const auto& [taskId, step, res] : results) {
-            numTotalSteps++;
-        }
-
+        auto numTotalSteps = results.size();
         std::cout << "Execution time: " << toc - tic << 
             " Speedup: " << 0.001*double(numTotalSteps * milliseconds)/(toc - tic) << 
             " Ideal: " << numWorkers << std::endl;
 
 
         // make sure there are no duplicate tasks and all the tasks have been executed
-        assert(results.size() == numCohortSteps);
+        assert(numTotalSteps == numCohortSteps);
         for (auto [taskId, step, res] : results) {
             // in this test we return the task_id when we're finished
             assert(taskId == res);
