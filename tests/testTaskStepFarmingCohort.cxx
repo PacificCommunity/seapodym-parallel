@@ -25,9 +25,10 @@ void taskFunc2(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, int ms) {
     for (auto i = stepBeg; i < stepEnd; ++i) {
         // Perform the work
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+        int success = 1;
 
         // Notify the manager at the end of each step
-        int output[3] = {task_id, i, task_id};
+        int output[3] = {task_id, i, success};
         const int endTaskTag = 1;
         MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
     }
@@ -66,7 +67,8 @@ int main(int argc, char** argv) {
     int numTimeSteps = cmdLine.get<int>("-nt");
     int milliseconds = cmdLine.get<int>("-nm");
 
-    // workers expect a function that takes a single argument
+    // workers expect a function that takes a 4 arguments. We bind the last
+    // argument to milliseconds
     auto taskFunc1 = std::bind(taskFunc2, 
         std::placeholders::_1, // task_id
         std::placeholders::_2, // stepBeg

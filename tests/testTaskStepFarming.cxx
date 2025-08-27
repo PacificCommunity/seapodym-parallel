@@ -65,7 +65,8 @@ int main(int argc, char** argv) {
     int numSteps = cmdLine.get<int>("-ns");
     int milliseconds = cmdLine.get<int>("-nm");
 
-    // Workers expect a function that takes a single argument
+    // Workers expect a function that takes 4 arguments. We bind the last
+    // argument to milliseconds
     auto taskFunc1 = std::bind(taskFunc2, 
         std::placeholders::_1, // task_id
         std::placeholders::_2, // stepBeg
