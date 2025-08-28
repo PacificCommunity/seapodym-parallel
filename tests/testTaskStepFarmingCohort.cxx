@@ -39,9 +39,7 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         int row = task_id - numAgeGroups + 1 + step;
         int col = task_id % numAgeGroups;
         int chunk_id = row*numAgeGroups + col;
-        //std::cout << "tid: " << task_id << " step: " << step << " row: " << row << " col: " << col << " chunk_id: " << chunk_id << std::endl;
-        // this currently hangs
-        //dataCollector->inject(chunk_id, data.data());
+        dataCollector->inject(chunk_id, data.data());
 
         // E.g.
         int success = task_id;

@@ -11,10 +11,12 @@ void test(int numSize, int numChunksPerRank) {
 
     DistDataCollector ddc(MPI_COMM_WORLD, numChunks, numSize);
 
-    for (auto i = 0; i < numChunksPerRank; ++i) {
-        int chunkId = rank * numChunksPerRank + i;
-        std::vector<double> data(numSize, chunkId);
-        ddc.inject(chunkId, data.data());
+    if (rank > 0) {
+        for (auto i = 0; i < numChunksPerRank; ++i) {
+            int chunkId = rank * numChunksPerRank + i;
+            std::vector<double> data(numSize, chunkId);
+            ddc.inject(chunkId, data.data());
+        }
     }
 
     if (rank == 0) {
