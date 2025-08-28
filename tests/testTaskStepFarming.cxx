@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, stepBegMap, stepEndMap);
+        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, stepBegMap, stepEndMap, nullptr);
         worker.run();
 
     }

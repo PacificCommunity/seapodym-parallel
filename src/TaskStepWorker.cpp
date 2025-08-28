@@ -1,12 +1,15 @@
 #include "TaskStepWorker.h"
 #include <array>
 
-TaskStepWorker::TaskStepWorker(MPI_Comm comm, std::function<void(int, int, int, MPI_Comm)> taskFunc,
-  std::map<int, int> stepBegMap, std::map<int, int> stepEndMap) {
+TaskStepWorker::TaskStepWorker(MPI_Comm comm, 
+  std::function<void(int, int, int, MPI_Comm)> taskFunc,
+  std::map<int, int> stepBegMap, std::map<int, int> stepEndMap,
+  DistDataCollector* dataCollector) {
     this->comm = comm;
     this->taskFunc = taskFunc;
     this->stepBegMap = stepBegMap;
     this->stepEndMap = stepEndMap;
+    this->dataCollector = dataCollector;
 }
         
 void
