@@ -3,13 +3,11 @@
 
 TaskStepWorker::TaskStepWorker(MPI_Comm comm, 
   std::function<void(int, int, int, MPI_Comm)> taskFunc,
-  std::map<int, int> stepBegMap, std::map<int, int> stepEndMap,
-  DistDataCollector* dataCollector) {
+  std::map<int, int> stepBegMap, std::map<int, int> stepEndMap) {
     this->comm = comm;
     this->taskFunc = taskFunc;
     this->stepBegMap = stepBegMap;
     this->stepEndMap = stepEndMap;
-    this->dataCollector = dataCollector;
 }
         
 void

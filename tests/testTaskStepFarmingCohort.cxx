@@ -10,6 +10,7 @@
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
 #include "SeapodymCohortDependencyAnalyzer.h"
+#include "DistDataCollector.h"
 
 // Task for the workers to execute
 /**
@@ -20,19 +21,33 @@
  * @param comm MPI communicator
  * @param ms Sleep # milliseconds
  */
-void taskFunc2(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, int ms) {
+void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
+    int ms, int numAgeGroups, int numData, DistDataCollector* dataCollector) {
 
     // step through...
-    for (auto i = stepBeg; i < stepEnd; ++i) {
+    for (auto step = stepBeg; step < stepEnd; ++step) {
 
-        // Perform the work
+        // Perform the work, just sleeping here zzzzzzz
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+
+        // Pretend we are computing some data
+        std::vector<double> data(numData, double(task_id));
+        
+        // Send the data to the manager. Here, the data are 
+        // collected row by row. The entry into the collected 
+        // array is at index chunk_id.
+        int row = task_id - numAgeGroups + 1 + step;
+        int col = task_id % numAgeGroups;
+        int chunk_id = row*numAgeGroups + col;
+        //std::cout << "tid: " << task_id << " step: " << step << " row: " << row << " col: " << col << " chunk_id: " << chunk_id << std::endl;
+        // this currently hangs
+        //dataCollector->inject(chunk_id, data.data());
 
         // E.g.
         int success = task_id;
 
         // Notify the manager at the end of each step
-        int output[3] = {task_id, i, success};
+        int output[3] = {task_id, step, success};
         const int endTaskTag = 1;
         MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
     }
@@ -53,6 +68,7 @@ int main(int argc, char** argv) {
     cmdLine.set("-na", 5, "Number of age groups");
     cmdLine.set("-nt", 5, "Total number of steps");
     cmdLine.set("-nm", 100, "Sleep milliseconds");
+    cmdLine.set("-nd", 10000, "Number of data values to send from worker to manager at each step");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
     if (!success) {
@@ -70,17 +86,9 @@ int main(int argc, char** argv) {
     int numAgeGroups = cmdLine.get<int>("-na");
     int numTimeSteps = cmdLine.get<int>("-nt");
     int milliseconds = cmdLine.get<int>("-nm");
+    int numData = cmdLine.get<int>("-nd");
 
-    // workers expect a function that takes a 4 arguments. We bind the last
-    // argument to milliseconds
-    auto taskFunc1 = std::bind(taskFunc2, 
-        std::placeholders::_1, // task_id
-        std::placeholders::_2, // stepBeg
-        std::placeholders::_3, // stepEnd
-        std::placeholders::_4, // comm
-        milliseconds);
-
-    // analyze the conhort Id task dependencies
+    // analyze the cohort Id task dependencies
     SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps);
     int numCohorts = taskDeps.getNumberOfCohorts();
     int numCohortSteps = taskDeps.getNumberOfCohortSteps();
@@ -99,7 +107,22 @@ int main(int argc, char** argv) {
             std::cout << std::endl;
         }
     }
-    
+
+    // set up the data collector
+    int numChunks = numAgeGroups * numTimeSteps;
+    DistDataCollector dataCollect(MPI_COMM_WORLD, numChunks, numData);
+
+    // workers expect a function that takes a 4 arguments. We bind the last
+    // argument to milliseconds
+    auto taskFunc = std::bind(taskFunction, 
+        std::placeholders::_1, // task_id
+        std::placeholders::_2, // stepBeg
+        std::placeholders::_3, // stepEnd
+        std::placeholders::_4, // comm
+        milliseconds,
+        numAgeGroups,
+        numData,
+        &dataCollect);
 
     if (workerId == 0) {
 
@@ -133,10 +156,12 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, stepBegMap, stepEndMap, nullptr);
+        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
         worker.run();
 
     }
+
+    dataCollect.free();
     
     // Clean up
     MPI_Finalize();

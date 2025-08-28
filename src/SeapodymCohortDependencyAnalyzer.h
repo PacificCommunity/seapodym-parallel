@@ -67,7 +67,7 @@ public:
     /**
      * Get the number of cohort steps
      * 
-     * In the above example, there are 5*315 cohort-steps
+     * In the above example, there are 5*3 = 15 cohort-steps
      * @return number
      */
     int getNumberOfCohortSteps() const;
