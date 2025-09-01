@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <limits>
 
 DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) {
     this->comm = comm;
@@ -15,7 +16,7 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) 
 
     if (rank == 0) {
         // allocate the collected data on rank 0
-        this->collectedData.resize(numChunks * numSize);
+        this->collectedData.resize(numChunks * numSize, std::numeric_limits<double>::infinity());
     }
 
     // set up the MPI window. Only rank 0 requests storage

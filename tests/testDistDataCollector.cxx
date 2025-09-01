@@ -1,5 +1,8 @@
 #include <DistDataCollector.h>
 #include <iostream>
+#include<cassert>
+#include "CmdLineArgParser.h"
+#include <limits>
 
 void test(int numSize, int numChunksPerRank) {
 
@@ -21,8 +24,15 @@ void test(int numSize, int numChunksPerRank) {
             }
             std::cout << std::endl;
             ddc.put(chunkId, localData.data());
+
+            // At this point the data have been sent and we can modify the local data
+            localData.clear();
         }
     }
+
+    // Make sure all the chunks have been received. All the above "put" operations
+    // must have completed. 
+    MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0) {
         double* collectedData = ddc.getCollectedDataPtr();
@@ -43,6 +53,7 @@ void test(int numSize, int numChunksPerRank) {
             std::cout << "[" << rank << "] get chunk " << chunkId << ": ";
             for (auto val : localData) {
                 std::cout << val << ", ";
+                assert(val == chunkId);
             }
             std::cout << std::endl;
         }
@@ -53,6 +64,7 @@ void test(int numSize, int numChunksPerRank) {
 
 
 int main(int argc, char* argv[]) {
+
     // Initialize the MPI environment
     MPI_Init(&argc, &argv);
 
