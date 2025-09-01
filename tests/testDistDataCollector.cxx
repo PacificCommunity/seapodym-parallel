@@ -15,7 +15,7 @@ void test(int numSize, int numChunksPerRank) {
         for (auto i = 0; i < numChunksPerRank; ++i) {
             int chunkId = rank * numChunksPerRank + i;
             std::vector<double> data(numSize, chunkId);
-            ddc.inject(chunkId, data.data());
+            ddc.put(chunkId, data.data());
         }
     }
 

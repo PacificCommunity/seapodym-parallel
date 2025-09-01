@@ -46,12 +46,20 @@ class DistDataCollector {
     ~DistDataCollector();
 
     /**
-     * @brief Inject the local data into the collected array 
+     * @brief Put the local data into the collected array 
      * @param chunkId Leading index in the collected array
      * @param data Pointer to the local data to inject  
-     * @note this should be executed on the source process
+     * @note this should be executed on the source process, typically on the worker
      */
-    void inject(int chunkId, const double* data);
+    void put(int chunkId, const double* data);
+
+    /**
+     * @brief Get a slice of the remote, collected array to the local worker
+     * @param chunkId Leading index in the collected array
+     * @return data array 
+     * @note this should be executed on the source process, typically on the worker
+     */
+    std::vector<double> get(int chunkId);
 
     /**
      * Get the pointer to the collected data

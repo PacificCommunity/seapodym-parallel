@@ -32,9 +32,9 @@ DistDataCollector::~DistDataCollector() {
 }
 
 void
-DistDataCollector::inject(int chunkId, const double* data) {
+DistDataCollector::put(int chunkId, const double* data) {
 
-    // Synchronize before RMA operations. Each rank will write contribute
+    // Synchronize before RMA operation. Each rank will write
     // disjoint pieces of data, so we can use shared locks
     MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
 
@@ -44,4 +44,22 @@ DistDataCollector::inject(int chunkId, const double* data) {
 
     // Synchronize after RMA operations
     MPI_Win_unlock(0, this-> win);
+}
+
+std::vector<double>
+DistDataCollector::get(int chunkId) {
+
+    // Synchronize before RMA operation. Each rank will read
+    // disjoint pieces of data, so we can use shared locks
+    MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
+
+    // Get the appropriate slice from rank 0
+    std::vector<double> data(this->numSize);
+    MPI_Get(data.data(), this->numSize, MPI_DOUBLE,
+                0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+
+    // Synchronize after RMA operations
+    MPI_Win_unlock(0, this-> win);
+
+    return data;
 }
