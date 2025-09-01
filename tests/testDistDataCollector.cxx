@@ -14,15 +14,20 @@ void test(int numSize, int numChunksPerRank) {
     if (rank > 0) {
         for (auto i = 0; i < numChunksPerRank; ++i) {
             int chunkId = rank * numChunksPerRank + i;
-            std::vector<double> data(numSize, chunkId);
-            ddc.put(chunkId, data.data());
+            std::vector<double> localData(numSize, chunkId);
+            std::cout << "[" << rank << "] put chunk " << chunkId << ": ";
+            for (auto val : localData) {
+                std::cout << val << ", ";
+            }
+            std::cout << std::endl;
+            ddc.put(chunkId, localData.data());
         }
     }
 
     if (rank == 0) {
         double* collectedData = ddc.getCollectedDataPtr();
         for (auto j = 0; j < numChunks; ++j) {
-            std::cout << "Chunk " << j << ": ";
+            std::cout << "[" << rank << "] chunk " << j << ": ";
             for (auto i = 0; i < numSize; ++i) {
                 std::cout << collectedData[j * numSize + i] << ", ";
             }
@@ -31,8 +36,21 @@ void test(int numSize, int numChunksPerRank) {
         std::cout << "Success\n";
     }
 
+    if (rank > 0) {
+        for (auto i = 0; i < numChunksPerRank; ++i) {
+            int chunkId = rank * numChunksPerRank + i;
+            std::vector<double> localData = ddc.get(chunkId);
+            std::cout << "[" << rank << "] get chunk " << chunkId << ": ";
+            for (auto val : localData) {
+                std::cout << val << ", ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
     ddc.free();
 }
+
 
 int main(int argc, char* argv[]) {
     // Initialize the MPI environment
