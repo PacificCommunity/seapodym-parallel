@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['get_0',['get',['../classCmdLineArgParser.html#a2a30ea22a2d087e8317473307c8d27f5',1,'CmdLineArgParser::get()'],['../classTaskScore.html#a8b01de0e35679ef9c134abdff03801c7',1,'TaskScore::get()']]],
+  ['get_0',['get',['../classCmdLineArgParser.html#a2a30ea22a2d087e8317473307c8d27f5',1,'CmdLineArgParser::get()'],['../classDistDataCollector.html#a182a20ab1ace0a73bbad1e25753661db',1,'DistDataCollector::get()'],['../classTaskScore.html#a8b01de0e35679ef9c134abdff03801c7',1,'TaskScore::get()']]],
   ['getarrayfromstate_1',['getArrayFromState',['../classSeapodymCohortAbstract.html#afcabc8d41e389a745d882b128fd79554',1,'SeapodymCohortAbstract::getArrayFromState()'],['../classSeapodymCohortFake.html#aa68cfe739b4d29154aa7c1f5a1e8e87b',1,'SeapodymCohortFake::getArrayFromState()']]],
   ['getcollecteddataptr_2',['getCollectedDataPtr',['../classDistDataCollector.html#a1f38912a18c0150e7828668a6bf62d57',1,'DistDataCollector']]],
   ['getdataptr_3',['getDataPtr',['../classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882',1,'SeapodymCourier']]],
