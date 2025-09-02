@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <limits>
+#include <cmath> // std::isnan()
 
 DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) {
     this->comm = comm;
@@ -18,6 +18,11 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) 
     MPI_Aint winSize = (rank == 0) ? (numChunks * numSize * sizeof(double)) : 0;
     MPI_Win_allocate(winSize, sizeof(double), MPI_INFO_NULL,
                         comm, &this->collectedData, &this->win);
+
+    // Initialize the collected data with bad values
+    if (rank == 0) {
+        std::fill(this->collectedData, this->collectedData + (numChunks * numSize), BAD_VALUE);
+    }
 }
 
 DistDataCollector::~DistDataCollector() {
