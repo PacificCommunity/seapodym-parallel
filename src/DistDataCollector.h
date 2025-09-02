@@ -24,8 +24,8 @@ class DistDataCollector {
         // local size of the data
         std::size_t numSize;
 
-        // the array that collects the data of size numChunks * numSize
-        std::vector<double> collectedData;
+        // the array that collects the data of size numChunks * numSize on rank 0
+        double* collectedData;
         
         // MPI window for remote memory access
         MPI_Win win;
@@ -67,7 +67,7 @@ class DistDataCollector {
      * @note this returns a null pointer on ranks other than 0
      */
     double* getCollectedDataPtr() {
-        return this->collectedData.data();
+        return this->collectedData;
     }
 
     /**
@@ -77,7 +77,8 @@ class DistDataCollector {
         if (this->win != MPI_WIN_NULL) {
             MPI_Win_free(&this->win);
         }
-        this->collectedData.clear();
+        // No need to free the data, MPI_Win_free will free the pointer
+        //MPI_Free_mem(this->collectedData);
     }
 
     // Disable copy and assignment operations
