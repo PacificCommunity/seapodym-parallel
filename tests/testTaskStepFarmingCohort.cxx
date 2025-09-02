@@ -24,6 +24,8 @@
 void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
     int ms, int numAgeGroups, int numData, DistDataCollector* dataCollector) {
 
+    std::vector<double> localData(numData);
+
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
 
@@ -31,7 +33,7 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 
         // Pretend we are computing some data
-        std::vector<double> data(numData, double(task_id));
+        std::fill(localData.begin(), localData.end(), double(task_id));
         
         // Send the data to the manager. Here, the data are 
         // collected row by row. The entry into the collected 
@@ -39,7 +41,7 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         int row = task_id - numAgeGroups + 1 + step;
         int col = task_id % numAgeGroups;
         int chunk_id = row*numAgeGroups + col;
-        dataCollector->put(chunk_id, data.data());
+        dataCollector->put(chunk_id, localData.data());
 
         // E.g.
         int success = task_id;
