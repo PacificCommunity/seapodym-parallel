@@ -259,7 +259,7 @@ The manager's pseudo-code is:
 \caption{The manager's pseudo-code.}
     \begin{algorithmic}[1] % [1] for line numbering
 
-    \While{$!task_queue.empty() || !assigned.empty()$}
+    \While{not taskQueue.empty() or  not assigned.empty()}
 
         \Comment{Look for messages ``task-step complete''}
         \While{true}
@@ -276,22 +276,22 @@ The manager's pseudo-code is:
             \State step = output[1]
             completed.insert{taskid, step}
 
-            \If{$step == stepEnd - 1$}
+            \If{step == stepEnd - 1}
                 assigned.erase(taskid);
             \EndIf
         \EndWhile
 
         \Comment{Assign ready tasks to any available worker}    
-        \For{$taskid in task_queue$}
+        \For{taskid in taskQueue}
             \State taskDependencies = getTaskStepDepenencies{taskid}
             bool ready = true;
             \For{dep in taskDependencies}
-                \If{$completed.find(dep) == completed.end()$}
+                \If{completed.find(dep) == completed.end()}
                     \State ready = false
                     \State break
                 \EndIf
             \EndFor
-            \If{$ready and !activeWorkers.empty()$}
+            \If{ready and !activeWorkers.empty()}
                 \State worker = activeWorkers.begin()
                 \State activeWorkers.erase(worker)
                 \State \Call{sendTaskToWorker}{taskid, worker}
