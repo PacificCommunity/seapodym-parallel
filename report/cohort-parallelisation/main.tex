@@ -58,7 +58,8 @@ giveninits=true]{biblatex}
 % Defines uth-specific title page
 %\usepackage{mieUTHtitle-en}
 \usepackage{pgfplots} 
-
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 %Correct spelling of words. If the spelling of a word is incorrect and LaTex puts a hyphen at the wrong place on a line break then we give the correct spelling here.
 %\babelhyphenation[greek]{Anti-here}
@@ -135,7 +136,7 @@ to our example, we have
     \end{tabular}
 \end{table}
 When a cohort dies, it is replaced by a new cohort at the next time step. To instantiate the new cohort, data will need 
-to be transferred from the cohorts at the previous time step. This creates are dependency of the new cohorts on the older 
+to be transferred from the cohorts at the previous time step. Figure \ref{fig:cohort_deps} shows the dependency of the new cohorts on the older 
 cohorts at different steps.
 \begin{figure}[htbp]
     \centering
@@ -186,29 +187,71 @@ cohorts at different steps.
     \draw[->] (70) -- (42);
     \draw[->] (70) -- (51);
 
-
 \end{tikzpicture}
-\caption{Dependency of cohort tasks on other cohort, step tuples.}
+\caption{Dependency of cohort tasks on other cohort, step tuples. The first digit is the cohort Id and the second the step. }
     \label{fig:cohort_deps}
 \end{figure}
 
 
-At each time step a new cohort is born. 
-For instance, cohort 3 is born at time step 1 (second row), cohort 4 at time 2, cohort 5 at time 3, etc. 
-
-
-
-
 \section{Task farming with dependencies on other tasks' steps}
 
-We opted for a task farming approach. This involves creating a pool of tasks that can be executed independently 
-and a manager that assigns the tasks to the workers. Workers get a task, execute the task and notify the manager when the task is complete.
-Task farming is particularly suitable when tasks take a different amount of time to execute, either because of the nature of the task or because of
-of varying computational loads. (Some nodes on a cluster may more or less affected by the workload than others.)
+We opted for a task farming approach. This involves creating a pool of tasks that can be executed concurrently
+and a manager that assigns the tasks to the workers. Each task consists of advancing a cohort for multiple time steps.
+
+In a classical task farming implementation, the manager starts by assigning tasks to the workers. This involves sending a message to each worker, along with 
+some input parameters. Each worker then executes the task and reports the results back to the manager, who then assigns a new task to the worker. 
+When no more tasks are available, the manager sends a message to the workers to shut down. Task farming is particularly suitable when tasks take a different amount of time to execute, either because of the nature of the task or because of
+of varying computational loads or because of task heterogeneity.
+
+Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:cohort_deps} prevents us from using a naive task farming approach. In our case, tasks can only be started when 
+other task steps have been completed. In other words, a task corresponding to advancing a cohort at a given step can only be started once all its prerequisite tasks 
+(as indicated by the arrows in Fig. \ref{fig:cohort_deps}) have finished. This requires the manager to keep track of task dependencies and only dispatch tasks to workers when 
+their dependencies are satisfied.
+
+We start by describing a worker's task. A worker waits for a task to be assigned by the manager. A task has a identification number \verb|workerId| that fully describes the task to accomplish.
+The worker reports back the status of the execution of each task to the manager. The corresponding pseudo-code is:
+
+\begin{algorithm}
+\caption{A worker's pseudo-code.}
+    \begin{algorithmic}[1] % [1] for line numbering
+    \While {true}
+
+        taskid = \Call{getTaskIdFromManager}{};
+        \If {taskid $< 0$}
+            Break
+        \EndIf
+
+        \Comment{Perform the task, stepping from stepBeg to stepEnd - 1}   
+        \State \Call{taskFunc}{taskid, stepBeg, stepEnd}
+
+        \Comment{Notify the manager that this worker is available again}
+        \State \Call{sendSignalToManager}{DONE}
+    
+    \EndWhile
+\end{algorithmic}
+\label{algo:worker}
+\end{algorithm}
+
+The task function defined in Algorithm \ref{algo:worker} is responsible for advancing the cohort associated with \verb|taskid| from \verb|stepBeg| to \verb|stepEnd - 1|:
+\begin{algorithm}
+\caption{The task function executed by the worker.}
+    \begin{algorithmic}[1] % [1] for line numbering
+\Function{MyFunction}{taskid, stepBeg, stepEnd}
+    \State data = \Call{getDataFromManager}{taskid}
+    \State cohort = \Call{createCohort}{taskid}
+    \Comment{Advance a cohort}
+    \For {step = stepBeg to stepEnd - 1}
+        \State \Call{stepForward}{cohort}
+        \State \Call{sendStepCompleteMessageToManager}{taskid, step}
+    \EndFor
+\EndFunction
+\end{algorithmic}
+\label{algo:worker}
+\end{algorithm}
+
 
 
 \section{Summary and future work}
-
-
+   
 
 \end{document}
