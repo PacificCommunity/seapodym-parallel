@@ -16,7 +16,6 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) 
 
     // Allocate and create the window, zero size on other ranks than 0
     MPI_Aint winSize = (rank == 0) ? (numChunks * numSize * sizeof(double)) : 0;
-    std::cerr << "[" << rank << "] Allocating window of size " << winSize << std::endl;
     MPI_Win_allocate(winSize, sizeof(double), MPI_INFO_NULL,
                         comm, &this->collectedData, &this->win);
 }
