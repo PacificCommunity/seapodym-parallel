@@ -12,6 +12,12 @@
 #include "SeapodymCohortDependencyAnalyzer.h"
 #include "DistDataCollector.h"
 
+int getChunkId(int task_id, int step, int numAgeGroups) {
+    int row = std::max(0, task_id - numAgeGroups + 1) + step;
+    int col = task_id % numAgeGroups;
+    return row * numAgeGroups + col;
+}
+
 // Task for the workers to execute
 /**
  * Task
@@ -22,24 +28,43 @@
  * @param ms Sleep # milliseconds
  */
 void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
-    int ms, int numAgeGroups, int numData, DistDataCollector* dataCollector) {
+    int ms, int numAgeGroups, int numData, 
+    DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
+    std::map<int, std::set<std::array<int, 2>>>* dependencyMap) {
+
+    std::vector<double> localData(numData);
 
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
+
+        // Fetch the data needed to create this cohort from the manager
+        // and sum them up
+        std::vector<double> initData(numData, 0.0);
+        for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
+            int chunk_id = getChunkId(task_id2, step, numAgeGroups);
+            std::vector<double> data = dataCollector->get(chunk_id);
+            // check that the data are valid
+            if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
+                // The data have not been previously populated. This could indicate that
+                // the worker has not yet produced any output for this cohort or the manager
+                // has not yet received the data.
+                MPI_Abort(comm, 1);
+            }
+            // sum up the cohort data at the previous time step
+            std::transform(data.begin(), data.end(), initData.begin(), initData.begin(), std::plus<double>());
+        }
 
         // Perform the work, just sleeping here zzzzzzz
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 
         // Pretend we are computing some data
-        std::vector<double> data(numData, double(task_id));
+        std::fill(localData.begin(), localData.end(), double(task_id));
         
         // Send the data to the manager. Here, the data are 
         // collected row by row. The entry into the collected 
         // array is at index chunk_id.
-        int row = task_id - numAgeGroups + 1 + step;
-        int col = task_id % numAgeGroups;
-        int chunk_id = row*numAgeGroups + col;
-        dataCollector->put(chunk_id, data.data());
+        int chunk_id = getChunkId(task_id, step, numAgeGroups);
+        dataCollector->put(chunk_id, localData.data());
 
         // E.g.
         int success = task_id;
@@ -120,7 +145,8 @@ int main(int argc, char** argv) {
         milliseconds,
         numAgeGroups,
         numData,
-        &dataCollect);
+        &dataCollect,
+        &dependencyMap);
 
     if (workerId == 0) {
 

@@ -1,11 +1,11 @@
 #include <mpi.h>
 #include <set>
 #include <vector>
+#include <limits>
+
 #ifndef DIST_DATA_COLLECTOR
 #define DIST_DATA_COLLECTOR
 
-    
-using Tuple3 = std::tuple<MPI_Win, double*, std::size_t>;
 
 /**
  * @brief DistDataCollector is a class that collects data stored on multiple MPI processes
@@ -31,6 +31,9 @@ class DistDataCollector {
         MPI_Win win;
 
         public:
+
+        // initial values
+        const double BAD_VALUE = std::numeric_limits<double>::quiet_NaN();
 
     /**
      * @brief Constructor

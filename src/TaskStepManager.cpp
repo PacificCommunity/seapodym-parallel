@@ -58,7 +58,7 @@ TaskStepManager::run() const {
 
             int flag = 0;
             // Probe for messages from workers
-            MPI_Iprobe(MPI_ANY_SOURCE, 1, this->comm, &flag, &status);
+            MPI_Iprobe(MPI_ANY_SOURCE, endTaskTag, this->comm, &flag, &status);
             if (!flag) break;
 
             MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, endTaskTag, this->comm, MPI_STATUS_IGNORE);
@@ -99,7 +99,7 @@ TaskStepManager::run() const {
         // Drain all worker-available messages (tag 2)
         for (int worker = 1; worker < size; ++worker) {
             int flag = 0;
-            MPI_Iprobe(worker, 2, this->comm, &flag, &status);
+            MPI_Iprobe(worker, workerAvailableTag, this->comm, &flag, &status);
             if (flag) {
                 int dummy;
                 MPI_Recv(&dummy, 1, MPI_INT, worker, workerAvailableTag, this->comm, MPI_STATUS_IGNORE);
