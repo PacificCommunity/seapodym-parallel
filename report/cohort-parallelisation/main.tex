@@ -248,7 +248,81 @@ The task function defined in Algorithm \ref{algo:worker} is responsible for adva
 \end{algorithmic}
 \label{algo:worker}
 \end{algorithm}
+Note the call to \verb|sendStepCompleteMessageToManager| which informs the manager that a specific step for a task has been completed. 
+This is crucial for managing task dependencies, as the manager needs to know when a task's prerequisites have been satisfied.
 
+The manager code orchestrates the work. It maintains a list of all active workers, task queue, a list of completed tasks and stores the results. Since workers will be sending 
+various types of messages (``worker is available'' or ``result of step of task X''), the manager needs to be able to distinguish between them. This is done using message tags.
+The manager's pseudo-code is:
+
+\begin{algorithm}
+\caption{The manager's pseudo-code.}
+    \begin{algorithmic}[1] % [1] for line numbering
+
+    \While{$!task_queue.empty() || !assigned.empty()$}
+
+        \Comment{Look for messages ``task-step complete''}
+        \While{true}
+
+            \Comment{Probe for messages from workers}
+            \State msg = getMessageFromAnyWorker{}
+            \If{msg.type != ``task-step complete''} 
+              \State break
+            \EndIf
+
+            \Comment{Store the result}
+            \State results.insert(msg.output)
+            \State taskid = output[0]
+            \State step = output[1]
+            completed.insert{taskid, step}
+
+            \If{$step == stepEnd - 1$}
+                assigned.erase(taskid);
+            \EndIf
+        \EndWhile
+
+        \Comment{Assign ready tasks to any available worker}    
+        \For{$taskid in task_queue$}
+            \State taskDependencies = getTaskStepDepenencies{taskid}
+            bool ready = true;
+            \For{dep in taskDependencies}
+                \If{$completed.find(dep) == completed.end()$}
+                    \State ready = false
+                    \State break
+                \EndIf
+            \EndFor
+            \If{$ready and !activeWorkers.empty()$}
+                \State worker = activeWorkers.begin()
+                \State activeWorkers.erase(worker)
+                \State \Call{sendTaskToWorker}{taskid, worker}
+                \State assigned.insert(taskid)
+                \State taskQueue.erase(taskid)
+            \EndIf
+        \EndFor
+
+        \Comment{Drain all worker-available messages}
+        \For{worker in workers}
+            \State msg = getMessageFromAnyWorker{}
+            \If{msg.type == ``worker is available''}
+                \State activeWorkers.insert(worker)
+            \EndIf
+        \EndFor
+
+    \EndWhile
+
+    \Comment{Send stop signal to workers}
+    \State stop = -1
+    \For{worker in workers}
+        \Call sendStopSignalToWorker{worker}
+    \EndFor
+
+\end{algorithmic}
+\label{algo:manager}
+\end{algorithm}
+
+ and their dependencies. When a worker completes a step and sends a message to the manager, the manager checks if this completion satisfies any other tasks' prerequisites. If so, it can dispatch those tasks to available workers.
+
+\section{Scalability}
 
 
 \section{Summary and future work}
