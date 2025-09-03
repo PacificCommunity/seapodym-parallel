@@ -10,10 +10,15 @@ data = {
     'workers': [],
     'speedup_avg': [],
     'speedup_std': [],
+    'send': [],
 }
 
 for f in glob.glob("nm*_nd*/resultsNw*.csv"):
     print(f)
+    send = 'send'
+    m = re.search(r'Nw\d+\_(\w+)', f)
+    if m:
+        send = m.group(1)
     workers = int(re.search(r'Nw(\d+)', f).group(1))
     num_doubles = int(re.search(r'nm(\d+)_nd(\d+)', f).group(2))
     step_milliseconds = int(re.search(r'nm(\d+)_nd(\d+)', f).group(1))
@@ -25,6 +30,7 @@ for f in glob.glob("nm*_nd*/resultsNw*.csv"):
     data['step_milliseconds'].append(step_milliseconds)
     data['num_doubles'].append(num_doubles)
     data['workers'].append(workers)
+    data['send'].append(send)
     
 df = pd.DataFrame(data)
 print(df)
@@ -48,6 +54,6 @@ plt.errorbar(x, y, yerr=yerr, label='15000 doubles/10ms per step', marker='x', c
 plt.title('Speedup vs Number of Workers')
 plt.xlabel('Number of Workers')
 plt.ylabel('Speedup')
-plt.legend(title='Number of Doubles')
+plt.legend(title='')
 plt.savefig('speedup_vs_workers.png')
 plt.show()

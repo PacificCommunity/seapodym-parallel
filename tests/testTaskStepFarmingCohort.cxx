@@ -77,11 +77,16 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         int output[3] = {task_id, step, success};
         const int endTaskTag = 1;
         MPI_Isend(output, 3, MPI_INT, 0, endTaskTag, comm, &requests[step - stepBeg]);
+
+        // Finish the previous send
+        if (step > stepBeg) {
+            MPI_Wait(&requests[step - stepBeg - 1], MPI_STATUS_IGNORE);
+        }
     }
-    // Wait for all the sends to complete
-    for (auto step = stepBeg; step < stepEnd; ++step) {
-        MPI_Wait(&requests[step - stepBeg], MPI_STATUS_IGNORE);
-    }
+
+    // Finish the last send
+    MPI_Wait(&requests[stepEnd - stepBeg - 1], MPI_STATUS_IGNORE);
+
 }
 
 int main(int argc, char** argv) {
