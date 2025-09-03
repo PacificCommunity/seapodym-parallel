@@ -34,6 +34,8 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
 
     std::vector<double> localData(numData);
 
+    std::vector<MPI_Request> requests(stepEnd - stepBeg);
+
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
 
@@ -69,10 +71,16 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // E.g.
         int success = task_id;
 
-        // Notify the manager at the end of each step
+        // Notify the manager at the end of each step. This can be done 
+        // asynchroneously since the next step does not need the send to have 
+        // completed.
         int output[3] = {task_id, step, success};
         const int endTaskTag = 1;
-        MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
+        MPI_Isend(output, 3, MPI_INT, 0, endTaskTag, comm, &requests[step - stepBeg]);
+    }
+    // Wait for all the sends to complete
+    for (auto step = stepBeg; step < stepEnd; ++step) {
+        MPI_Wait(&requests[step - stepBeg], MPI_STATUS_IGNORE);
     }
 }
 
