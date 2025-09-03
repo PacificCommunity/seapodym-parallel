@@ -12,7 +12,7 @@
 #include "SeapodymCohortDependencyAnalyzer.h"
 #include "DistDataCollector.h"
 
-int getChunkId(int task_id, int step, int numAgeGroups) {
+int inline getChunkId(int task_id, int step, int numAgeGroups) {
     int row = std::max(0, task_id - numAgeGroups + 1) + step;
     int col = task_id % numAgeGroups;
     return row * numAgeGroups + col;
