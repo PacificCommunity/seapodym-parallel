@@ -68,7 +68,8 @@ giveninits=true]{biblatex}
 \begin{document}
 
 % Fill in your details
-\author{Alexander Pletzer, Chris Scott, Inna Senina, Lucas Bonnin and Romain Forestier}
+\author{Alexander Pletzer, Chris Scott, \\
+Inna Senina, Lucas Bonnin and Romain Forestier}
 \title{Implementation of cohort parallelisation in the Seapodym code}
 
 \maketitle
@@ -209,7 +210,7 @@ other task steps have been completed. In other words, a task corresponding to ad
 their dependencies are satisfied.
 
 We start by describing a worker's task. A worker waits for a task to be assigned by the manager. A task has a identification number \verb|workerId| that fully describes the task to accomplish.
-The worker reports back the status of the execution of each task to the manager. The corresponding pseudo-code is:
+The worker reports back the status of the execution of each task to the manager. The corresponding pseudo-code is shown in Algorithm \ref{algo:worker}.
 
 \begin{algorithm}
 \caption{A worker's pseudo-code.}
@@ -232,7 +233,7 @@ The worker reports back the status of the execution of each task to the manager.
 \label{algo:worker}
 \end{algorithm}
 
-The task function defined in Algorithm \ref{algo:worker} is responsible for advancing the cohort associated with \verb|taskid| from \verb|stepBeg| to \verb|stepEnd - 1|:
+The task function defined in Algorithm \ref{algo:worker} is responsible for advancing the cohort associated with \verb|taskid| from \verb|stepBeg| to \verb|stepEnd - 1|.
 \begin{algorithm}
 \caption{The task function executed by the worker.}
     \begin{algorithmic}[1] % [1] for line numbering
@@ -253,7 +254,7 @@ This is crucial for managing task dependencies, as the manager needs to know whe
 
 The manager code orchestrates the work. It maintains a list of all active workers, task queue, a list of completed tasks and stores the results. Since workers will be sending 
 various types of messages (``worker is available'' or ``result of step of task X''), the manager needs to be able to distinguish between them. This is done using message tags.
-The manager's pseudo-code is:
+The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
 
 \begin{algorithm}
 \caption{The manager's pseudo-code.}
@@ -319,8 +320,6 @@ The manager's pseudo-code is:
 \end{algorithmic}
 \label{algo:manager}
 \end{algorithm}
-
- and their dependencies. When a worker completes a step and sends a message to the manager, the manager checks if this completion satisfies any other tasks' prerequisites. If so, it can dispatch those tasks to available workers.
 
 \section{Scalability}
 
