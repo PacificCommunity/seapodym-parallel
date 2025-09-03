@@ -71,11 +71,6 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // E.g.
         int success = task_id;
 
-        // Finish the previous send
-        if (step > stepBeg) {
-            MPI_Wait(&requests[step - stepBeg - 1], MPI_STATUS_IGNORE);
-        }
-
         // Notify the manager at the end of each step. This can be done 
         // asynchroneously since the next step does not need the send to have 
         // completed.
@@ -84,8 +79,8 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         MPI_Isend(output, 3, MPI_INT, 0, endTaskTag, comm, &requests[step - stepBeg]);
     }
 
-    // Finish the last send
-    MPI_Wait(&requests[stepEnd - stepBeg - 1], MPI_STATUS_IGNORE);
+    // Finish the sends
+    MPI_Waitall(requests.size(), requests.data(), MPI_STATUSES_IGNORE);
 
 }
 
