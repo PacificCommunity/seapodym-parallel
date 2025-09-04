@@ -188,19 +188,16 @@ int main(int argc, char** argv) {
     }
 
     // Do we need this?
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
 
     if (workerId == 0) {
         double* data = dataCollect.getCollectedDataPtr();
         int numSize = dataCollect.getNumSize();
         double checksum = 0;
         for (auto chunk = 0; chunk < dataCollect.getNumChunks(); ++chunk) {\
-            std::cout << "chunk: " << chunk << " data: ";
             for (auto i = 0; i < numSize; ++i) {
                 checksum += data[chunk*numSize + i];
-                std::cout << data[chunk*numSize + i] << ", ";
             }
-            std::cout << std::endl;
         }
         std::cout << "\nchecksum: " << checksum << std::endl;
     }
