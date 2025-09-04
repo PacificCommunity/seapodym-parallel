@@ -5,10 +5,12 @@
 #include <chrono>
 #include <algorithm>
 #include <cmath>
-#include <cassert>
-#include <CmdLineArgParser.h>
+#include "CmdLineArgParser.h"
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
+#undef NDEBUG
+#include <cassert>
+
 
 // Task for the workers to execute
 /**
@@ -131,7 +133,7 @@ int main(int argc, char** argv) {
         // }
 
         // make sure there are no duplicate tasks and all the tasks have been executed
-        assert(results.size() == numTasks);
+        assert(results.size() == numTotalSteps);
         for (auto [taskId, step, res] : results) {
             assert(taskId == res);
         }
