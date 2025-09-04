@@ -14,7 +14,7 @@
 #include <cassert>
 
 int inline getChunkId(int task_id, int step, int numAgeGroups) {
-    int row = std::max(0, task_id - numAgeGroups + 1) + step;
+    int row = task_id + step - numAgeGroups + 1;
     int col = task_id % numAgeGroups;
     return row * numAgeGroups + col;
 }
@@ -187,13 +187,20 @@ int main(int argc, char** argv) {
 
     }
 
+    // Do we need this?
+    MPI_Barrier(MPI_COMM_WORLD);
+
     if (workerId == 0) {
         double* data = dataCollect.getCollectedDataPtr();
-        int n = numAgeGroups * numTimeSteps;
+        int numSize = dataCollect.getNumSize();
         double checksum = 0;
-        for (auto i = numAgeGroups; i < n; ++i) {
-            checksum += data[i];
-            std::cout << data[i];
+        for (auto chunk = 0; chunk < dataCollect.getNumChunks(); ++chunk) {\
+            std::cout << "chunk: " << chunk << " data: ";
+            for (auto i = 0; i < numSize; ++i) {
+                checksum += data[chunk*numSize + i];
+                std::cout << data[chunk*numSize + i] << ", ";
+            }
+            std::cout << std::endl;
         }
         std::cout << "\nchecksum: " << checksum << std::endl;
     }
