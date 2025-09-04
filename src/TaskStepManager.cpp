@@ -49,6 +49,8 @@ TaskStepManager::run() const {
         active_workers.insert(i);
     }
 
+    MPI_Request request;
+
     while (!task_queue.empty() || !assigned.empty()) {
 
         MPI_Status status;
@@ -78,6 +80,7 @@ TaskStepManager::run() const {
         }
 
         // Assign ready tasks to any available worker
+        std::vector<MPI_Request> requests;
         for (auto it = task_queue.begin(); it != task_queue.end();) {
             int task_id = *it;
             const auto& deps = this->deps.at(task_id);
@@ -91,13 +94,15 @@ TaskStepManager::run() const {
             if (ready && !active_workers.empty()) {
                 int worker = *active_workers.begin();
                 active_workers.erase(worker);
-                MPI_Send(&task_id, 1, MPI_INT, worker, startTaskTag, this->comm);
+                MPI_Isend(&task_id, 1, MPI_INT, worker, startTaskTag, this->comm, &request);
+                requests.push_back(request);
                 assigned.insert(task_id);
                 it = task_queue.erase(it);
             } else {
                 ++it;
             }
         }
+        MPI_Waitall(requests.size(), requests.data(), MPI_STATUSES_IGNORE);
 
         // Drain all worker-available messages (tag 2)
         for (int worker = 1; worker < size; ++worker) {
