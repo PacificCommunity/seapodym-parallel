@@ -2,6 +2,9 @@
 #include <set>
 #include <vector>
 #include <limits>
+#include <iostream>
+#include <numeric>   // for std::accumulate
+#include <iomanip>  // for std::setprecision, std::fixed, std::scientific
 
 #ifndef DIST_DATA_COLLECTOR
 #define DIST_DATA_COLLECTOR
@@ -72,6 +75,53 @@ class DistDataCollector {
     double* getCollectedDataPtr() {
         return this->collectedData;
     }
+
+    /**
+     * Displays sum of data
+     */
+    void displaySumArray() const{
+        if (!collectedData) {
+            std::cout << "collectedData is null." << std::endl;
+            return;
+        }
+
+        double sum = 0.0;
+        std::size_t totalSize = numChunks * numSize;
+
+        for (std::size_t i = 0; i < totalSize; ++i) {
+            sum += collectedData[i];
+        }
+
+        std::cout << "Sum of collectedData: " << sum << std::endl;
+    }
+    
+    /**
+     * Displays sum of a chunk
+     */
+    void displaySumChunk(int chunk_id) const {
+        // Only rank 0 has valid collectedData to read
+        int rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        if (rank != 0) {
+            if (rank == 0) return; // Only rank 0 prints
+            return;
+        }
+
+        // Compute bounds
+        std::size_t start = static_cast<std::size_t>(chunk_id) * numSize;
+        std::size_t end   = start + numSize;
+
+        // Compute the sum
+        double sum = std::accumulate(collectedData + start,
+                                    collectedData + end,
+                                    0.0);
+
+        std::cout  << std::setprecision(15) << "1st element of chunk" << chunk_id << " = " << collectedData[start] << std::endl;
+        std::cout << "numSize = " << numSize << std::endl;
+        std::cout << "Sum of collectedData in chunk "
+                << chunk_id << " = " << sum << std::endl;
+    }
+    
 
     /**
      * @brief Free the MPI window and empty the collected data
