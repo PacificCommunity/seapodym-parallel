@@ -87,7 +87,7 @@ add_test(NAME testTaskStepFarmingNT16Ns10 COMMAND mpiexec -n 5 testTaskStepFarmi
 set_tests_properties(testTaskStepFarmingNT16Ns10 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 
 add_test(NAME testTaskStepFarmingCohortNa3Nt5 COMMAND mpiexec -n 5 testTaskStepFarmingCohort -na 3 -nt 5)
-set_tests_properties(testTaskStepFarmingCohortNa3Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+set_tests_properties(testTaskStepFarmingCohortNa3Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 450")
 
 add_test(NAME testTaskScore COMMAND mpiexec -n 3 testTaskScore)
 set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "SUCCEEDED")
