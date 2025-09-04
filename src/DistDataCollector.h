@@ -73,6 +73,22 @@ class DistDataCollector {
         return this->collectedData;
     }
 
+    /** 
+     * Get the number of chunks
+     * @return number
+     */
+    int getNumChunks() const {
+        return this->numChunks;
+    }
+
+    /** 
+     * Get the size of each chunk
+     * @return number
+     */
+    int getNumSize() const {
+        return this->numSize;
+    }
+
     /**
      * @brief Free the MPI window and empty the collected data
      */

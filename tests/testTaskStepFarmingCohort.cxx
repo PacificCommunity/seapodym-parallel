@@ -5,14 +5,15 @@
 #include <chrono>
 #include <algorithm>
 #include <cmath>
-#include <cassert>
 #include <CmdLineArgParser.h>
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
 #include "SeapodymCohortDependencyAnalyzer.h"
 #include "DistDataCollector.h"
+#undef NDEBUG
+#include <cassert>
 
-int getChunkId(int task_id, int step, int numAgeGroups) {
+int inline getChunkId(int task_id, int step, int numAgeGroups) {
     int row = std::max(0, task_id - numAgeGroups + 1) + step;
     int col = task_id % numAgeGroups;
     return row * numAgeGroups + col;
@@ -27,7 +28,8 @@ int getChunkId(int task_id, int step, int numAgeGroups) {
  * @param comm MPI communicator
  * @param ms Sleep # milliseconds
  */
-void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
+void inline 
+taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
     int ms, int numAgeGroups, int numData, 
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap) {
@@ -183,6 +185,17 @@ int main(int argc, char** argv) {
         TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
         worker.run();
 
+    }
+
+    if (workerId == 0) {
+        double* data = dataCollect.getCollectedDataPtr();
+        int n = numAgeGroups * numTimeSteps;
+        double checksum = 0;
+        for (auto i = numAgeGroups; i < n; ++i) {
+            checksum += data[i];
+            std::cout << data[i];
+        }
+        std::cout << "\nchecksum: " << checksum << std::endl;
     }
 
     dataCollect.free();

@@ -1,8 +1,8 @@
 #include <DistDataCollector.h>
 #include <iostream>
-#include<cassert>
 #include "CmdLineArgParser.h"
-#include <limits>
+#undef NDEBUG
+#include <cassert>
 
 void test(int numSize, int numChunksPerRank) {
 
@@ -16,7 +16,7 @@ void test(int numSize, int numChunksPerRank) {
 
     double timePut = 0, timeGet = 0;
 
-    if (rank > 0) {
+    if (rank >= 0) {
 
         double tic = MPI_Wtime();
 
@@ -57,6 +57,23 @@ void test(int numSize, int numChunksPerRank) {
         timeGet += toc - tic;
     }
 
+    if (rank == 0) {
+        int numChunk = ddc.getNumChunks();
+        int numSize = ddc.getNumSize();
+        double* data = ddc.getCollectedDataPtr();
+        double checksum = 0;
+        for (auto chunk = 0; chunk < numChunk; ++chunk) {
+            std::cout << "chunk " << chunk << ": ";
+            for (auto i = 0; i < numSize; ++i) {
+                std::cout << data[chunk*numSize + i] << ", ";
+                checksum += data[chunk*numSize + i];
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "checksum: " << checksum << std::endl;
+        assert(checksum == numSize * numChunks * (numChunks - 1) / 2);
+    }
+
     ddc.free();
 
     double timePutTotal, timeGetTotal;
@@ -93,11 +110,6 @@ int main(int argc, char* argv[]) {
         MPI_Finalize();
         return 1;
     }
-
-    int numAgeGroups = cmdLine.get<int>("-na");
-    int numTimeSteps = cmdLine.get<int>("-nt");
-    int milliseconds = cmdLine.get<int>("-nm");
-    int numData = cmdLine.get<int>("-nd");
 
     int numSize = cmdLine.get<int>("-numSize");
     int numChunksPerRank = cmdLine.get<int>("-numChunksPerRank");

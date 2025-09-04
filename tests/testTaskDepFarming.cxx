@@ -4,11 +4,13 @@
 #include <thread>
 #include <chrono>
 #include <algorithm>
-#include <cassert>
-#include <CmdLineArgParser.h>
+#include "CmdLineArgParser.h"
 #include "TaskDependencyManager.h"
 #include "TaskWorker.h"
 #include "SeapodymCohortManager.h"
+#undef NDEBUG
+#include <cassert>
+
 
 // Task for the workers to execute
 /**

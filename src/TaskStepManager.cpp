@@ -59,7 +59,10 @@ TaskStepManager::run() const {
             int flag = 0;
             // Probe for messages from workers
             MPI_Iprobe(MPI_ANY_SOURCE, endTaskTag, this->comm, &flag, &status);
-            if (!flag) break;
+            if (!flag) {
+                // not an end task message
+                break;
+            }
 
             MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, endTaskTag, this->comm, MPI_STATUS_IGNORE);
 
