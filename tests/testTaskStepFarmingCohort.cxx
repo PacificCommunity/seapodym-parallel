@@ -66,7 +66,7 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // collected row by row. The entry into the collected 
         // array is at index chunk_id.
         int chunk_id = getChunkId(task_id, step, numAgeGroups);
-        dataCollector->put(chunk_id, localData.data());
+        dataCollector->startPut(chunk_id, localData.data());
 
         // E.g.
         int success = task_id;
@@ -77,6 +77,9 @@ void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         int output[3] = {task_id, step, success};
         const int endTaskTag = 1;
         MPI_Isend(output, 3, MPI_INT, 0, endTaskTag, comm, &requests[step - stepBeg]);
+
+        // Finish the put
+        dataCollector->finishPut();
     }
 
     // Finish the sends

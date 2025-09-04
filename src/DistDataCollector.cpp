@@ -30,18 +30,22 @@ DistDataCollector::~DistDataCollector() {
 }
 
 void
-DistDataCollector::put(int chunkId, const double* data) {
+DistDataCollector::startPut(int chunkId, const double* data) {
 
     // Synchronize before RMA operation. Each rank will write
     // disjoint pieces of data, so we can use shared locks
-    MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
+    MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, this->win);
 
     // Put local_data into the appropriate slice on rank 0
     MPI_Put(data, this->numSize, MPI_DOUBLE,
                 0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+}
+
+void
+DistDataCollector::finishPut() {
 
     // Synchronize after RMA operations
-    MPI_Win_unlock(0, this-> win);
+    MPI_Win_unlock(0, this->win);
 }
 
 std::vector<double>

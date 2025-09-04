@@ -49,18 +49,24 @@ class DistDataCollector {
     ~DistDataCollector();
 
     /**
-     * @brief Put the local data into the collected array 
+     * @brief Start putting the local data into the collected array 
      * @param chunkId Leading index in the collected array
      * @param data Pointer to the local data to inject  
      * @note this should be executed on the source process, typically on the worker
      */
-    void put(int chunkId, const double* data);
+    void startPut(int chunkId, const double* data);
+
+    /**
+     * @brief Finish the asynchronous put operation
+     * @note this should be executed on the source process, typically on the worker
+     */
+    void finishPut();
 
     /**
      * @brief Get a slice of the remote, collected array to the local worker
      * @param chunkId Leading index in the collected array
      * @return data array 
-     * @note this should be executed on the source process, typically on the worker
+     * @note this should be executed on the source process, typically on the worker. This get is blocking.
      */
     std::vector<double> get(int chunkId);
 

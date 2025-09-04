@@ -25,7 +25,8 @@ void test(int numSize, int numChunksPerRank) {
             int chunkId = rank * numChunksPerRank + i;
             std::vector<double> localData(numSize, chunkId);
 
-            ddc.put(chunkId, localData.data());
+            ddc.startPut(chunkId, localData.data());
+            ddc.finishPut();
 
             // At this point the data have been sent and we can modify the local data
             localData.clear();
