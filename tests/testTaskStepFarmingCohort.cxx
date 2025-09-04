@@ -13,6 +13,12 @@
 #undef NDEBUG
 #include <cassert>
 
+/** 
+ * Return the chunk Id
+ * @param task_id Id of the task (same as cohort Id)
+ * @param step step in the task
+ * @return index
+ */
 int inline getChunkId(int task_id, int step, int numAgeGroups) {
     int row = task_id + step - numAgeGroups + 1;
     int col = task_id % numAgeGroups;
