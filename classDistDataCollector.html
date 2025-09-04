@@ -97,6 +97,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a182a20ab1ace0a73bbad1e25753661db" id="r_a182a20ab1ace0a73bbad1e25753661db"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a182a20ab1ace0a73bbad1e25753661db">get</a> (int chunkId)</td></tr>
 <tr class="memdesc:a182a20ab1ace0a73bbad1e25753661db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a slice of the remote, collected array to the local worker.  <br /></td></tr>
 <tr class="memitem:a1f38912a18c0150e7828668a6bf62d57" id="r_a1f38912a18c0150e7828668a6bf62d57"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f38912a18c0150e7828668a6bf62d57">getCollectedDataPtr</a> ()</td></tr>
+<tr class="memitem:aa6537a314c706a06004f3d47c2016b09" id="r_aa6537a314c706a06004f3d47c2016b09"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6537a314c706a06004f3d47c2016b09">getNumChunks</a> () const</td></tr>
+<tr class="memitem:a17446d432f5982ccc125ec4d3a162b0d" id="r_a17446d432f5982ccc125ec4d3a162b0d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17446d432f5982ccc125ec4d3a162b0d">getNumSize</a> () const</td></tr>
 <tr class="memitem:a4a513b240eb1b892b87ee60677aef496" id="r_a4a513b240eb1b892b87ee60677aef496"><td class="memItemLeft" align="right" valign="top"><a id="a4a513b240eb1b892b87ee60677aef496" name="a4a513b240eb1b892b87ee60677aef496"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> ()</td></tr>
 <tr class="memdesc:a4a513b240eb1b892b87ee60677aef496"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free the MPI window and empty the collected data. <br /></td></tr>
@@ -205,6 +207,58 @@ const double&#160;</td><td class="memItemRight" valign="bottom"><b>BAD_VALUE</b>
 </div><div class="memdoc">
 <p>Get the pointer to the collected data </p><dl class="section return"><dt>Returns</dt><dd>pointer </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>this returns a null pointer on ranks other than 0 </dd></dl>
+
+</div>
+</div>
+<a id="aa6537a314c706a06004f3d47c2016b09" name="aa6537a314c706a06004f3d47c2016b09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6537a314c706a06004f3d47c2016b09">&#9670;&#160;</a></span>getNumChunks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int DistDataCollector::getNumChunks </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the number of chunks </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
+
+</div>
+</div>
+<a id="a17446d432f5982ccc125ec4d3a162b0d" name="a17446d432f5982ccc125ec4d3a162b0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17446d432f5982ccc125ec4d3a162b0d">&#9670;&#160;</a></span>getNumSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int DistDataCollector::getNumSize </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the size of each chunk </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
 
 </div>
 </div>

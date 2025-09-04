@@ -11,7 +11,9 @@ var searchData=
   ['getnextcohort_8',['getNextCohort',['../classSeapodymCohortManager.html#a5df2ede3e48e612d6673338dfdd5b796',1,'SeapodymCohortManager']]],
   ['getnumberofcohorts_9',['getNumberOfCohorts',['../classSeapodymCohortDependencyAnalyzer.html#ac04d9d679a683db23a43dfddf9125660',1,'SeapodymCohortDependencyAnalyzer']]],
   ['getnumberofcohortsteps_10',['getNumberOfCohortSteps',['../classSeapodymCohortDependencyAnalyzer.html#af235e3d52e21539b8291bda27e23da7b',1,'SeapodymCohortDependencyAnalyzer']]],
-  ['getnumsteps_11',['getNumSteps',['../classSeapodymCohortManager.html#ae34f18f3427e70e294759cffa82850a9',1,'SeapodymCohortManager']]],
-  ['getstepbegmap_12',['getStepBegMap',['../classSeapodymCohortDependencyAnalyzer.html#af759705b4a84ccd0edbf29060e401791',1,'SeapodymCohortDependencyAnalyzer']]],
-  ['getstependmap_13',['getStepEndMap',['../classSeapodymCohortDependencyAnalyzer.html#ad7b6a3e2efb1059aad833c1449f9e53a',1,'SeapodymCohortDependencyAnalyzer']]]
+  ['getnumchunks_11',['getNumChunks',['../classDistDataCollector.html#aa6537a314c706a06004f3d47c2016b09',1,'DistDataCollector']]],
+  ['getnumsize_12',['getNumSize',['../classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d',1,'DistDataCollector']]],
+  ['getnumsteps_13',['getNumSteps',['../classSeapodymCohortManager.html#ae34f18f3427e70e294759cffa82850a9',1,'SeapodymCohortManager']]],
+  ['getstepbegmap_14',['getStepBegMap',['../classSeapodymCohortDependencyAnalyzer.html#af759705b4a84ccd0edbf29060e401791',1,'SeapodymCohortDependencyAnalyzer']]],
+  ['getstependmap_15',['getStepEndMap',['../classSeapodymCohortDependencyAnalyzer.html#ad7b6a3e2efb1059aad833c1449f9e53a',1,'SeapodymCohortDependencyAnalyzer']]]
 ];
