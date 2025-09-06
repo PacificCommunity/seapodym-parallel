@@ -1,4 +1,5 @@
 #include "TaskWorker.h"
+#include "Tags.h"
 
 TaskWorker::TaskWorker(MPI_Comm comm, std::function<int(int)> taskFunc) {
     this->comm = comm;
@@ -13,12 +14,11 @@ TaskWorker::run() const {
     MPI_Comm_rank(this->comm, &workerId);
 
     int taskId;
-    const int startTaskTag = 1;
 
     while (true) {
 
         // get the assigned task
-        int ier = MPI_Recv(&taskId, 1, MPI_INT, manager_rank, startTaskTag, this->comm, MPI_STATUS_IGNORE);
+        int ier = MPI_Recv(&taskId, 1, MPI_INT, manager_rank, START_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
         
         if (taskId < 0) {
             // No more tasks

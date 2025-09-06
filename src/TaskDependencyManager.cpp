@@ -1,4 +1,5 @@
 #include "TaskDependencyManager.h"
+#include "Tags.h"
 #include <set>
 #include <vector>
 #include <iostream>
@@ -39,7 +40,6 @@ TaskDependencyManager::addDependencies(int taskId, const std::set<int>& otherTas
 std::map<int, int>
 TaskDependencyManager::run() const {
 
-    const int startTaskTag = 1;
     const int shutdown = -1;
     int size;
     int ier = MPI_Comm_size(this->comm, &size);
@@ -55,7 +55,7 @@ TaskDependencyManager::run() const {
     for (int workerId = 1; workerId < size && !ready.empty(); ++ workerId) {
         int taskId = ready.back(); 
         ready.pop_back();
-        MPI_Send(&taskId, 1, MPI_INT, workerId, startTaskTag, this->comm);
+        MPI_Send(&taskId, 1, MPI_INT, workerId, START_TASK_TAG, this->comm);
         assigned.insert(taskId);
     }
 
@@ -78,14 +78,14 @@ TaskDependencyManager::run() const {
         if (!ready.empty()) {
             int nextTaskId = ready.back(); 
             ready.pop_back();
-            MPI_Send(&nextTaskId, 1, MPI_INT, workerId, startTaskTag, MPI_COMM_WORLD);
+            MPI_Send(&nextTaskId, 1, MPI_INT, workerId, START_TASK_TAG, MPI_COMM_WORLD);
             assigned.insert(nextTaskId);
         }
     }
 
     // Shutdown
     for (int workerId = 1; workerId < size; ++workerId) {
-        MPI_Send(&shutdown, 1, MPI_INT, workerId, startTaskTag, this->comm);
+        MPI_Send(&shutdown, 1, MPI_INT, workerId, START_TASK_TAG, this->comm);
     } 
     
     return results;

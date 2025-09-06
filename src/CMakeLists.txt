@@ -17,6 +17,7 @@ set(SRCS
    CmdLineArgParser.cpp
    )
 set(HEADERS
+   Tags.h
    DistDataCollector.h
    SeapodymCohortDependencyAnalyzer.h
    TaskStepManager.h

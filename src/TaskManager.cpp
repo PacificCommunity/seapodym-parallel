@@ -1,4 +1,5 @@
 #include "TaskManager.h"
+#include "Tags.h"
 
 TaskManager::TaskManager(MPI_Comm comm, int numTasks) {
 
@@ -9,7 +10,6 @@ TaskManager::TaskManager(MPI_Comm comm, int numTasks) {
 std::map<int, int>
 TaskManager::run() const {
 
-    const int startTaskTag = 1;
     const int shutdown = -1;
     int size;
     int ier = MPI_Comm_size(this->comm, &size);
@@ -20,7 +20,7 @@ TaskManager::run() const {
     // initial distribution of tasks
     for (int rank = 1; rank < numWorkers + 1; ++rank) {
         if (task_id >= 0 && task_id <= this->numTasks) {
-            ier = MPI_Send(&task_id, 1, MPI_INT, rank, startTaskTag, this->comm);
+            ier = MPI_Send(&task_id, 1, MPI_INT, rank, START_TASK_TAG, this->comm);
             ++task_id;
         }  
     }
@@ -35,7 +35,7 @@ TaskManager::run() const {
         results.insert( std::pair<int, int>(taskId, res) );
 
         // send the next task
-        ier = MPI_Send(&task_id, 1, MPI_INT, status.MPI_SOURCE, startTaskTag, this->comm);
+        ier = MPI_Send(&task_id, 1, MPI_INT, status.MPI_SOURCE, START_TASK_TAG, this->comm);
 
         ++task_id;
     }
@@ -49,7 +49,7 @@ TaskManager::run() const {
         results.insert( std::pair<int, int>(taskId, res) );
 
         // send shutdown signal
-        ier = MPI_Send(&shutdown, 1, MPI_INT, status.MPI_SOURCE, startTaskTag, this->comm);
+        ier = MPI_Send(&shutdown, 1, MPI_INT, status.MPI_SOURCE, START_TASK_TAG, this->comm);
     }
 
     return results;
