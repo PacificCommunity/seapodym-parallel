@@ -12,11 +12,13 @@ nd="20000"
 nw=$((SLURM_NTASKS - 1))
 nt=$((nw * 2))
 echo "Number of workers: $nw number of time steps: $nt"
-echo "speedup,ideal" > resultsNw${nw}.csv
+csvfile="resultsNw${nw}_nm${nm}_nd${nd}.csv"
+echo "speedup,ideal" > $csvfile
 for i in {0..9}; do
-    echo "Running @CMAKE_BINARY_DIR@/tests/testTaskStepFarmingCohort -na $nw -nt $nt >& logNw${nw}_${i}.txt"
-    srun @CMAKE_BINARY_DIR@/tests/testTaskStepFarmingCohort -na $nw -nt $nt -nm $nm -nd $nd >& logNw${nw}_${i}.txt
-    speedup=$(cat logNw${nw}_${i}.txt | grep Speedup | awk '{print $5;}')
-    ideal=$(cat logNw${nw}_${i}.txt | grep Speedup | awk '{print $7;}')
-    echo "${speedup},${ideal}" >> resultsNw${nw}.csv
+    resfile="logNw${nw}_nm${nm}_nd${nd}_${i}.txt"
+    echo "Running @CMAKE_BINARY_DIR@/tests/testTaskStepFarmingCohort -na $nw -nt $nt >& $resfile"
+    srun @CMAKE_BINARY_DIR@/tests/testTaskStepFarmingCohort -na $nw -nt $nt -nm $nm -nd $nd >& $resfile
+    speedup=$(cat $resfile | grep Speedup | awk '{print $5;}')
+    ideal=$(cat $resfile | grep Speedup | awk '{print $7;}')
+    echo "${speedup},${ideal}" >> $csvfile
 done
