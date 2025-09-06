@@ -108,9 +108,9 @@ TaskStepManager::run() const {
         }
 
         // (optional) avoid hot-spinning if nothing to do
-        if (active_workers.empty() && assigned.empty()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
+        //if (active_workers.empty() && assigned.empty()) {
+        //    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        //}
     }
 
     // Send stop signal
