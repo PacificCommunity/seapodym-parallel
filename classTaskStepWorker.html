@@ -126,7 +126,7 @@ Public Member Functions</h2></td></tr>
 <p>Constructor </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">comm</td><td>MPI communicator </td></tr>
-    <tr><td class="paramname">taskFunc</td><td>task function takes task_id, stepBeg, stepEnd and the MPI communicator as input arguments. This function should include a call notifying the manager at the end of each step, ie MPI_Send({task_id, step, result}, 3, MPI_INT, managerRank, endTaskTag, comm); </td></tr>
+    <tr><td class="paramname">taskFunc</td><td>task function takes task_id, stepBeg, stepEnd and the MPI communicator as input arguments. This function should include a call notifying the manager at the end of each step, ie MPI_Send({task_id, step, result}, 3, MPI_INT, managerRank, END_TASK_TAG, comm); </td></tr>
     <tr><td class="paramname">stepBegMap</td><td>map of task Id to first step index </td></tr>
     <tr><td class="paramname">stepEndMap</td><td>map of task Id to last step index + 1 </td></tr>
   </table>
