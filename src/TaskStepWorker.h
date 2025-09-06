@@ -39,7 +39,7 @@ class TaskStepWorker {
          * @param taskFunc task function takes task_id, stepBeg, stepEnd and the MPI communicator
          *                 as input arguments. This function should include a call 
          *                 notifying the manager at the end of each step, ie 
-         *                 MPI_Send({task_id, step, result}, 3, MPI_INT, managerRank, endTaskTag, comm);
+         *                 MPI_Send({task_id, step, result}, 3, MPI_INT, managerRank, END_TASK_TAG, comm);
          * @param stepBegMap map of task Id to first step index
          * @param stepEndMap map of task Id to last step index + 1
          */

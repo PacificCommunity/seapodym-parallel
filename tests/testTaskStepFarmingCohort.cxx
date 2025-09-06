@@ -5,15 +5,22 @@
 #include <chrono>
 #include <algorithm>
 #include <cmath>
-#include <cassert>
 #include <CmdLineArgParser.h>
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
 #include "SeapodymCohortDependencyAnalyzer.h"
 #include "DistDataCollector.h"
+#undef NDEBUG
+#include <cassert>
 
-int getChunkId(int task_id, int step, int numAgeGroups) {
-    int row = std::max(0, task_id - numAgeGroups + 1) + step;
+/** 
+ * Return the chunk Id
+ * @param task_id Id of the task (same as cohort Id)
+ * @param step step in the task
+ * @return index
+ */
+int inline getChunkId(int task_id, int step, int numAgeGroups) {
+    int row = task_id + step - numAgeGroups + 1;
     int col = task_id % numAgeGroups;
     return row * numAgeGroups + col;
 }
@@ -27,7 +34,8 @@ int getChunkId(int task_id, int step, int numAgeGroups) {
  * @param comm MPI communicator
  * @param ms Sleep # milliseconds
  */
-void taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
+void inline 
+taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
     int ms, int numAgeGroups, int numData, 
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap) {
@@ -183,6 +191,21 @@ int main(int argc, char** argv) {
         TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
         worker.run();
 
+    }
+
+    // Do we need this?
+    //MPI_Barrier(MPI_COMM_WORLD);
+
+    if (workerId == 0) {
+        double* data = dataCollect.getCollectedDataPtr();
+        int numSize = dataCollect.getNumSize();
+        double checksum = 0;
+        for (auto chunk = 0; chunk < dataCollect.getNumChunks(); ++chunk) {\
+            for (auto i = 0; i < numSize; ++i) {
+                checksum += data[chunk*numSize + i];
+            }
+        }
+        std::cout << "\nchecksum: " << checksum << std::endl;
     }
 
     dataCollect.free();
