@@ -50,7 +50,7 @@ TaskStepManager::run() const {
 
         MPI_Status status;
 
-        // Drain all step-complete messages (tag 1)
+        // Drain all step-complete messages (tag END_TASK_TAG)
         while (true) {
 
             int flag = 0;
@@ -96,7 +96,7 @@ TaskStepManager::run() const {
             }
         }
 
-        // Drain all worker-available messages (tag 2)
+        // Drain all worker-available messages (tag WORKER_AVAILABLE_TAG)
         for (int worker = 1; worker < size; ++worker) {
             int flag = 0;
             MPI_Iprobe(worker, WORKER_AVAILABLE_TAG, this->comm, &flag, &status);
