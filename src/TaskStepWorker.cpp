@@ -10,37 +10,62 @@ TaskStepWorker::TaskStepWorker(MPI_Comm comm,
     this->stepBegMap = stepBegMap;
     this->stepEndMap = stepEndMap;
 }
-        
-void
-TaskStepWorker::run() const {
 
-    const int manager_rank = 0;
+void TaskStepWorker::run() const {
+    const int managerRank = 0;
     int workerId;
     MPI_Comm_rank(this->comm, &workerId);
 
-    const int managerRank = 0;
-
     while (true) {
-
-        // Get the task_id to operate on
         int task_id;
         MPI_Recv(&task_id, 1, MPI_INT, managerRank, START_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
 
-        if (task_id == -1) {
-            // Shutdown
-            break;
-        }
+        if (task_id == -1) break; // shutdown
 
         int stepBeg = this->stepBegMap.at(task_id);
         int stepEnd = this->stepEndMap.at(task_id);
 
-        // Perform the task, which includes stepping from stepBeg to stepEnd - 1.
-        // This function should notify the manager at the end of each step
+        // Perform the task
         this->taskFunc(task_id, stepBeg, stepEnd, this->comm);
 
-        // Notify the manager that this worker is available again
+        // Nonblocking notify manager
         int done = 1;
-        MPI_Send(&done, 1, MPI_INT, managerRank, WORKER_AVAILABLE_TAG, MPI_COMM_WORLD);
+        MPI_Request req;
+        MPI_Isend(&done, 1, MPI_INT, managerRank, WORKER_AVAILABLE_TAG, MPI_COMM_WORLD, &req);
+        MPI_Request_free(&req); // worker doesn't need to wait
     }
- 
 }
+        
+// void
+// TaskStepWorker::run() const {
+
+//     const int manager_rank = 0;
+//     int workerId;
+//     MPI_Comm_rank(this->comm, &workerId);
+
+//     const int managerRank = 0;
+
+//     while (true) {
+
+//         // Get the task_id to operate on
+//         int task_id;
+//         MPI_Recv(&task_id, 1, MPI_INT, managerRank, START_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
+
+//         if (task_id == -1) {
+//             // Shutdown
+//             break;
+//         }
+
+//         int stepBeg = this->stepBegMap.at(task_id);
+//         int stepEnd = this->stepEndMap.at(task_id);
+
+//         // Perform the task, which includes stepping from stepBeg to stepEnd - 1.
+//         // This function should notify the manager at the end of each step
+//         this->taskFunc(task_id, stepBeg, stepEnd, this->comm);
+
+//         // Notify the manager that this worker is available again
+//         int done = 1;
+//         MPI_Send(&done, 1, MPI_INT, managerRank, WORKER_AVAILABLE_TAG, MPI_COMM_WORLD);
+//     }
+ 
+// }

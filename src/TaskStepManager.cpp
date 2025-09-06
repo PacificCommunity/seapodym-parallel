@@ -67,7 +67,7 @@ TaskStepManager::run() const {
             results.insert(output);
             int task_id = output[0];
             int step = output[1];
-            completed.insert(std::array<int,2>{task_id, step});
+            completed.insert(std::array<int, 2>{task_id, step});
 
             if (step == this->stepEndMap.at(task_id) - 1) {
                 assigned.erase(task_id);
@@ -81,10 +81,12 @@ TaskStepManager::run() const {
             bool ready = true;
             for (auto& dep : deps) {
                 if (completed.find(dep) == completed.end()) {
+                    // this task has a dependency on a task/step that has not yet completed
                     ready = false;
                     break;
                 }
             }
+            // task is ready to be executed. Are there any workers available?
             if (ready && !active_workers.empty()) {
                 int worker = *active_workers.begin();
                 active_workers.erase(worker);
@@ -92,6 +94,7 @@ TaskStepManager::run() const {
                 assigned.insert(task_id);
                 it = task_queue.erase(it);
             } else {
+                // next task
                 ++it;
             }
         }
