@@ -12,7 +12,8 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
       const std::map<int, int>& stepBegMap, 
       const std::map<int, int>& stepEndMap,
       const std::map<int, std::set<dep_type>>& dependencyMap,
-      DistDataCollector* dataCollect) {
+      DistDataCollector* dataCollect,
+    const std::map< std::array<int, 2>, int >& chunkIdMap) {
 
     this->comm = comm;
     this->numTasks = numTasks;
@@ -20,6 +21,7 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
     this->stepEndMap = stepEndMap;
     this->deps = dependencyMap;
     this->dataCollect = dataCollect;
+    this->chunkIdMap = chunkIdMap;
 }
 
 std::set< std::array<int, 3> >
@@ -48,33 +50,67 @@ TaskStepManager::run() const {
         active_workers.insert(i);
     }
 
+    MPI_Status status;
+    double* managerData = this->dataCollect->getCollectedDataPtr();
+    int numData = this->dataCollect->getNumSize();
+
     while (!task_queue.empty() || !assigned.empty()) {
 
-        MPI_Status status;
 
-        // Drain all step-complete messages (tag END_TASK_TAG)
-        while (true) {
 
-            int flag = 0;
-            // Probe for messages from workers
-            MPI_Iprobe(MPI_ANY_SOURCE, END_TASK_TAG, this->comm, &flag, &status);
-            if (!flag) {
-                // not an end task message
-                break;
-            }
+        // Check for newly completed steps by scanning the managerData array
+        for (int task_id = 0; task_id < this->numTasks; ++task_id) {
+            for (int step = this->stepBegMap.at(task_id);
+                     step < this->stepEndMap.at(task_id); ++step) {
 
-            MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, END_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
+                std::array<int,2> key{task_id, step};
+                if (completed.find(key) != completed.end()) {
+                    continue; // already marked
+                }
 
-            // Store the result
-            results.insert(output);
-            int task_id = output[0];
-            int step = output[1];
-            completed.insert(std::array<int,2>{task_id, step});
+                int chunk_id = this->chunkIdMap.at(key);
+                double lastVal = managerData[chunk_id * numData + (numData - 1)];
+                if (lastVal != this->dataCollect->BAD_VALUE) {
+                    // Step is done
+                    completed.insert(key);
+                    results.insert({task_id, step, /*success*/ 1});
 
-            if (step == this->stepEndMap.at(task_id) - 1) {
-                assigned.erase(task_id);
+                    if (step == this->stepEndMap.at(task_id) - 1) {
+                        assigned.erase(task_id);
+                    }
+                }
             }
         }
+
+
+
+        // // Drain all step-complete messages (tag END_TASK_TAG)
+        // while (true) {
+
+        //     int flag = 0;
+        //     // Probe for messages from workers
+        //     MPI_Iprobe(MPI_ANY_SOURCE, END_TASK_TAG, this->comm, &flag, &status);
+        //     if (!flag) {
+        //         // not an end task message
+        //         break;
+        //     }
+
+        //     MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, END_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
+
+        //     // Store the result
+        //     results.insert(output);
+        //     int task_id = output[0];
+        //     int step = output[1];
+        //     completed.insert(std::array<int,2>{task_id, step});
+
+        //     if (step == this->stepEndMap.at(task_id) - 1) {
+        //         assigned.erase(task_id);
+        //     }
+        // }
+
+
+
+
 
         // Assign ready tasks to any available worker
         for (auto it = task_queue.begin(); it != task_queue.end();) {

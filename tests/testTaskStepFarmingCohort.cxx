@@ -77,10 +77,10 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // E.g.
         int success = task_id;
 
-        // Notify the manager at the end of each step
-        int output[3] = {task_id, step, success};
-        const int endTaskTag = 1;
-        MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
+        // // Notify the manager at the end of each step
+        // int output[3] = {task_id, step, success};
+        // const int endTaskTag = 1;
+        // MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
     }
 }
 
@@ -143,6 +143,15 @@ int main(int argc, char** argv) {
     int numChunks = numAgeGroups * numTimeSteps;
     DistDataCollector dataCollect(MPI_COMM_WORLD, numChunks, numData);
 
+    // set up the task_id, step -> chunkId map
+    std::map< std::array<int, 2>, int > chunkIdMap;
+    for (auto task_id = 0; task_id < numCohorts; ++task_id) {
+        for (auto step = stepBegMap.at(task_id); step < stepEndMap.at(task_id); ++step) {
+            int chunkId = getChunkId(task_id, step, numAgeGroups);
+            chunkIdMap.insert( std::pair< std::array<int, 2>, int >({task_id, step}, chunkId));
+        }
+    }
+
     // workers expect a function that takes a 4 arguments. We bind the last
     // argument to milliseconds
     auto taskFunc = std::bind(taskFunction, 
@@ -161,7 +170,8 @@ int main(int argc, char** argv) {
         // Manager
         
         // note: the number of tasks is the number of cohorts
-        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap, &dataCollect);
+        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, 
+            dependencyMap, &dataCollect, chunkIdMap);
 
         double tic = MPI_Wtime();
 
@@ -180,7 +190,7 @@ int main(int argc, char** argv) {
         assert(numTotalSteps == numCohortSteps);
         for (auto [taskId, step, res] : results) {
             // in this test we return the task_id when we're finished
-            assert(taskId == res);
+            assert(res == 1);
         }
 
         std::cout << "Success\n";
@@ -208,6 +218,7 @@ int main(int argc, char** argv) {
         std::cout << "\nchecksum: " << checksum << std::endl;
     }
 
+    std::cerr << "[" << workerId << "] freeing dataCollect...\n";
     dataCollect.free();
     
     // Clean up

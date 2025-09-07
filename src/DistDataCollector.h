@@ -33,7 +33,7 @@ class DistDataCollector {
         public:
 
         // initial values
-        const double BAD_VALUE = std::numeric_limits<double>::quiet_NaN();
+        const double BAD_VALUE = -941985634678467.; //std::numeric_limits<double>::quiet_NaN();
 
     /**
      * @brief Constructor

@@ -52,6 +52,9 @@ class TaskStepManager {
         // data collector
         DistDataCollector* dataCollect;
 
+        // (task_id, step) -> chunk_id map
+        std::map< std::array<int, 2>, int > chunkIdMap;
+
     public:
 
         /**
@@ -62,12 +65,14 @@ class TaskStepManager {
          * @param stepEndMap taskId -> last step + 1 map
          * @param dependencyMap map of task dependencies {taskId: {taskId, step}, ...}
          * @param dataCollect pointer to a DistDataCollector instance
+         * @param chunkIdMap (task_id, step) -> chunkId map
          */
         TaskStepManager(MPI_Comm comm, int numTasks, 
             const std::map<int, int>& stepBegMap,
             const std::map<int, int>& stepEndMap,
             const std::map<int, std::set<dep_type> >& dependencyMap,
-            DistDataCollector* dataCollect);
+            DistDataCollector* dataCollect,
+            const std::map< std::array<int, 2>, int >& chunkIdMap);
 
         /**
          * Run the manager
