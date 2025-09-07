@@ -5,6 +5,7 @@
 #include <chrono>
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <CmdLineArgParser.h>
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
@@ -215,7 +216,7 @@ int main(int argc, char** argv) {
                 checksum += data[chunk*numSize + i];
             }
         }
-        std::cout << "\nchecksum: " << checksum << std::endl;
+        printf("\nchecksum: %.0lf\n", checksum);
     }
 
     std::cerr << "[" << workerId << "] freeing dataCollect...\n";
