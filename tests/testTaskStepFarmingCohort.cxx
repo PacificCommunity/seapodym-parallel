@@ -77,11 +77,6 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
 
         // E.g.
         int success = task_id;
-
-        // // Notify the manager at the end of each step
-        // int output[3] = {task_id, step, success};
-        // const int endTaskTag = 1;
-        // MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
     }
 }
 

@@ -82,36 +82,6 @@ TaskStepManager::run() const {
             }
         }
 
-
-
-        // // Drain all step-complete messages (tag END_TASK_TAG)
-        // while (true) {
-
-        //     int flag = 0;
-        //     // Probe for messages from workers
-        //     MPI_Iprobe(MPI_ANY_SOURCE, END_TASK_TAG, this->comm, &flag, &status);
-        //     if (!flag) {
-        //         // not an end task message
-        //         break;
-        //     }
-
-        //     MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, END_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
-
-        //     // Store the result
-        //     results.insert(output);
-        //     int task_id = output[0];
-        //     int step = output[1];
-        //     completed.insert(std::array<int,2>{task_id, step});
-
-        //     if (step == this->stepEndMap.at(task_id) - 1) {
-        //         assigned.erase(task_id);
-        //     }
-        // }
-
-
-
-
-
         // Assign ready tasks to any available worker
         for (auto it = task_queue.begin(); it != task_queue.end();) {
             int task_id = *it;
