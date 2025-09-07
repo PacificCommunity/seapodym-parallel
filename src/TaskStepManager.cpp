@@ -11,13 +11,15 @@
 TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
       const std::map<int, int>& stepBegMap, 
       const std::map<int, int>& stepEndMap,
-      const std::map<int, std::set<dep_type>>& dependencyMap) {
+      const std::map<int, std::set<dep_type>>& dependencyMap,
+      DistDataCollector* dataCollect) {
 
     this->comm = comm;
     this->numTasks = numTasks;
     this->stepBegMap = stepBegMap;
     this->stepEndMap = stepEndMap;
     this->deps = dependencyMap;
+    this->dataCollect = dataCollect;
 }
 
 std::set< std::array<int, 3> >

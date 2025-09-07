@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
         // Manager
         
         // note: the number of tasks is the number of cohorts
-        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap);
+        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap, &dataCollect);
 
         double tic = MPI_Wtime();
 

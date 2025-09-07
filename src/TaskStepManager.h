@@ -2,6 +2,7 @@
 #include <map>
 #include <set>
 #include <array>
+#include "DistDataCollector.h"
 
 #ifndef TASK_DEPENDENCY_MANAGER
 #define TASK_DEPENDENCY_MANAGER
@@ -48,6 +49,9 @@ class TaskStepManager {
         // dependencies
         std::map<int, std::set<dep_type> > deps;
 
+        // data collector
+        DistDataCollector* dataCollect;
+
     public:
 
         /**
@@ -57,11 +61,13 @@ class TaskStepManager {
          * @param stepBegMap taskId -> first step map
          * @param stepEndMap taskId -> last step + 1 map
          * @param dependencyMap map of task dependencies {taskId: {taskId, step}, ...}
+         * @param dataCollect pointer to a DistDataCollector instance
          */
         TaskStepManager(MPI_Comm comm, int numTasks, 
             const std::map<int, int>& stepBegMap,
             const std::map<int, int>& stepEndMap,
-            const std::map<int, std::set<dep_type> >& dependencyMap);
+            const std::map<int, std::set<dep_type> >& dependencyMap,
+            DistDataCollector* dataCollect);
 
         /**
          * Run the manager
