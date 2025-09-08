@@ -44,6 +44,15 @@ DistDataCollector::put(int chunkId, const double* data) {
     MPI_Win_unlock(0, this-> win);
 }
 
+void
+DistDataCollector::putAsync(int chunkId, const double* data) {
+
+    // Put local_data into the appropriate slice on rank 0
+    MPI_Put(data, this->numSize, MPI_DOUBLE,
+                0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+}
+
+
 std::vector<double>
 DistDataCollector::get(int chunkId) {
 
@@ -74,6 +83,13 @@ DistDataCollector::get(int chunkId, double* buffer) {
                 0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
 
     // Synchronize after RMA operations
-    MPI_Win_unlock(0, this-> win);
+    MPI_Win_unlock(0, this->win);
 }
 
+void
+DistDataCollector::getAsync(int chunkId, double* buffer) {
+
+    // Get the appropriate slice from rank 0
+    MPI_Get(buffer, this->numSize, MPI_DOUBLE,
+                0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+}

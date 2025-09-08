@@ -27,10 +27,10 @@ class DistDataCollector {
         // the array that collects the data of size numChunks * numSize on rank 0
         double* collectedData;
         
+        public:
+
         // MPI window for remote memory access
         MPI_Win win;
-
-        public:
 
         // initial values
         const double BAD_VALUE = std::numeric_limits<double>::quiet_NaN();
@@ -57,6 +57,14 @@ class DistDataCollector {
     void put(int chunkId, const double* data);
 
     /**
+     * @brief Put the local data into the collected array 
+     * @param chunkId Leading index in the collected array
+     * @param data Pointer to the local data to inject  
+     * @note this should be executed on the source process, typically on the worker
+     */
+    void putAsync(int chunkId, const double* data);
+
+    /**
      * @brief Get a slice of the remote, collected array to the local worker
      * @param chunkId Leading index in the collected array
      * @return data array 
@@ -71,6 +79,14 @@ class DistDataCollector {
      * @note this should be executed on the source process, typically on the worker
      */
     void get(int chunkId, double* buffer);
+
+    /**
+     * @brief Get a slice of the remote, collected array to the local worker
+     * @param chunkId Leading index in the collected array
+     * @param buffer will hold the fetched data
+     * @note this should be executed on the source process, typically on the worker
+     */
+    void getAsync(int chunkId, double* buffer);
 
     /**
      * Get the pointer to the collected data

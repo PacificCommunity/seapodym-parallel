@@ -1,6 +1,7 @@
 #include <mpi.h>
 #include <iostream>
 #include <functional>
+#include <numeric> // accumulate
 #include <thread>
 #include <chrono>
 #include <algorithm>
@@ -41,33 +42,62 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap) {
 
+    std::vector<double> buffer(numAgeGroups * numData);
+
     std::vector<double> localData(numData);
     std::vector<double> data(numData);
+
+    int rank;
+    MPI_Comm_rank(comm, &rank);
+
+    MPI_Win_lock_all(0, dataCollector->win);
 
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
 
         // Fetch the data needed to create this cohort from the manager
         // and sum them up
-        std::fill(localData.begin(), localData.end(), 0.0);
+        //std::fill(localData.begin(), localData.end(), 0.0);
+
+        int count = 0;
+
+        //MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, dataCollector->win);
+        //MPI_Win_lock_all(0, dataCollector->win);
 
         for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
 
             int chunk_id = getChunkId(task_id2, step, numAgeGroups);
 
             // fetch the data
-            dataCollector->get(chunk_id, data.data());
+            //dataCollector->get(chunk_id, data.data());
+            //MPI_Get(&buffer[count * numData], numData, MPI_DOUBLE,
+            // 0, chunk_id * numData, numData, MPI_DOUBLE, dataCollector->win);
+            dataCollector->getAsync(chunk_id, &buffer[count * numData]);
+            
+            count += 1;
 
-            // check that the data are valid
-            if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
-                // The data have not been previously populated. This could indicate that
-                // the worker has not yet produced any output for this cohort or the manager
-                // has not yet received the data.
-                MPI_Abort(comm, 1);
-            }
+            // // check that the data are valid
+            // if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
+            //     // The data have not been previously populated. This could indicate that
+            //     // the worker has not yet produced any output for this cohort or the manager
+            //     // has not yet received the data.
+            //     MPI_Abort(comm, 1);
+            // }
+
             // sum up the cohort data at the previous time step
-            std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
+            //std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
         }
+
+        //MPI_Win_unlock(0, dataCollector->win);
+        //MPI_Win_unlock_all(dataCollector->win);
+
+        // Ensure all gets for this step are locally complete before using buffer
+        MPI_Win_flush(0, dataCollector->win);
+
+        //double checksum = std::accumulate(localData.begin(), localData.end(), 0.0);
+        double checksum = std::accumulate(buffer.begin(), buffer.end(), 0.0);
+        std::cerr << "[" << rank << "] task id: " << task_id << " checksum: " << checksum << '\n';
+
 
 
         // Perform the work, just sleeping here zzzzzzz
@@ -80,7 +110,10 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // collected row by row. The entry into the collected 
         // array is at index chunk_id.
         int chunk_id = getChunkId(task_id, step, numAgeGroups);
-        dataCollector->put(chunk_id, localData.data());
+        dataCollector->putAsync(chunk_id, localData.data());
+
+        // Ensure put is complete
+        MPI_Win_flush(0, dataCollector->win);
 
         // E.g.
         int success = task_id;
@@ -90,6 +123,8 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         const int endTaskTag = 1;
         MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
     }
+
+    MPI_Win_unlock_all(dataCollector->win);
 }
 
 int main(int argc, char** argv) {
