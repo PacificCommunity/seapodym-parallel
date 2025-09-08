@@ -27,10 +27,10 @@ class DistDataCollector {
         // the array that collects the data of size numChunks * numSize on rank 0
         double* collectedData;
         
+        public:
+
         // MPI window for remote memory access
         MPI_Win win;
-
-        public:
 
         // initial values
         const double BAD_VALUE = -941985634678467.; //std::numeric_limits<double>::quiet_NaN();

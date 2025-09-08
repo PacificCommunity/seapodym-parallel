@@ -16,6 +16,8 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) 
 
     // Allocate and create the window, zero size on other ranks than 0
     MPI_Aint winSize = (rank == 0) ? (numChunks * numSize * sizeof(double)) : 0;
+
+    std::cerr << "DEBUG: winSize = " <<  winSize << " numChunks = " << numChunks << " numSize = " << numSize << '\n';
     MPI_Win_allocate(winSize, sizeof(double), MPI_INFO_NULL,
                         comm, &this->collectedData, &this->win);
 
@@ -34,7 +36,7 @@ DistDataCollector::put(int chunkId, const double* data) {
 
     // Synchronize before RMA operation. Each rank will write
     // disjoint pieces of data, so we can use shared locks
-    MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
+    MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, this->win);
 
     // Put local_data into the appropriate slice on rank 0
     MPI_Put(data, this->numSize, MPI_DOUBLE,
