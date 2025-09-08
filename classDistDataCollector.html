@@ -96,6 +96,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a118faa1333cae78fa6ec862638d11389"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the local data into the collected array.  <br /></td></tr>
 <tr class="memitem:a182a20ab1ace0a73bbad1e25753661db" id="r_a182a20ab1ace0a73bbad1e25753661db"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a182a20ab1ace0a73bbad1e25753661db">get</a> (int chunkId)</td></tr>
 <tr class="memdesc:a182a20ab1ace0a73bbad1e25753661db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a slice of the remote, collected array to the local worker.  <br /></td></tr>
+<tr class="memitem:af023a167441c0cf51629fbcf67803fb4" id="r_af023a167441c0cf51629fbcf67803fb4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af023a167441c0cf51629fbcf67803fb4">get</a> (int chunkId, double *buffer)</td></tr>
+<tr class="memdesc:af023a167441c0cf51629fbcf67803fb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a slice of the remote, collected array to the local worker.  <br /></td></tr>
 <tr class="memitem:a1f38912a18c0150e7828668a6bf62d57" id="r_a1f38912a18c0150e7828668a6bf62d57"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f38912a18c0150e7828668a6bf62d57">getCollectedDataPtr</a> ()</td></tr>
 <tr class="memitem:aa6537a314c706a06004f3d47c2016b09" id="r_aa6537a314c706a06004f3d47c2016b09"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6537a314c706a06004f3d47c2016b09">getNumChunks</a> () const</td></tr>
 <tr class="memitem:a17446d432f5982ccc125ec4d3a162b0d" id="r_a17446d432f5982ccc125ec4d3a162b0d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17446d432f5982ccc125ec4d3a162b0d">getNumSize</a> () const</td></tr>
@@ -157,7 +159,7 @@ const double&#160;</td><td class="memItemRight" valign="bottom"><b>BAD_VALUE</b>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a182a20ab1ace0a73bbad1e25753661db" name="a182a20ab1ace0a73bbad1e25753661db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a182a20ab1ace0a73bbad1e25753661db">&#9670;&#160;</a></span>get()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a182a20ab1ace0a73bbad1e25753661db">&#9670;&#160;</a></span>get() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -179,6 +181,37 @@ const double&#160;</td><td class="memItemRight" valign="bottom"><b>BAD_VALUE</b>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>data array </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>this should be executed on the source process, typically on the worker </dd></dl>
+
+</div>
+</div>
+<a id="af023a167441c0cf51629fbcf67803fb4" name="af023a167441c0cf51629fbcf67803fb4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af023a167441c0cf51629fbcf67803fb4">&#9670;&#160;</a></span>get() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DistDataCollector::get </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>chunkId</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>buffer</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get a slice of the remote, collected array to the local worker. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">chunkId</td><td>Leading index in the collected array </td></tr>
+    <tr><td class="paramname">buffer</td><td>will hold the fetched data </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section note"><dt>Note</dt><dd>this should be executed on the source process, typically on the worker </dd></dl>
 
 </div>
