@@ -42,15 +42,17 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap) {
 
     std::vector<double> localData(numData);
-     std::vector<double> data(numData);
+    std::vector<double> data(numData);
 
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
 
         // Fetch the data needed to create this cohort from the manager
         // and sum them up
-        std::vector<double> initData(numData, 0.0);
+        std::fill(localData.begin(), localData.end(), 0.0);
+
         for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
+
             int chunk_id = getChunkId(task_id2, step, numAgeGroups);
 
             // fetch the data
@@ -64,8 +66,9 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
                 MPI_Abort(comm, 1);
             }
             // sum up the cohort data at the previous time step
-            std::transform(data.begin(), data.end(), initData.begin(), initData.begin(), std::plus<double>());
+            std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
         }
+
 
         // Perform the work, just sleeping here zzzzzzz
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
