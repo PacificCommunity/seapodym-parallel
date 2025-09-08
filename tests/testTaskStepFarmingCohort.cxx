@@ -45,13 +45,8 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     std::vector<double> data(numData);
     int rc;
 
+    // start an long lived epoch, ideal if there are lots of steps
     rc = MPI_Win_lock_all(0, dataCollector->win);
-    if (rc != MPI_SUCCESS) {
-        char err[256]; int len; MPI_Error_string(rc, err, &len);
-        fprintf(stderr,"lock_all failed: %s\n", err); MPI_Abort(comm, rc);
-    } else {
-        std::cerr << " MPI_Win_lock_all: rc = " << rc << " should be " << MPI_SUCCESS << '\n';
-    }
 
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
@@ -63,18 +58,11 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
             int chunk_id = getChunkId(task_id2, step, numAgeGroups);
             
             //std::vector<double> data = dataCollector->get(chunk_id);
-
             // Get the appropriate slice from rank 0
-    
-            MPI_Get(data.data(), numData, MPI_DOUBLE,
+            rc = MPI_Get(data.data(), numData, MPI_DOUBLE,
                 0, chunk_id * numData, numData, MPI_DOUBLE, dataCollector->win);
         
             rc = MPI_Win_flush(0, dataCollector->win); // ensures manager sees this step
-            if (rc != MPI_SUCCESS) {
-                char err[256]; int len; MPI_Error_string(rc, err, &len);
-                fprintf(stderr, "MPI_Win_flush failed: %s\n", err);
-                MPI_Abort(comm, rc);
-            }
                  
 
             // check that the data are valid
@@ -99,42 +87,18 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // array is at index chunk_id.
         int chunkId = getChunkId(task_id, step, numAgeGroups);
 
-        // Synchronize before RMA operation. Each rank will write
-        // disjoint pieces of data, so we can use shared locks
-        //MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, dataCollector->win);
-
+        //dataCollector->put(chunkId, localData.data());
          // Put local_data into the appropriate slice on rank 0
-        std::cerr << "DEBUG: numData = " << numData << " chunkId = " << chunkId << '\n';
         rc = MPI_Put(localData.data(), numData, MPI_DOUBLE,
                     0, 
                     chunkId * numData, numData, 
                     MPI_DOUBLE, dataCollector->win);
-        if (rc != MPI_SUCCESS) {
-            char err[256]; int len; MPI_Error_string(rc, err, &len);
-            fprintf(stderr, "MPI_Put failed: %s\n",
-            err);
-            MPI_Abort(comm, rc);
-        }
 
         rc = MPI_Win_flush(0, dataCollector->win); // ensures manager sees this step
-        if (rc != MPI_SUCCESS) {
-            char err[256]; int len; MPI_Error_string(rc, err, &len);
-            fprintf(stderr, "MPI_Win_flush failed: %s\n", err);
-            MPI_Abort(comm, rc);
-        }
-        //MPI_Win_unlock(0, dataCollector->win);
 
-        //dataCollector->put(chunkId, localData.data());
-
-        // E.g.
-        //int success = task_id;
     }
     // Synchronize after RMA operations
     rc = MPI_Win_unlock_all(dataCollector->win);
-    if (rc != MPI_SUCCESS) {
-        fprintf(stderr, "ERROR: MPI_Win_unlock_all\n");
-        MPI_Abort(comm, rc);
-    }
 
 }
 
