@@ -42,6 +42,7 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap) {
 
+    // Array contains all the inital data contributions from all the step preceding cohorts
     std::vector<double> buffer(numAgeGroups * numData);
 
     std::vector<double> localData(numData);
@@ -50,55 +51,32 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     int rank;
     MPI_Comm_rank(comm, &rank);
 
+    // Start an epoch... The Get/Put calls are asynchronous
     MPI_Win_lock_all(0, dataCollector->win);
 
-    // step through...
+    // Step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
 
-        // Fetch the data needed to create this cohort from the manager
-        // and sum them up
-        //std::fill(localData.begin(), localData.end(), 0.0);
-
+        // index into the buffer array
         int count = 0;
 
-        //MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, dataCollector->win);
-        //MPI_Win_lock_all(0, dataCollector->win);
-
+        // iterate over the dependencies
         for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
 
             int chunk_id = getChunkId(task_id2, step, numAgeGroups);
 
             // fetch the data
-            //dataCollector->get(chunk_id, data.data());
-            //MPI_Get(&buffer[count * numData], numData, MPI_DOUBLE,
-            // 0, chunk_id * numData, numData, MPI_DOUBLE, dataCollector->win);
             dataCollector->getAsync(chunk_id, &buffer[count * numData]);
             
+            // update the index into the buffer
             count += 1;
-
-            // // check that the data are valid
-            // if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
-            //     // The data have not been previously populated. This could indicate that
-            //     // the worker has not yet produced any output for this cohort or the manager
-            //     // has not yet received the data.
-            //     MPI_Abort(comm, 1);
-            // }
-
-            // sum up the cohort data at the previous time step
-            //std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
         }
 
-        //MPI_Win_unlock(0, dataCollector->win);
-        //MPI_Win_unlock_all(dataCollector->win);
-
         // Ensure all gets for this step are locally complete before using buffer
+        // assume the worker needs the data from now on...
         MPI_Win_flush(0, dataCollector->win);
-
-        //double checksum = std::accumulate(localData.begin(), localData.end(), 0.0);
-        double checksum = std::accumulate(buffer.begin(), buffer.end(), 0.0);
-        std::cerr << "[" << rank << "] task id: " << task_id << " checksum: " << checksum << '\n';
-
-
+        // double checksum = std::accumulate(buffer.begin(), buffer.end(), 0.0);
+        // std::cerr << "[" << rank << "] task id: " << task_id << " checksum: " << checksum << '\n';
 
         // Perform the work, just sleeping here zzzzzzz
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
@@ -112,8 +90,8 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         int chunk_id = getChunkId(task_id, step, numAgeGroups);
         dataCollector->putAsync(chunk_id, localData.data());
 
-        // Ensure put is complete
-        MPI_Win_flush(0, dataCollector->win);
+        // Ensure put is complete, it may or may not be necessary
+        //MPI_Win_flush(0, dataCollector->win);
 
         // E.g.
         int success = task_id;
@@ -124,6 +102,7 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
     }
 
+    // End the epoch
     MPI_Win_unlock_all(dataCollector->win);
 }
 
