@@ -45,7 +45,8 @@ class TaskStepWorker {
          */
         TaskStepWorker(MPI_Comm comm, 
             std::function<void(int, int, int, MPI_Comm)> taskFunc, 
-            std::map<int, int> stepBegMap, std::map<int, int> stepEndMap);
+            const std::map<int, int>& stepBegMap,
+            const std::map<int, int>& stepEndMap);
 
         /**
          * Run the tasks assigned by the TaskManager
