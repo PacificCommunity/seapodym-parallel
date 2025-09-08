@@ -42,6 +42,7 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap) {
 
     std::vector<double> localData(numData);
+     std::vector<double> data(numData);
 
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
@@ -51,7 +52,10 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         std::vector<double> initData(numData, 0.0);
         for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
             int chunk_id = getChunkId(task_id2, step, numAgeGroups);
-            std::vector<double> data = dataCollector->get(chunk_id);
+
+            // fetch the data
+            dataCollector->get(chunk_id, data.data());
+
             // check that the data are valid
             if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
                 // The data have not been previously populated. This could indicate that

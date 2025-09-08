@@ -61,3 +61,19 @@ DistDataCollector::get(int chunkId) {
 
     return data;
 }
+
+void
+DistDataCollector::get(int chunkId, double* buffer) {
+
+    // Synchronize before RMA operation. Each rank will read
+    // disjoint pieces of data, so we can use shared locks
+    MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
+
+    // Get the appropriate slice from rank 0
+    MPI_Get(buffer, this->numSize, MPI_DOUBLE,
+                0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+
+    // Synchronize after RMA operations
+    MPI_Win_unlock(0, this-> win);
+}
+

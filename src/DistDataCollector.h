@@ -65,6 +65,14 @@ class DistDataCollector {
     std::vector<double> get(int chunkId);
 
     /**
+     * @brief Get a slice of the remote, collected array to the local worker
+     * @param chunkId Leading index in the collected array
+     * @param buffer will hold the fetched data
+     * @note this should be executed on the source process, typically on the worker
+     */
+    void get(int chunkId, double* buffer);
+
+    /**
      * Get the pointer to the collected data
      * @return pointer
      * @note this returns a null pointer on ranks other than 0
