@@ -71,7 +71,7 @@ TaskStepManager::run() const {
                 int chunk_id = this->chunkIdMap.at(key);
 
                 // ensure local window is up to date
-                MPI_Win_sync(dataCollect->win);
+                //MPI_Win_sync(dataCollect->win);
                 
                 double lastVal = managerData[chunk_id * numData + (numData - 1)];
                 if (lastVal != this->dataCollect->BAD_VALUE) {

@@ -1,0 +1,15 @@
+#!/bin/bash -e
+#SBATCH --job-name=run_test_step_farming_cohort
+#SBATCH --ntasks=5
+#SBATCH --time=00:10:00
+#SBATCH --hint=nomultithread
+
+module purge
+module load gimkl CMake forge
+
+nm="1"
+nd="20000"
+nw=$((SLURM_NTASKS - 1))
+nt=$((nw * 2))
+echo "Number of workers: $nw number of time steps: $nt"
+map --forge srun @CMAKE_BINARY_DIR@/tests/testTaskStepFarmingCohort -na $nw -nt $nt -nm $nm -nd $nd >& $resfile
