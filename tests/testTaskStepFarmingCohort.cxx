@@ -51,22 +51,28 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // and sum them up
         std::fill(localData.begin(), localData.end(), 0.0);
 
-        for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
+        if (step == stepBeg) {
 
-            int chunk_id = getChunkId(task_id2, step, numAgeGroups);
+            // Only fetch initially the data from the other cohorts
 
-            // fetch the data
-            dataCollector->get(chunk_id, data.data());
+            for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
 
-            // check that the data are valid
-            if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
-                // The data have not been previously populated. This could indicate that
-                // the worker has not yet produced any output for this cohort or the manager
-                // has not yet received the data.
-                MPI_Abort(comm, 1);
+                int chunk_id = getChunkId(task_id2, step, numAgeGroups);
+
+                // fetch the data
+                dataCollector->get(chunk_id, data.data());
+
+                // check that the data are valid
+                if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
+                    // The data have not been previously populated. This could indicate that
+                    // the worker has not yet produced any output for this cohort or the manager
+                    // has not yet received the data.
+                    MPI_Abort(comm, 1);
+                }
+                // sum up the cohort data at the previous time step
+                std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
             }
-            // sum up the cohort data at the previous time step
-            std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
+
         }
 
 
