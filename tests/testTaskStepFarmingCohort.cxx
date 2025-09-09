@@ -44,37 +44,29 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     std::vector<double> localData(numData);
     std::vector<double> data(numData);
 
+    // Initial conditions from the other cohorts
+
+    std::fill(localData.begin(), localData.end(), 0.0);
+    for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
+
+        int chunk_id = getChunkId(task_id2, step, numAgeGroups);
+
+        // fetch the data
+        dataCollector->get(chunk_id, data.data());
+
+        // check that the data are valid
+        if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
+            // The data have not been previously populated. This could indicate that
+            // the worker has not yet produced any output for this cohort or the manager
+            // has not yet received the data.
+            MPI_Abort(comm, 1);
+        }
+        // sum up the cohort data at the previous time step
+        std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
+    }
+
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
-
-        // Fetch the data needed to create this cohort from the manager
-        // and sum them up
-        std::fill(localData.begin(), localData.end(), 0.0);
-
-        if (step == stepBeg) {
-
-            // Only fetch initially the data from the other cohorts
-
-            for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
-
-                int chunk_id = getChunkId(task_id2, step, numAgeGroups);
-
-                // fetch the data
-                dataCollector->get(chunk_id, data.data());
-
-                // check that the data are valid
-                if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
-                    // The data have not been previously populated. This could indicate that
-                    // the worker has not yet produced any output for this cohort or the manager
-                    // has not yet received the data.
-                    MPI_Abort(comm, 1);
-                }
-                // sum up the cohort data at the previous time step
-                std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
-            }
-
-        }
-
 
         // Perform the work, just sleeping here zzzzzzz
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
