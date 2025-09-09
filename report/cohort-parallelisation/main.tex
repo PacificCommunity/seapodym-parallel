@@ -323,6 +323,39 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
 
 \section{Scalability}
 
+\begin{figure}
+    \includegraphics[width=15cm]{results/speedup_vs_workers.png}
+    \caption{Parallel scalability for different step execution 
+    times and number of doubles initially fetched from the manager. 
+    The number of age groups matches the number of workers. These results 
+    assume no initialisation setup time.}
+    \label{fig:speedup}
+\end{figure}
+
+Figure \ref{fig:speedup} shows the parallel scalability of the cohort parallelisation 
+approach described above as the number of workers is increased. 
+The results were obtained on the NeSI/REANNZ cluster by running on the AMD Milan nodes.
+In all cases the number of age groups matches the number of workers.
+
+Perfect parallel scaling 
+is shown as the black dashed line. Good scalability depends on the time taken to execute 
+each step and the amount of data fetched from the manager at the start of each task. Parallel 
+efficiency $> 50\%$ is achieved for time step times $\geq 10$ms and initial data sizes 
+$\leq 10000$ doubles. For instance, a time step taking $10$ms and an initial data size of 
+$10000$ doubles gives a speedup of 60, $75\%$ parallel efficiency, when using $80$ workers.
+
+Note that at every step the worker sends data to the manager, as well as a message 
+to inform the manager that the step has been completed. This introduces a communication overhead
+that limits parallel scalability. 
+Taking the example of $20,000$ doubles sent by 80 workers to the manager at a cadence of 
+ $10$ms, we get a data transfer rate of $1.3$GB/s = $100$Gb/s, which is close to the bandwidth 
+ of the Infiniband communication fabric. To further improve parallel scalability, one would need to 
+ either increase the computational load per step, reduce the amount of data to be transferred or apply
+some form of data compression. For instance, one could send flots instead of double and this would 
+improve the speedup from 40 to 60. 
+
+
+
 
 \section{Summary and future work}
    
