@@ -49,18 +49,50 @@ class DistDataCollector {
     ~DistDataCollector();
 
     /**
+     * @brief Start an epoch for RMA operations
+     */
+    void inline startEpoch() {
+        MPI_Win_lock_all(MPI_MODE_NOCHECK, this->win);
+    }
+
+    /** 
+     * @brief Ensure that all RMA operations are completed
+     */
+    void inline flush() {
+        MPI_Win_flush_all(this->win);
+    }
+
+    /** 
+     * @brief End an epoch for RMA operations
+     */
+    void inline endEpoch() {
+        MPI_Win_unlock_all(this->win);
+    }   
+
+    /**
      * @brief Put the local data into the collected array 
      * @param chunkId Leading index in the collected array
      * @param data Pointer to the local data to inject  
-     * @note this should be executed on the source process, typically on the worker
+     * @note this should be executed on the source process, typically by the worker
      */
     void put(int chunkId, const double* data);
+
+    /**
+     * @brief Put the local data into the collected array 
+     * @param chunkId Leading index in the collected array
+     * @param data Pointer to the local data to inject  
+     * @note this should be executed on the source process, typically by the worker
+     * This is a non-blocking call which relies on startEpoch/flush/endEpoch to
+     */
+    void inline putAsync(int chunkId, const double* data) {
+        MPI_Put(data, this->numSize, MPI_DOUBLE, 0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+    }
 
     /**
      * @brief Get a slice of the remote, collected array to the local worker
      * @param chunkId Leading index in the collected array
      * @return data array 
-     * @note this should be executed on the source process, typically on the worker
+     * @note this should be executed on the source process, typically by the worker
      */
     std::vector<double> get(int chunkId);
 
@@ -68,9 +100,20 @@ class DistDataCollector {
      * @brief Get a slice of the remote, collected array to the local worker
      * @param chunkId Leading index in the collected array
      * @param buffer will hold the fetched data
-     * @note this should be executed on the source process, typically on the worker
+     * @note this should be executed on the source process, typically by the worker
      */
     void get(int chunkId, double* buffer);
+
+    /**
+     * @brief Get a slice of the remote, collected array to the local worker
+     * @param chunkId Leading index in the collected array
+     * @param buffer will hold the fetched data
+     * @note this should be executed on the source process, typically by the worker. 
+     * This is a non-blocking call which relies on startEpoch/flush/endEpoch to complete
+     */
+    void inline getAsync(int chunkId, double* buffer) {
+        MPI_Get(buffer, this->numSize, MPI_DOUBLE, 0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+    }
 
     /**
      * Get the pointer to the collected data
