@@ -1,0 +1,20 @@
+#!/bin/bash -e
+#SBATCH --job-name=run_async
+#SBATCH --ntasks=10
+#SBATCH --time=00:10:00
+#SBATCH --hint=nomultithread
+
+module purge
+module load gimkl CMake Python
+
+csvfile="results_asyncN${SLURM_NTASKS}.csv"
+echo "nm,nd,time_blocking,time_nonblocking" > $csvfile
+for nm in 2 5 10 20; do
+    for nd in 5000 10000 20000; do
+        resfile="logAsyncN${SLURM_NTASKS}.txt"
+        srun @CMAKE_BINARY_DIR@/tests/testAsyncPutGet -nm $nm -nd $nd >& $resfile
+        t=$(python @CMAKE_SOURCE_DIR@/scripts/avgAsync.py $resfile)
+        tAsync=$(python @CMAKE_SOURCE_DIR@/scripts/avgAsync.py $resfile -e async)
+        echo "${nm},${nd},${t},${tAsync}" >> $csvfile
+    done
+done
