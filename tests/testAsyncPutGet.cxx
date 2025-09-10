@@ -3,7 +3,7 @@
 #include <iostream>
 #include <numeric> // std::accumulate
 #include <functional>
-
+#include "CmdLineArgParser.h"
 
 void testPutGet(int num_chunks, int num_size) {
 
@@ -48,7 +48,6 @@ void testPutGet(int num_chunks, int num_size) {
             double val1 = data1[i];
             double val2 = data2[i];
             diff += std::abs(val1 - val2);
-            std::cerr << "i = " << i << ", data1 = " << val1 << ", data2 = " << val2 << ", diff = " << std::abs(val1 - val2) << std::endl;
         }
         if (diff < 1e-10) {
             std::cerr << "Put/Get test passed\n";
@@ -79,7 +78,7 @@ void testAsyncPutGet(int num_chunks, int num_size) {
         
     }
 
-    // make sure all ranks have initialized
+    // make sure data has been initialized before remote memory accesses are issued
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank > 0) {
@@ -97,8 +96,38 @@ void testAsyncPutGet(int num_chunks, int num_size) {
         dataCollector2.endEpoch();
     }
 
-    // make sure the manager has received all the data
     MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank > 0) {
+
+        std::vector<double> localData(num_size);
+        double checksum = 0.0;
+
+        // this is how one could use getAsync in conjunction with startEpoch/flush/endEpoch
+        double tic = MPI_Wtime();
+        dataCollector2.startEpoch();
+        for (auto i = 0; i < num_chunks; ++i) {
+
+            // fetch a chunk asynchronously
+            dataCollector2.getAsync(i, localData.data());
+
+            // .. do other work here if needed...
+
+            // make sure the get is complete before using localData
+            dataCollector2.flush();
+            checksum += std::accumulate(localData.begin(), localData.end(), 0.0);
+        }
+        dataCollector2.endEpoch();
+        double toc = MPI_Wtime();
+        std::cout << "Rank " << rank << " checksum = " << checksum << " time: " << (toc - tic) << "sec\n";
+
+    } else {
+        // rank 0 could also use getAsync/putAsync in a similar manner
+        // but here we just compute the checksum directly
+        double* data = dataCollector2.getCollectedDataPtr();
+        double checksum = std::accumulate(data, data + num_chunks * num_size, 0.0);
+        std::cout << "Rank " << rank << " checksum = " << checksum << std::endl;    
+    }
 
     // check
     if (rank == 0) {
@@ -111,7 +140,6 @@ void testAsyncPutGet(int num_chunks, int num_size) {
             double val1 = data1[i];
             double val2 = data2[i];
             diff += std::abs(val1 - val2);
-            std::cerr << "i = " << i << ", data1 = " << val1 << ", data2 = " << val2 << ", diff = " << std::abs(val1 - val2) << std::endl;
         }
         if (diff < 1e-10) {
             std::cerr << "Async Put/Get test passed\n";
@@ -129,10 +157,34 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+    // Parse the command line arguments
+    CmdLineArgParser cmdLine;
+    cmdLine.set("-nd", 10000, "Number of data values to send from worker to manager at each step");
+    bool success = cmdLine.parse(argc, argv);
+    bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
+    if (!success) {
+        std::cerr << "Error parsing command line arguments." << std::endl;
+        cmdLine.help();
+        MPI_Finalize();
+        return 1;
+    }
+    if (help) {
+        cmdLine.help();
+        MPI_Finalize();
+        return 1;
+    }
+
+    int numAgeGroups = cmdLine.get<int>("-na");
+    int numTimeSteps = cmdLine.get<int>("-nt");
+    int milliseconds = cmdLine.get<int>("-nm");
+    int numData = cmdLine.get<int>("-nd");
+
+
     const int num_chunks = size;
-    const int num_size = 10; // size of each chunk
+    const int num_size = cmdLine.get<int>("-nd"); // size of each chunk
 
     testAsyncPutGet(num_chunks, num_size);
+    testPutGet(num_chunks, num_size);
 
     if (rank == 0) {
         std::cout << "Success\n";

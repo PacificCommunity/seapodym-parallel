@@ -113,5 +113,5 @@ set_tests_properties(testSeapodymCohortDependencyAnalyzerNa4Nt5 PROPERTIES PASS_
 add_test(NAME testDistDataCollector COMMAND mpiexec -n 2 testDistDataCollector)
 set_tests_properties(testDistDataCollector PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 
-add_test(NAME testAsyncPutGet COMMAND mpiexec -n 2 testAsyncPutGet)
+add_test(NAME testAsyncPutGet COMMAND mpiexec -n 6 testAsyncPutGet)
 set_tests_properties(testAsyncPutGet PROPERTIES PASS_REGULAR_EXPRESSION "Success")
