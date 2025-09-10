@@ -58,15 +58,9 @@ void testPutGet(int num_chunks, int num_size) {
     }
 }
 
-void testAsyncPutGet(int num_chunks, int num_size) {
-
-    int rank, size;
+void initData(DistDataCollector& dataCollector1, DistDataCollector& dataCollector2, int num_chunks, int num_size) {
+    int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    DistDataCollector dataCollector1(MPI_COMM_WORLD, num_chunks, num_size);
-    DistDataCollector dataCollector2(MPI_COMM_WORLD, num_chunks, num_size);
-
     if (rank == 0) {
         // fill the collected array with known values for testing
         double* data1 = dataCollector1.getCollectedDataPtr();
@@ -77,6 +71,42 @@ void testAsyncPutGet(int num_chunks, int num_size) {
         std::fill(data2, data2 + num_chunks*num_size, -1.0);
         
     }
+}
+
+void checkData(const std::string& testCase, 
+    DistDataCollector& dataCollector1, DistDataCollector& dataCollector2, 
+    int num_chunks, int num_size) {
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (rank == 0) {
+        // verify that dataCollector2 has the same data as dataCollector1
+        double* data1 = dataCollector1.getCollectedDataPtr();
+        double* data2 = dataCollector2.getCollectedDataPtr();
+        double diff = 0.0;
+        // we are only checking the data written by other ranks
+        for (int i = num_size; i < num_chunks * num_size; ++i) {
+            double val1 = data1[i];
+            double val2 = data2[i];
+            diff += std::abs(val1 - val2);
+        }
+        if (diff > 1e-10) {
+            std::cerr << testCase << " Put/Get test failed, diff = " << diff << "\n";
+            MPI_Abort(MPI_COMM_WORLD, 1);
+        }
+    }
+}
+
+void testAsyncPutGet(int num_chunks, int num_size) {
+
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    DistDataCollector dataCollector1(MPI_COMM_WORLD, num_chunks, num_size);
+    DistDataCollector dataCollector2(MPI_COMM_WORLD, num_chunks, num_size);
+
+    initData(dataCollector1, dataCollector2, num_chunks, num_size);
 
     // make sure data has been initialized before remote memory accesses are issued
     MPI_Barrier(MPI_COMM_WORLD);
@@ -130,24 +160,7 @@ void testAsyncPutGet(int num_chunks, int num_size) {
     }
 
     // check
-    if (rank == 0) {
-        // verify that dataCollector2 has the same data as dataCollector1
-        double* data1 = dataCollector1.getCollectedDataPtr();
-        double* data2 = dataCollector2.getCollectedDataPtr();
-        double diff = 0.0;
-        // we are only checking the data written by other ranks
-        for (int i = num_size; i < num_chunks * num_size; ++i) {
-            double val1 = data1[i];
-            double val2 = data2[i];
-            diff += std::abs(val1 - val2);
-        }
-        if (diff < 1e-10) {
-            std::cerr << "Async Put/Get test passed\n";
-        } else {
-            std::cerr << "Async Put/Get test failed, diff = " << diff << "\n";
-            MPI_Abort(MPI_COMM_WORLD, 1);
-        }
-    }
+    checkData("Async", dataCollector1, dataCollector2, num_chunks, num_size);
 }
 
 int main(int argc, char** argv) {
