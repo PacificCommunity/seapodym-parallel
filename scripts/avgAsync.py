@@ -6,13 +6,14 @@ pat = r'^\s*Rank\s*[^0]\s*checksum\s*\=\s*[\.\de\+\-]+\s*time\:\s*([\.\de\+\-]+)
 patAsync = r'^\s*Async\s+Rank\s*[^0]\s*checksum\s*\=\s*[\.\de\+\-]+\s*time\:\s*([\.\de\+\-]+)'
 times = []
 def main(resfile: str, *, extract: str=''):
+    
     p = pat
     if extract.lower() == 'async':
         p = patAsync
         
     for line in open(resfile).readlines():
         
-        m = re.match(pat, line)
+        m = re.match(p, line)
         if m:
             times.append( float(m.group(1)) )
 
