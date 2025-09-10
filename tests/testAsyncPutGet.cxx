@@ -47,6 +47,12 @@ void checkData(const std::string& testCase,
     }
 }
 
+/**
+ * @brief Test asynchronous put/get with DistDataCollector
+ * @param num_chunks number of chunks
+ * @param num_size size of each chunk
+ * @param ms milliseconds to simulate work
+ */
 void testAsyncPutGet(int num_chunks, int num_size, int ms) {
 
     int rank, size;
@@ -114,7 +120,12 @@ void testAsyncPutGet(int num_chunks, int num_size, int ms) {
     checkData("Async", dataCollector1, dataCollector2, num_chunks, num_size);
 }
 
-
+/**
+ * @brief Test blocking put/get with DistDataCollector
+ * @param num_chunks number of chunks
+ * @param num_size size of each chunk
+ * @param ms milliseconds to simulate work
+ */
 void testPutGet(int num_chunks, int num_size, int ms) {
 
     int rank, size;
