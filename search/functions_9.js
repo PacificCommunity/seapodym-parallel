@@ -8,6 +8,7 @@ var searchData=
   ['set_5',['set',['../classCmdLineArgParser.html#aecb72fc6f86ecf09c9fa0e8063e6eac0',1,'CmdLineArgParser']]],
   ['setpurpose_6',['setPurpose',['../classCmdLineArgParser.html#af0bd437e50466b7dc4b889171b02b346',1,'CmdLineArgParser']]],
   ['setstatefromarray_7',['setStateFromArray',['../classSeapodymCohortAbstract.html#aa172eb3cd71f6fc27398796b3249d7f7',1,'SeapodymCohortAbstract::setStateFromArray()'],['../classSeapodymCohortFake.html#aae37b8d365dda19aebdb9fba3ce4573e',1,'SeapodymCohortFake::setStateFromArray()']]],
-  ['stepforward_8',['stepForward',['../classSeapodymCohortAbstract.html#ab3823bec38c8b40012330a18d5f336f0',1,'SeapodymCohortAbstract::stepForward()'],['../classSeapodymCohortFake.html#ac04ec8183226247ccc05e00306e57f36',1,'SeapodymCohortFake::stepForward()']]],
-  ['store_9',['store',['../classTaskScore.html#a34c41c46c370e5654e9c1e3f929d39cc',1,'TaskScore']]]
+  ['startepoch_8',['startEpoch',['../classDistDataCollector.html#a183885a2a22cf7e5168a2392d16a94dc',1,'DistDataCollector']]],
+  ['stepforward_9',['stepForward',['../classSeapodymCohortAbstract.html#ab3823bec38c8b40012330a18d5f336f0',1,'SeapodymCohortAbstract::stepForward()'],['../classSeapodymCohortFake.html#ac04ec8183226247ccc05e00306e57f36',1,'SeapodymCohortFake::stepForward()']]],
+  ['store_10',['store',['../classTaskScore.html#a34c41c46c370e5654e9c1e3f929d39cc',1,'TaskScore']]]
 ];

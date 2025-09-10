@@ -117,59 +117,94 @@ $(function() {
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span></div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <a class="code hl_function" href="classDistDataCollector.html#ac1c937220625bdee6c7b890548f44de6">~DistDataCollector</a>();</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDistDataCollector.html#a118faa1333cae78fa6ec862638d11389">put</a>(<span class="keywordtype">int</span> chunkId, <span class="keyword">const</span> <span class="keywordtype">double</span>* data);</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    std::vector&lt;double&gt; <a class="code hl_function" href="classDistDataCollector.html#a182a20ab1ace0a73bbad1e25753661db">get</a>(<span class="keywordtype">int</span> chunkId);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDistDataCollector.html#a182a20ab1ace0a73bbad1e25753661db">get</a>(<span class="keywordtype">int</span> chunkId, <span class="keywordtype">double</span>* buffer);</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span></div>
-<div class="foldopen" id="foldopen00080" data-start="{" data-end="}">
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a1f38912a18c0150e7828668a6bf62d57">   80</a></span>    <span class="keywordtype">double</span>* <a class="code hl_function" href="classDistDataCollector.html#a1f38912a18c0150e7828668a6bf62d57">getCollectedDataPtr</a>() {</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keywordflow">return</span> this-&gt;collectedData;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    }</div>
+<div class="foldopen" id="foldopen00054" data-start="{" data-end="}">
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a183885a2a22cf7e5168a2392d16a94dc">   54</a></span>    <span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="classDistDataCollector.html#a183885a2a22cf7e5168a2392d16a94dc">startEpoch</a>() {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        MPI_Win_lock_all(MPI_MODE_NOCHECK, this-&gt;win);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    }</div>
 </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span></div>
-<div class="foldopen" id="foldopen00088" data-start="{" data-end="}">
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#aa6537a314c706a06004f3d47c2016b09">   88</a></span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classDistDataCollector.html#aa6537a314c706a06004f3d47c2016b09">getNumChunks</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keywordflow">return</span> this-&gt;numChunks;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    }</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span></div>
+<div class="foldopen" id="foldopen00061" data-start="{" data-end="}">
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a76445a0cb5fef5e7b60374c9051bb4d9">   61</a></span>    <span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="classDistDataCollector.html#a76445a0cb5fef5e7b60374c9051bb4d9">flush</a>() {</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        MPI_Win_flush_all(this-&gt;win);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    }</div>
 </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span></div>
-<div class="foldopen" id="foldopen00096" data-start="{" data-end="}">
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d">   96</a></span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d">getNumSize</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        <span class="keywordflow">return</span> this-&gt;numSize;</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    }</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span></div>
+<div class="foldopen" id="foldopen00068" data-start="{" data-end="}">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a0cab40e183b0509adac87de75a62fad6">   68</a></span>    <span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="classDistDataCollector.html#a0cab40e183b0509adac87de75a62fad6">endEpoch</a>() {</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        MPI_Win_unlock_all(this-&gt;win);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    }   </div>
 </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span></div>
-<div class="foldopen" id="foldopen00103" data-start="{" data-end="}">
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a4a513b240eb1b892b87ee60677aef496">  103</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDistDataCollector.html#a4a513b240eb1b892b87ee60677aef496">free</a>() {</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        <span class="keywordflow">if</span> (this-&gt;win != MPI_WIN_NULL) {</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            MPI_Win_free(&amp;this-&gt;win);</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        }</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        <span class="comment">// No need to free the data, MPI_Win_free will free the pointer</span></div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="comment">//MPI_Free_mem(this-&gt;collectedData);</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    }</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDistDataCollector.html#a118faa1333cae78fa6ec862638d11389">put</a>(<span class="keywordtype">int</span> chunkId, <span class="keyword">const</span> <span class="keywordtype">double</span>* data);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span></div>
+<div class="foldopen" id="foldopen00087" data-start="{" data-end="}">
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a2c654981dd8e13801eddda28d38856e3">   87</a></span>    <span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="classDistDataCollector.html#a2c654981dd8e13801eddda28d38856e3">putAsync</a>(<span class="keywordtype">int</span> chunkId, <span class="keyword">const</span> <span class="keywordtype">double</span>* data) {</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        MPI_Put(data, this-&gt;numSize, MPI_DOUBLE, 0, chunkId * this-&gt;numSize, this-&gt;numSize, MPI_DOUBLE, this-&gt;win);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    }</div>
 </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="comment">// Disable copy and assignment operations</span></div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="comment">// to prevent accidental copying of the DistDataCollector instance</span></div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="comment">// This is important because the class manages an MPI window and data pointer</span></div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="comment">// which should not be copied or assigned.</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <a class="code hl_function" href="classDistDataCollector.html#addc699fa6632609c66c865671cb1e2bc">DistDataCollector</a>(<span class="keyword">const</span> <a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp;) = <span class="keyword">delete</span>; <span class="comment">// Disable copy constructor</span></div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp; operator=(<span class="keyword">const</span> <a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp;) = <span class="keyword">delete</span>; <span class="comment">// Disable assignment operator</span></div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <a class="code hl_function" href="classDistDataCollector.html#addc699fa6632609c66c865671cb1e2bc">DistDataCollector</a>(<a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp;&amp; other) <span class="keyword">noexcept</span>; <span class="comment">// Move constructor</span></div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp; operator=(<a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp;&amp; other) <span class="keyword">noexcept</span>; <span class="comment">// Move assignment operator</span></div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>};</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    std::vector&lt;double&gt; <a class="code hl_function" href="classDistDataCollector.html#a182a20ab1ace0a73bbad1e25753661db">get</a>(<span class="keywordtype">int</span> chunkId);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDistDataCollector.html#a182a20ab1ace0a73bbad1e25753661db">get</a>(<span class="keywordtype">int</span> chunkId, <span class="keywordtype">double</span>* buffer);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span></div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="}">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#abd4acdc1b5069dc34ab2bec45c2ead5b">  114</a></span>    <span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="classDistDataCollector.html#abd4acdc1b5069dc34ab2bec45c2ead5b">getAsync</a>(<span class="keywordtype">int</span> chunkId, <span class="keywordtype">double</span>* buffer) {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        MPI_Get(buffer, this-&gt;numSize, MPI_DOUBLE, 0, chunkId * this-&gt;numSize, this-&gt;numSize, MPI_DOUBLE, this-&gt;win);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    }</div>
 </div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#endif </span><span class="comment">// DIST_DATA_COLLECTOR</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span></div>
+<div class="foldopen" id="foldopen00123" data-start="{" data-end="}">
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a1f38912a18c0150e7828668a6bf62d57">  123</a></span>    <span class="keywordtype">double</span>* <a class="code hl_function" href="classDistDataCollector.html#a1f38912a18c0150e7828668a6bf62d57">getCollectedDataPtr</a>() {</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        <span class="keywordflow">return</span> this-&gt;collectedData;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    }</div>
+</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span></div>
+<div class="foldopen" id="foldopen00131" data-start="{" data-end="}">
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#aa6537a314c706a06004f3d47c2016b09">  131</a></span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classDistDataCollector.html#aa6537a314c706a06004f3d47c2016b09">getNumChunks</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        <span class="keywordflow">return</span> this-&gt;numChunks;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    }</div>
+</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span></div>
+<div class="foldopen" id="foldopen00139" data-start="{" data-end="}">
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d">  139</a></span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d">getNumSize</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        <span class="keywordflow">return</span> this-&gt;numSize;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    }</div>
+</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span></div>
+<div class="foldopen" id="foldopen00146" data-start="{" data-end="}">
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="classDistDataCollector.html#a4a513b240eb1b892b87ee60677aef496">  146</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDistDataCollector.html#a4a513b240eb1b892b87ee60677aef496">free</a>() {</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        <span class="keywordflow">if</span> (this-&gt;win != MPI_WIN_NULL) {</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>            MPI_Win_free(&amp;this-&gt;win);</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        }</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        <span class="comment">// No need to free the data, MPI_Win_free will free the pointer</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        <span class="comment">//MPI_Free_mem(this-&gt;collectedData);</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    }</div>
+</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="comment">// Disable copy and assignment operations</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="comment">// to prevent accidental copying of the DistDataCollector instance</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <span class="comment">// This is important because the class manages an MPI window and data pointer</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="comment">// which should not be copied or assigned.</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <a class="code hl_function" href="classDistDataCollector.html#addc699fa6632609c66c865671cb1e2bc">DistDataCollector</a>(<span class="keyword">const</span> <a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp;) = <span class="keyword">delete</span>; <span class="comment">// Disable copy constructor</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp; operator=(<span class="keyword">const</span> <a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp;) = <span class="keyword">delete</span>; <span class="comment">// Disable assignment operator</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <a class="code hl_function" href="classDistDataCollector.html#addc699fa6632609c66c865671cb1e2bc">DistDataCollector</a>(<a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp;&amp; other) <span class="keyword">noexcept</span>; <span class="comment">// Move constructor</span></div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp; operator=(<a class="code hl_class" href="classDistDataCollector.html">DistDataCollector</a>&amp;&amp; other) <span class="keyword">noexcept</span>; <span class="comment">// Move assignment operator</span></div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>};</div>
+</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="preprocessor">#endif </span><span class="comment">// DIST_DATA_COLLECTOR</span></div>
 <div class="ttc" id="aclassDistDataCollector_html"><div class="ttname"><a href="classDistDataCollector.html">DistDataCollector</a></div><div class="ttdoc">DistDataCollector is a class that collects data stored on multiple MPI processes into a large array s...</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:14</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_a0cab40e183b0509adac87de75a62fad6"><div class="ttname"><a href="classDistDataCollector.html#a0cab40e183b0509adac87de75a62fad6">DistDataCollector::endEpoch</a></div><div class="ttdeci">void endEpoch()</div><div class="ttdoc">End an epoch for RMA operations.</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:68</div></div>
 <div class="ttc" id="aclassDistDataCollector_html_a118faa1333cae78fa6ec862638d11389"><div class="ttname"><a href="classDistDataCollector.html#a118faa1333cae78fa6ec862638d11389">DistDataCollector::put</a></div><div class="ttdeci">void put(int chunkId, const double *data)</div><div class="ttdoc">Put the local data into the collected array.</div><div class="ttdef"><b>Definition</b> DistDataCollector.cpp:33</div></div>
-<div class="ttc" id="aclassDistDataCollector_html_a17446d432f5982ccc125ec4d3a162b0d"><div class="ttname"><a href="classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d">DistDataCollector::getNumSize</a></div><div class="ttdeci">int getNumSize() const</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:96</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_a17446d432f5982ccc125ec4d3a162b0d"><div class="ttname"><a href="classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d">DistDataCollector::getNumSize</a></div><div class="ttdeci">int getNumSize() const</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:139</div></div>
 <div class="ttc" id="aclassDistDataCollector_html_a182a20ab1ace0a73bbad1e25753661db"><div class="ttname"><a href="classDistDataCollector.html#a182a20ab1ace0a73bbad1e25753661db">DistDataCollector::get</a></div><div class="ttdeci">std::vector&lt; double &gt; get(int chunkId)</div><div class="ttdoc">Get a slice of the remote, collected array to the local worker.</div><div class="ttdef"><b>Definition</b> DistDataCollector.cpp:48</div></div>
-<div class="ttc" id="aclassDistDataCollector_html_a1f38912a18c0150e7828668a6bf62d57"><div class="ttname"><a href="classDistDataCollector.html#a1f38912a18c0150e7828668a6bf62d57">DistDataCollector::getCollectedDataPtr</a></div><div class="ttdeci">double * getCollectedDataPtr()</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:80</div></div>
-<div class="ttc" id="aclassDistDataCollector_html_a4a513b240eb1b892b87ee60677aef496"><div class="ttname"><a href="classDistDataCollector.html#a4a513b240eb1b892b87ee60677aef496">DistDataCollector::free</a></div><div class="ttdeci">void free()</div><div class="ttdoc">Free the MPI window and empty the collected data.</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:103</div></div>
-<div class="ttc" id="aclassDistDataCollector_html_aa6537a314c706a06004f3d47c2016b09"><div class="ttname"><a href="classDistDataCollector.html#aa6537a314c706a06004f3d47c2016b09">DistDataCollector::getNumChunks</a></div><div class="ttdeci">int getNumChunks() const</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:88</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_a183885a2a22cf7e5168a2392d16a94dc"><div class="ttname"><a href="classDistDataCollector.html#a183885a2a22cf7e5168a2392d16a94dc">DistDataCollector::startEpoch</a></div><div class="ttdeci">void startEpoch()</div><div class="ttdoc">Start an epoch for RMA operations.</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:54</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_a1f38912a18c0150e7828668a6bf62d57"><div class="ttname"><a href="classDistDataCollector.html#a1f38912a18c0150e7828668a6bf62d57">DistDataCollector::getCollectedDataPtr</a></div><div class="ttdeci">double * getCollectedDataPtr()</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:123</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_a2c654981dd8e13801eddda28d38856e3"><div class="ttname"><a href="classDistDataCollector.html#a2c654981dd8e13801eddda28d38856e3">DistDataCollector::putAsync</a></div><div class="ttdeci">void putAsync(int chunkId, const double *data)</div><div class="ttdoc">Put the local data into the collected array.</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:87</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_a4a513b240eb1b892b87ee60677aef496"><div class="ttname"><a href="classDistDataCollector.html#a4a513b240eb1b892b87ee60677aef496">DistDataCollector::free</a></div><div class="ttdeci">void free()</div><div class="ttdoc">Free the MPI window and empty the collected data.</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:146</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_a76445a0cb5fef5e7b60374c9051bb4d9"><div class="ttname"><a href="classDistDataCollector.html#a76445a0cb5fef5e7b60374c9051bb4d9">DistDataCollector::flush</a></div><div class="ttdeci">void flush()</div><div class="ttdoc">Ensure that all RMA operations are completed.</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:61</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_aa6537a314c706a06004f3d47c2016b09"><div class="ttname"><a href="classDistDataCollector.html#aa6537a314c706a06004f3d47c2016b09">DistDataCollector::getNumChunks</a></div><div class="ttdeci">int getNumChunks() const</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:131</div></div>
+<div class="ttc" id="aclassDistDataCollector_html_abd4acdc1b5069dc34ab2bec45c2ead5b"><div class="ttname"><a href="classDistDataCollector.html#abd4acdc1b5069dc34ab2bec45c2ead5b">DistDataCollector::getAsync</a></div><div class="ttdeci">void getAsync(int chunkId, double *buffer)</div><div class="ttdoc">Get a slice of the remote, collected array to the local worker.</div><div class="ttdef"><b>Definition</b> DistDataCollector.h:114</div></div>
 <div class="ttc" id="aclassDistDataCollector_html_ac1c937220625bdee6c7b890548f44de6"><div class="ttname"><a href="classDistDataCollector.html#ac1c937220625bdee6c7b890548f44de6">DistDataCollector::~DistDataCollector</a></div><div class="ttdeci">~DistDataCollector()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> DistDataCollector.cpp:28</div></div>
 <div class="ttc" id="aclassDistDataCollector_html_addc699fa6632609c66c865671cb1e2bc"><div class="ttname"><a href="classDistDataCollector.html#addc699fa6632609c66c865671cb1e2bc">DistDataCollector::DistDataCollector</a></div><div class="ttdeci">DistDataCollector(MPI_Comm comm, int numChunks, int numSize)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> DistDataCollector.cpp:8</div></div>
 </div><!-- fragment --></div><!-- contents -->

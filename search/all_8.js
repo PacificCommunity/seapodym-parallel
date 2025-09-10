@@ -4,5 +4,6 @@ var searchData=
   ['parse_1',['parse',['../classCmdLineArgParser.html#aed4bd2ccc0a55ca1259678b244d7958c',1,'CmdLineArgParser']]],
   ['prerequisites_2',['Prerequisites',['../index.html#autotoc_md1',1,'']]],
   ['print_3',['print',['../classCmdLineArgParser.html#adc279ba0b94a2fb1dd6255da8615c8f9',1,'CmdLineArgParser::print()'],['../classTaskScore.html#a74646a8396d8bcfa82c197fee4770bcc',1,'TaskScore::print()']]],
-  ['put_4',['put',['../classDistDataCollector.html#a118faa1333cae78fa6ec862638d11389',1,'DistDataCollector']]]
+  ['put_4',['put',['../classDistDataCollector.html#a118faa1333cae78fa6ec862638d11389',1,'DistDataCollector']]],
+  ['putasync_5',['putAsync',['../classDistDataCollector.html#a2c654981dd8e13801eddda28d38856e3',1,'DistDataCollector']]]
 ];
