@@ -86,7 +86,7 @@ void testAsyncPutGet(int num_chunks, int num_size, int ms) {
 
     if (rank > 0) {
 
-        std::vector<double> localData(num_size);
+        std::vector<double> bigData(num_chunks * num_size);
         double checksum = 0.0;
 
         // this is how one could use getAsync in conjunction with startEpoch/flush/endEpoch
@@ -95,16 +95,17 @@ void testAsyncPutGet(int num_chunks, int num_size, int ms) {
         for (auto i = 0; i < num_chunks; ++i) {
 
             // fetch a chunk asynchronously
-            dataCollector2.getAsync(i, localData.data());
+            dataCollector2.getAsync(i, &bigData[i*num_size]);
 
             // .. do some work ...
+            //dataCollector2.flush(); // required if the work needs to access the slice of data 
             std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-
-            // make sure the get is complete before using localData
-            dataCollector2.flush();
-            checksum += std::accumulate(localData.begin(), localData.end(), 0.0);
         }
+        // no need to flush
         dataCollector2.endEpoch();
+
+        checksum = std::accumulate(bigData.begin(), bigData.end(), 0.0);
+
         double toc = MPI_Wtime();
         std::cout << " Async Rank " << rank << " checksum = " << checksum << " time: " << (toc - tic) << "sec\n";
 
@@ -173,9 +174,11 @@ void testPutGet(int num_chunks, int num_size, int ms) {
     } else {
         // rank 0 could also use getAsync/putAsync in a similar manner
         // but here we just compute the checksum directly
+        double tic = MPI_Wtime();
         double* data = dataCollector2.getCollectedDataPtr();
         double checksum = std::accumulate(data, data + num_chunks * num_size, 0.0);
-        std::cout << "Rank " << rank << " checksum = " << checksum << std::endl;    
+        double toc = MPI_Wtime();
+        std::cout << "       Rank " << rank << " checksum = " << checksum << " time: " << (toc - tic) << "sec\n";    
     }
 
     // check
