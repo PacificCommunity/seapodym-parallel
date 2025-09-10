@@ -78,21 +78,27 @@ void testAsyncPutGet(int num_chunks, int num_size) {
         std::fill(data2, data2 + num_chunks*num_size, -1.0);
         
     }
-    else {
+
+    // make sure all ranks have initialized
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank > 0) {
         int chunk_id = rank;
+        std::vector<double> localData(num_size);
 
         dataCollector1.startEpoch();
-        std::vector<double> localData = dataCollector1.get(chunk_id);
-        //dataCollector1.flush();
+        dataCollector1.getAsync(chunk_id, localData.data());
+        dataCollector1.flush();
         dataCollector1.endEpoch();
 
         dataCollector2.startEpoch();
         dataCollector2.putAsync(chunk_id, localData.data());
-        //dataCollector2.flush();
+        dataCollector2.flush();
         dataCollector2.endEpoch();
     }
 
-    // no need to call MPI_Barrier(MPI_COMM_WORLD) here
+    // make sure the manager has received all the data
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // check
     if (rank == 0) {
@@ -126,7 +132,7 @@ int main(int argc, char** argv) {
     const int num_chunks = size;
     const int num_size = 10; // size of each chunk
 
-    testPutGet(num_chunks, num_size);
+    testAsyncPutGet(num_chunks, num_size);
 
     if (rank == 0) {
         std::cout << "Success\n";
