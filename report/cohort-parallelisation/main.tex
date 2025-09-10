@@ -354,7 +354,39 @@ Taking the example of $20,000$ doubles sent by 80 workers to the manager at a ca
 some form of data compression. For instance, one could send flots instead of double and this would 
 improve the speedup from 40 to 60. 
 
+\section{The cost of intitalization}
 
+\section{Comparing blocking and non-blocking get operations}
+
+A significant part for the initialization time involves fetching data from the manager. This takes
+place at each time step. Our library support asynchronous get operations, which allow one to 
+overlap communication with computation. 
+
+The default mode to ``get'' data is blocking, that is retrieved data are ready when the ``get'' call
+completes. Alternatively, the programmer may rely on ``getAsync'' calls. In this case the programmer 
+indicates his/her desire to fetch the data but the data need not be immediately available. A ``startEpoch''
+and ``endEpoch'' calls around the ``getAsync" operations determine the the time interval 
+when remote memory access operations take place with 
+``endEpoch'' indicating that the data must available at that point. (An additional ``flush'' can be used 
+) to request completed ``get'' operations within a period. 
+
+In Fig. \ref{fig:async} we compare the  execution time of MPI ``get'' operations using 
+blocking and non-blocking approaches. Each test involves reading $N$ chunks ($=$ number of workers) 
+of $nd$ values from rank 0 and summing the result. In the blocking test, the chunks are read one at a 
+time, followed by a sleep operation lasting $nm$ milliseconds and a sum operation over the chunk. 
+In the nonblocking test, a big array is filled by reading the chunks asynchronously, followed by the 
+sleep operation. These two operations are within a single epoch. The final step then involves summing up the values
+of the big array. The benefit of using non-blocking ``get'' calls is particulalry apparent for large chunks 
+$nd$ and small amount of work (low $nm$).
+
+\begin{figure}
+\begin{tabular}{|c|c|}
+      % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+      \includegraphics[width=60mm]{speedup_async_N20.png} & \includegraphics[width=60mm]{speedup_async_N40.png} \\
+      \includegraphics[width=60mm]{speedup_async_N80.png} & \includegraphics[width=60mm]{speedup_async_N160.png} \\
+\end{tabular}
+\label{fig:async}
+\end{figure}
 
 
 \section{Summary and future work}
