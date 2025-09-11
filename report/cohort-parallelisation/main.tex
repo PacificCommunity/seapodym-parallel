@@ -272,13 +272,13 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
             \EndIf
 
             \Comment{Store the result}
-            \State results.insert(msg.output)
+            \State results.insert{msg.output}
             \State taskid = output[0]
             \State step = output[1]
             completed.insert{taskid, step}
 
             \If{step == stepEnd - 1}
-                assigned.erase(taskid);
+                assigned.erase{taskid};
             \EndIf
         \EndWhile
 
@@ -287,17 +287,17 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
             \State taskDependencies = getTaskStepDependencies{taskid}
             \State bool ready = true
             \For{dep in taskDependencies}
-                \If{completed.find(dep) == completed.end()}
+                \If{completed.find{dep} == completed.end{}}
                     \State ready = false
                     \State break
                 \EndIf
             \EndFor
-            \If{ready and !activeWorkers.empty()}
-                \State worker = activeWorkers.begin()
-                \State activeWorkers.erase(worker)
+            \If{ready and !activeWorkers.empty{}}
+                \State worker = activeWorkers.begin{}
+                \State activeWorkers.erase{worker}
                 \State \Call{sendTaskToWorker}{taskid, worker}
-                \State assigned.insert(taskid)
-                \State taskQueue.erase(taskid)
+                \State assigned.insert{taskid}
+                \State taskQueue.erase{taskid}
             \EndIf
         \EndFor
 
@@ -333,8 +333,9 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
 \end{figure}
 
 Figure \ref{fig:speedup} shows the parallel scalability of the cohort parallelisation 
-approach described above as the number of workers is increased. The speedup numbers were obtained for an idealized scenario, assuming 
-a fixed cost of communication (to initialize a new cohort) and a constant cost of executing a step
+approach described above as the number of workers is increased (see code \verb|testTaskStepFarmingCohort|). 
+The speedup numbers were obtained for an idealized scenario, assuming 
+a fixed cost of communication to initialize a new cohort and a constant cost of executing a step
 on the NeSI/REANNZ AMD Milan node cluster.
 In all cases the number of workers was chosen to match the number of age groups $N_a$.
 
