@@ -104,13 +104,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>endEpoch</b> ()</td><
 <tr class="memitem:a118faa1333cae78fa6ec862638d11389" id="r_a118faa1333cae78fa6ec862638d11389"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a118faa1333cae78fa6ec862638d11389">put</a> (int chunkId, const double *data)</td></tr>
 <tr class="memdesc:a118faa1333cae78fa6ec862638d11389"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the local data into the collected array.  <br /></td></tr>
 <tr class="memitem:a2c654981dd8e13801eddda28d38856e3" id="r_a2c654981dd8e13801eddda28d38856e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c654981dd8e13801eddda28d38856e3">putAsync</a> (int chunkId, const double *data)</td></tr>
-<tr class="memdesc:a2c654981dd8e13801eddda28d38856e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the local data into the collected array.  <br /></td></tr>
+<tr class="memdesc:a2c654981dd8e13801eddda28d38856e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the local data into the collected array (non-blocking)  <br /></td></tr>
 <tr class="memitem:a182a20ab1ace0a73bbad1e25753661db" id="r_a182a20ab1ace0a73bbad1e25753661db"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a182a20ab1ace0a73bbad1e25753661db">get</a> (int chunkId)</td></tr>
 <tr class="memdesc:a182a20ab1ace0a73bbad1e25753661db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a slice of the remote, collected array to the local worker.  <br /></td></tr>
 <tr class="memitem:af023a167441c0cf51629fbcf67803fb4" id="r_af023a167441c0cf51629fbcf67803fb4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af023a167441c0cf51629fbcf67803fb4">get</a> (int chunkId, double *buffer)</td></tr>
 <tr class="memdesc:af023a167441c0cf51629fbcf67803fb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a slice of the remote, collected array to the local worker.  <br /></td></tr>
 <tr class="memitem:abd4acdc1b5069dc34ab2bec45c2ead5b" id="r_abd4acdc1b5069dc34ab2bec45c2ead5b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd4acdc1b5069dc34ab2bec45c2ead5b">getAsync</a> (int chunkId, double *buffer)</td></tr>
-<tr class="memdesc:abd4acdc1b5069dc34ab2bec45c2ead5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a slice of the remote, collected array to the local worker.  <br /></td></tr>
+<tr class="memdesc:abd4acdc1b5069dc34ab2bec45c2ead5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a slice of the remote, collected array to the local worker (non-blocking)  <br /></td></tr>
 <tr class="memitem:a1f38912a18c0150e7828668a6bf62d57" id="r_a1f38912a18c0150e7828668a6bf62d57"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f38912a18c0150e7828668a6bf62d57">getCollectedDataPtr</a> ()</td></tr>
 <tr class="memitem:aa6537a314c706a06004f3d47c2016b09" id="r_aa6537a314c706a06004f3d47c2016b09"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6537a314c706a06004f3d47c2016b09">getNumChunks</a> () const</td></tr>
 <tr class="memitem:a17446d432f5982ccc125ec4d3a162b0d" id="r_a17446d432f5982ccc125ec4d3a162b0d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17446d432f5982ccc125ec4d3a162b0d">getNumSize</a> () const</td></tr>
@@ -256,7 +256,7 @@ const double&#160;</td><td class="memItemRight" valign="bottom"><b>BAD_VALUE</b>
 </table>
 </div><div class="memdoc">
 
-<p>Get a slice of the remote, collected array to the local worker. </p>
+<p>Get a slice of the remote, collected array to the local worker (non-blocking) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">chunkId</td><td>Leading index in the collected array </td></tr>
@@ -406,7 +406,7 @@ const double&#160;</td><td class="memItemRight" valign="bottom"><b>BAD_VALUE</b>
 </table>
 </div><div class="memdoc">
 
-<p>Put the local data into the collected array. </p>
+<p>Put the local data into the collected array (non-blocking) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">chunkId</td><td>Leading index in the collected array </td></tr>
