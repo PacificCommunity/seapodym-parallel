@@ -78,7 +78,7 @@ class DistDataCollector {
     void put(int chunkId, const double* data);
 
     /**
-     * @brief Put the local data into the collected array 
+     * @brief Put the local data into the collected array (non-blocking)
      * @param chunkId Leading index in the collected array
      * @param data Pointer to the local data to inject  
      * @note this should be executed on the source process, typically by the worker
@@ -105,7 +105,7 @@ class DistDataCollector {
     void get(int chunkId, double* buffer);
 
     /**
-     * @brief Get a slice of the remote, collected array to the local worker
+     * @brief Get a slice of the remote, collected array to the local worker (non-blocking)
      * @param chunkId Leading index in the collected array
      * @param buffer will hold the fetched data
      * @note this should be executed on the source process, typically by the worker. 

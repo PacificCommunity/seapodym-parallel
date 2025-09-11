@@ -90,6 +90,14 @@ likelihood estimation approach that integrates georeferenced
 datasets obtained from industrial fishing and scientific campaigns.
 
 The objective of this work is to parallelise the SEAPODYM code over cohorts. 
+This was achieved by designing and implementing the sepodym-parallel library 
+(\url{github.com/PacificCommunity/seapodym-parallel.git}), a collection of 
+C++ classes that abstract parallelization. This library comes with a 
+\verb|CMake| build system, unit tests and continuous integration via 
+GitHub actions. The documentation of the API can be found at 
+\url{https://pacificcommunity.github.io/seapodym-parallel/}.
+
+
 A cohort is a group of fish that are born at the same time. Each cohort 
 can be integrated forward in time independently of other cohorts, until the cohort reaches a certain age and dies. 
 At the next time step, a new cohort is born and integrated forward in time until it dies. Except 
