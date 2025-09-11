@@ -1,15 +1,16 @@
 
 # User inputs ---------------------------------------------------------------
-nb_ages = 5			# Number of age classes
-nb_workers = 3		# Number of workers
-nsteps = 11			# Simulation time
-add_randomness = T  # Weither to add randomness in each step computation time
+nb_ages = 37		# Number of age classes
+nb_workers = 37 		# Number of workers
+nsteps = 132		# Simulation time
+add_randomness = F  # Weither to add randomness in each step computation time
 rnorm_sd = 0.1		# Randomness factor (baseline computation time will be multiplied by rnorm(mean=1, sd = rnorm_sd))
-show_matrices <- T  # Weither to show time matrices in the output or not
+show_matrices <- F  # Weither to show time matrices in the output or not
+time_init = 9 
 
 # Baseline computation times (age-specific)
 ages_ctime = data.frame(age = (1:nb_ages)-1,
-						 # time = 1 + c(1:nb_ages)*0.1)
+						#time = 1 + c(1:nb_ages)*0.1)
 						time = 1)
 # set.seed(1)
 
@@ -77,11 +78,12 @@ for (tstep in 1:nsteps){
 	for (cohort_id in 0:(nb_cohorts-1)){
 		is_active <- is_cohort_active[tstep, cohort_id+1]
 		if (is_active){
-			# is_new <- t_starts[cohort_id +1] == tstep
+			is_new <- t_starts[cohort_id +1] == tstep
 			age_start <- age_starts[cohort_id + 1]
 			age <-tstep - t_starts[cohort_id +1] + age_starts[cohort_id +1] 
 			t <- ages_ctime$time[age+1]
 			if (add_randomness) t <- t * rnorm(1, mean=1, sd=rnorm_sd)
+			if (is_new) t = t+time_init
 			C[tstep, cohort_id+1] <- start_time_tstep + t
 		}
 	}
@@ -91,7 +93,7 @@ for (tstep in 1:nsteps){
 ## Approach 2: each cohort runs for its life time
 ## wait time = wait for needed previous cohorts to reach needed steps
 C2 <- matrix(NA, nrow = nsteps, ncol=nb_cohorts) 
-C2[1,1:nb_ages] <- ages_ctime$time
+C2[1,1:nb_ages] <- ages_ctime$time + time_init
 for (tstep in 2:nsteps){
 	for (cohort_id in 0:(nb_cohorts-1)){
 		is_active <- is_cohort_active[tstep, cohort_id+1]
@@ -102,6 +104,7 @@ for (tstep in 2:nsteps){
 				waiting_time <- max(C2[tstep-1,], na.rm=T)
 				nt <-  ages_ctime$time[age + 1]
 				if (add_randomness) nt = nt * rnorm(1, mean=1, sd=rnorm_sd)
+				nt <- nt+time_init
 				C2[tstep, cohort_id+1] <- nt + waiting_time
 			}else{
 				age <-tstep - t_starts[cohort_id +1] + age_starts[cohort_id +1] 
@@ -135,7 +138,8 @@ for (tstep in 1:nsteps){
 			}
 			step_time <- ages_ctime$time[age + 1]
 			if (add_randomness) step_time <- step_time * rnorm(1, mean=1, sd=rnorm_sd)
-			
+			if (is_new) step_time = step_time+time_init
+					
 			if (is.na(previous_cohort)){
 				if (tstep==1){
 					C3[tstep, cohort_id+1] <- step_time
@@ -196,10 +200,12 @@ for (cohort_id in cohort_ids){
 
 	for (age in age_start:(age_start+cohort_lifespan-1)){
 		tstep <- t_start - age_start + age
+		is_new <- t_starts[cohort_id +1] == tstep
 		step_time <- ages_ctime$time[age+1]
 		if (add_randomness){
 			step_time <- step_time * rnorm(1, mean=1, sd=rnorm_sd)
 		}
+		if (is_new) step_time = step_time+time_init
 		if (age==age_start){
 			C4[tstep, cohort_id + 1] = step_time + waiting_time
 		}else{
@@ -221,6 +227,7 @@ cat("\n\n###########################################\n")
 cat("   User input \n")
 cat("###########################################\n")
 cat(sprintf("\n%s age classes, %s time steps -> %s cohorts\n", nb_ages, nsteps, nb_cohorts))
+cat(sprintf("\nTime spent for prerun (read forcing, etc.): %s\n",time_init))
 cat(sprintf("\nBaseline computation time at age: %s\n", paste(ages_ctime$time, collapse=" ")))
 if (add_randomness){
 	cat(sprintf("\nWith a random aspect to each step's computation time (* rnorm(mean = 1, sd = %s))\n", rnorm_sd)) 
@@ -248,13 +255,19 @@ if (show_matrices){
 	print_matrix(C4)
 }
 
+
 cat("\n###########################################\n")
 cat("   Outcome\n")
 cat("###########################################\n")
 
+time_sequential = time_init + sum(rep(nsteps, sum(ages_ctime$time)))
+cat(sprintf("\nSequential approach: %.01fms\n", time_sequential))
+
 cat("\n#### Number of workers = number of age classes\n")
-cat(sprintf("\tApproach 1: %.01fs\n\tApproach 2: %.01fs\n", max(C, na.rm=T), max(C2, na.rm=T)))
+cat(sprintf("\tApproach 1: %.01fms (%.01f quicker than sequential)\n\tApproach 2: %.01fms (%.01f quicker than sequential)\n", max(C, na.rm=T), time_sequential / max(C, na.rm=T), max(C2, na.rm=T), time_sequential / max(C2, na.rm=T)))
 
 cat("\n#### Number of workers <= number of age classes\n")
 cat(sprintf("%s workers\n", nb_workers))
-cat(sprintf("\tApproach 1: %.01fs\n\tApproach 2: %.01fs\n", max(C3, na.rm=T), max(C4, na.rm=T)))
+
+cat(sprintf("\tApproach 1: %.01fms (%.01f quicker than sequential)\n\tApproach 2: %.01fms (%.01f quicker than sequential)\n", max(C3, na.rm=T), time_sequential / max(C3, na.rm=T), max(C4, na.rm=T), time_sequential / max(C4, na.rm=T)))
+
