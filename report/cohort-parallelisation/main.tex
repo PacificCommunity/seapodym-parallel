@@ -68,17 +68,26 @@ giveninits=true]{biblatex}
 \begin{document}
 
 % Fill in your details
-\author{Alexander Pletzer, Chris Scott, \\
-Inna Senina, Lucas Bonnin and Romain Forestier}
+\author{Alexander Pletzer, Chris Scott (NeSI/REANNZ), \\
+Inna Senina, Lucas Bonnin and Romain Forestier (SPC)}
 \title{Implementation of cohort parallelisation in the Seapodym code}
 
 \maketitle
+
+\begin{abstract}
+This report describes NeSI/REANNZ's consultancy project entitled ``SEAPODYM cohort parallelisation'' 
+whose work was performed from May to September 2025. The outcome of this work is a C++ library,
+\verb|seapodym-parallel|, which can be leveraged by the SEAPODYM code to parallelize the spatio-temporal
+evolution of tuna fish densities in the Pacific. The \verb|seapodym-parallel| library implements a 
+variation of the manager/worker setup whereby workers create new fish age cohorts and advances these in time. 
+The manager distributes tasks to the workers and stores results. The implemented manager/worker design differs from 
+traditional implementations in that tasks can only be started when other tasks have completed specific internal steps. 
+\end{abstract}
 
 %\frontmatter
 
 \pagestyle{plain}
 
-This report describes NeSI/REANNZ's consultancy project entitled ``SEAPODYM cohort parallelisation'' whose work was performed from May to September 2025.
 
 \section{Statement of the problem}
 
@@ -381,7 +390,7 @@ involves reading forcing data and spawning, is executed when launching the new c
 
 
 \begin{figure}
-    \includegraphics[width=15cm]{results/speedup_vs_workers.png}
+    \includegraphics[width=15cm]{c2i.png}
     \caption{Ratio of compute over initialization time for Seapodym.}
     \label{fig:c2i}
 \end{figure}
