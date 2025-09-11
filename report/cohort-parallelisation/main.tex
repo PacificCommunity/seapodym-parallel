@@ -89,7 +89,7 @@ traditional implementations in that tasks can only be started when other tasks h
 \pagestyle{plain}
 
 
-\section{Statement of the problem}
+\section{Introduction}
 
 SEAPODYM is a quantitative spatio-temporal model
 of population dynamics that solves partial differential
@@ -106,6 +106,7 @@ C++ classes that abstract parallelization. This library comes with a
 GitHub actions. The documentation of the API can be found at 
 \url{https://pacificcommunity.github.io/seapodym-parallel/}.
 
+\section{What is a cohort?}
 
 A cohort is a group of fish that are born at the same time. Each cohort 
 can be integrated forward in time independently of other cohorts, until the cohort reaches a certain age and dies. 
@@ -153,7 +154,11 @@ a cohort is integrated is $i = i_{beg} \cdots i_{end} - 1$ where $i_{beg} \geq 0
     \end{tabular}
 \end{table}
 When a cohort dies, it is replaced by a new cohort at the next time step. To instantiate the new cohort, data will need 
-to be communicated from the cohorts at the previous time step. Figure \ref{fig:cohort_deps} shows the dependency of the new cohorts on the older 
+to be communicated from the cohorts at the previous time step. 
+
+\section{Cohort task dependencies}
+
+Figure \ref{fig:cohort_deps} shows the dependency of the new cohorts on the older 
 cohorts at different steps.
 \begin{figure}[htbp]
     \centering
@@ -210,7 +215,7 @@ cohorts at different steps.
 \end{figure}
 
 
-\section{Task farming with dependencies on other tasks' steps}
+\section{Parallel task farming with dependencies}
 
 We opted for a task farming approach. This involves creating a pool of tasks that can be executed concurrently
 and a manager that assigns the tasks to the workers. Each task consists of advancing a cohort in time.
