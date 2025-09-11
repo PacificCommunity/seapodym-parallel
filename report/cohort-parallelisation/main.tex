@@ -209,7 +209,7 @@ and a manager that assigns the tasks to the workers. Each task consists of advan
 In classical task farming, the manager starts by assigning tasks to the workers. This involves sending a message to each worker, along with 
 some input parameters. Each worker then executes the task and reports the results back to the manager, who then assigns a new task to the worker. 
 When no more tasks are available, the manager sends a message to the workers to shut down. Task farming is particularly suitable when tasks 
-take various amount of time to execute.
+take a various amount of time to execute.
 
 Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:cohort_deps} prevents us from using such a naive task farming approach. 
 In our case, tasks can only be started when other tasks' particular steps have completed
