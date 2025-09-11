@@ -93,7 +93,7 @@ The objective of this work is to parallelise the SEAPODYM code over cohorts.
 A cohort is a group of fish that are born at the same time. Each cohort 
 can be integrated forward in time independently of other cohorts, until the cohort reaches a certain age and dies. 
 At the next time step, a new cohort is born and integrated forward in time until it dies. Except 
-at the first time step, the initial conditions of each cohort, however, depends on 
+at the first time step, the initial condition of each cohort depends on 
 the density of the other cohorts at the previous time step. Thus, the integration of 
 each cohort must take into account the state of the other cohorts and this requires 
 careful consideration when parallelising the code.
@@ -111,12 +111,11 @@ An example of cohort time integration is shown below:
 \end{equation}
 Here, the vertical axis represents time increasing from top to bottom ($N_t = 6$). The horizontal axis represents the 
 tasks than can be performed concurrently. Each row represents different age groups ($N_a = 3$). 
-Moreover, each cohort is identified by an integer ($0, 1, \cdots 7$). 
+Each cohort is identified by an integer ($0, 1, \cdots 7$). 
 
-Cohort 1 is one unit time older than cohort 2. Therefore cohort 1 dies one time step before cohort 2. Likewise,
-cohort 0 is one time step older than cohort 1 and thus dies after the first time step. The number of time steps 
-a cohort is integrated is $i = i_{beg} \cdots i_{end} - 1$ where $i_{beg} \geq 0$  and $i_{end} <= N_a$. Going back 
-to our example, we have
+Cohort 1 is one unit time older than cohort 2. Therefore cohort 1 dies one time step before cohort 2. 
+The number of time steps 
+a cohort is integrated is $i = i_{beg} \cdots i_{end} - 1$ where $i_{beg} \geq 0$  and $i_{end} <= N_a$. In our example, we have
 \begin{table}[htbp]
     \centering % Centers the table horizontally
     \caption{Start and end integration indices for each cohort}
@@ -137,7 +136,7 @@ to our example, we have
     \end{tabular}
 \end{table}
 When a cohort dies, it is replaced by a new cohort at the next time step. To instantiate the new cohort, data will need 
-to be transferred from the cohorts at the previous time step. Figure \ref{fig:cohort_deps} shows the dependency of the new cohorts on the older 
+to be communicated from the cohorts at the previous time step. Figure \ref{fig:cohort_deps} shows the dependency of the new cohorts on the older 
 cohorts at different steps.
 \begin{figure}[htbp]
     \centering
@@ -197,20 +196,20 @@ cohorts at different steps.
 \section{Task farming with dependencies on other tasks' steps}
 
 We opted for a task farming approach. This involves creating a pool of tasks that can be executed concurrently
-and a manager that assigns the tasks to the workers. Each task consists of advancing a cohort for multiple time steps.
+and a manager that assigns the tasks to the workers. Each task consists of advancing a cohort in time.
 
-In a classical task farming implementation, the manager starts by assigning tasks to the workers. This involves sending a message to each worker, along with 
+In classical task farming, the manager starts by assigning tasks to the workers. This involves sending a message to each worker, along with 
 some input parameters. Each worker then executes the task and reports the results back to the manager, who then assigns a new task to the worker. 
-When no more tasks are available, the manager sends a message to the workers to shut down. Task farming is particularly suitable when tasks take a different amount of time to execute, either because of the nature of the task or because of
-of varying computational loads or because of task heterogeneity.
+When no more tasks are available, the manager sends a message to the workers to shut down. Task farming is particularly suitable when tasks 
+take various amount of time to execute.
 
-Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:cohort_deps} prevents us from using a naive task farming approach. In our case, tasks can only be started when 
-other task steps have been completed. In other words, a task corresponding to advancing a cohort at a given step can only be started once all its prerequisite tasks 
-(as indicated by the arrows in Fig. \ref{fig:cohort_deps}) have finished. This requires the manager to keep track of task dependencies and only dispatch tasks to workers when 
-their dependencies are satisfied.
+Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:cohort_deps} prevents us from using such a naive task farming approach. 
+In our case, tasks can only be started when other tasks' particular steps have completed
+(as indicated by the arrows in Fig. \ref{fig:cohort_deps}). This requires the manager to keep track of task-step dependencies.
 
-We start by describing a worker's task. A worker waits for a task to be assigned by the manager. A task has a identification number \verb|workerId| that fully describes the task to accomplish.
-The worker reports back the status of the execution of each task to the manager. The corresponding pseudo-code is shown in Algorithm \ref{algo:worker}.
+We start by describing a worker's task. A worker waits for a task to be assigned by the manager. A task has a identification number \verb|taskid| 
+that fully describes the task to accomplish. The worker reports back the status of the execution of each task to the manager. 
+The corresponding pseudo-code is shown in Algorithm \ref{algo:worker}.
 
 \begin{algorithm}
 \caption{A worker's pseudo-code.}
@@ -250,10 +249,11 @@ The task function defined in Algorithm \ref{algo:worker} is responsible for adva
 \label{algo:worker}
 \end{algorithm}
 Note the call to \verb|sendStepCompleteMessageToManager| which informs the manager that a specific step for a task has been completed. 
-This is crucial for managing task dependencies, as the manager needs to know when a task's prerequisites have been satisfied.
+This is crucial for managing task dependencies.
 
-The manager code orchestrates the work. It maintains a list of all active workers, task queue, a list of completed tasks and stores the results. Since workers will be sending 
-various types of messages (``worker is available'' or ``result of step of task X''), the manager needs to be able to distinguish between them. This is done using message tags.
+The manager code orchestrates the work. It maintains a list of all active workers, a task queue, a list of completed tasks and stores the results. 
+Since workers will be sending various types of messages (``worker is available'' or ``result of task-step X''), the manager needs to be able to 
+distinguish between them. This is done using message tags.
 The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
 
 \begin{algorithm}
@@ -333,16 +333,17 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
 \end{figure}
 
 Figure \ref{fig:speedup} shows the parallel scalability of the cohort parallelisation 
-approach described above as the number of workers is increased. 
-The results were obtained on the NeSI/REANNZ cluster by running on the AMD Milan nodes.
-In all cases the number of age groups matches the number of workers.
+approach described above as the number of workers is increased. The speedup numbers were obtained for an idealized scenario, assuming 
+a fixed cost of communication (to initialize a new cohort) and a constant cost of executing a step
+on the NeSI/REANNZ AMD Milan node cluster.
+In all cases the number of workers was chosen to match the number of age groups $N_a$.
 
 Perfect parallel scaling 
 is shown as the black dashed line. Good scalability depends on the time taken to execute 
 each step and the amount of data fetched from the manager at the start of each task. Parallel 
 efficiency $> 50\%$ is achieved for time step times $\geq 10$ms and initial data sizes 
 $\leq 10000$ doubles. For instance, a time step taking $10$ms and an initial data size of 
-$10000$ doubles gives a speedup of 60, $75\%$ parallel efficiency, when using $80$ workers.
+$10000$ doubles gives a speedup of 60, when using $80$ workers, i.e. $75\%$ parallel efficiency.
 
 Note that at every step the worker sends data to the manager, as well as a message 
 to inform the manager that the step has been completed. This introduces a communication overhead
@@ -351,32 +352,52 @@ Taking the example of $20,000$ doubles sent by 80 workers to the manager at a ca
  $10$ms, we get a data transfer rate of $1.3$GB/s = $100$Gb/s, which is close to the bandwidth 
  of the Infiniband communication fabric. To further improve parallel scalability, one would need to 
  either increase the computational load per step, reduce the amount of data to be transferred or apply
-some form of data compression. For instance, one could send flots instead of double and this would 
+some form of data compression. For instance, one could send floats instead of double and this would 
 improve the speedup from 40 to 60. 
 
-\section{The cost of intitalization}
+\section{The cost of initialization}
+
+Scalability can be affected by load balancing. Some concurrently executed tasks may take longer than others
+to complete. When synchronization occurs, which is the case at every time step in Seapodym, then 
+workers whose task has finished need to wait for the slowest woprker to finish their task. While the evolution of
+the reaction-diffusion equations takes the same time for all cohorts, the initialization of a new cohort, which occurs
+at every time step, can lead to severe load imbalance and can thus affect the parallel speedup. 
+Fig. \ref{fig:c2i} shows the the ratio of the compute time over the initialization time, the higher the 
+better. Initialization involves reading data from file and other one off operations. 
+
+There are different ways to amortize the high cost of initialization. One possibility is to avoid constructing a new 
+cohort at every time step. Instead a ``vanilla'' cohort is created initially, when the simulation start. This cohort,
+reads the restart files, the input files and set things up. Only the final stage of the construction, which 
+involves reading forcing data and spawning, is executed when launching the new cohort. 
+
+
+\begin{figure}
+    \includegraphics[width=15cm]{results/speedup_vs_workers.png}
+    \caption{Ratio of compute over initialization time for Seapodym.}
+    \label{fig:c2i}
+\end{figure}
 
 \section{Comparing blocking and non-blocking get operations}
 
-A significant part for the initialization time involves fetching data from the manager. This takes
-place at each time step. Our library support asynchronous get operations, which allow one to 
+A significant part for the initialization time involves fetching data from the manager. 
+Our library support asynchronous get operations, which allow one to 
 overlap communication with computation. 
 
-The default mode to ``get'' data is blocking, that is retrieved data are ready when the ``get'' call
-completes. Alternatively, the programmer may rely on ``getAsync'' calls. In this case the programmer 
-indicates his/her desire to fetch the data but the data need not be immediately available. A ``startEpoch''
-and ``endEpoch'' calls around the ``getAsync" operations determine the the time interval 
-when remote memory access operations take place with 
-``endEpoch'' indicating that the data must available at that point. (An additional ``flush'' can be used 
-) to request completed ``get'' operations within a period. 
+The default mode to \verb|get| data is blocking, that is the retrieved data are ready when the call
+completes. Alternatively, the programmer may rely on \verb|getAsync| calls. In this case the programmer 
+indicates his/her desire to fetch the data but the data need not be immediately available. A \verb|startEpoch|
+and \verb|endEpoch| calls around the \verb|getAsync| operations determine the time interval 
+when remote memory access operations take place. The retrived data are guaranteed to be available only when
+\verb|endEpoch| is called. (An additional ``flush'' medthod can be invoked
+to synchronize operations within a period.)
 
-In Fig. \ref{fig:async} we compare the  execution time of MPI ``get'' operations using 
-blocking and non-blocking approaches. Each test involves reading $N$ chunks ($=$ number of workers) 
+In Fig. \ref{fig:async} we compare the  execution time of MPI \verb|get| operations using 
+the blocking and non-blocking variants. Each test involves reading $N$ chunks ($=$ number of workers) 
 of $nd$ values from rank 0 and summing the result. In the blocking test, the chunks are read one at a 
 time, followed by a sleep operation lasting $nm$ milliseconds and a sum operation over the chunk. 
 In the nonblocking test, a big array is filled by reading the chunks asynchronously, followed by the 
-sleep operation. These two operations are within a single epoch. The final step then involves summing up the values
-of the big array. The benefit of using non-blocking ``get'' calls is particulalry apparent for large chunks 
+sleep operation -- these two operations are within a single epoch. The final step then involves summing up the values
+of the big array. The benefit of using non-blocking \verb|get| calls is particulalry apparent for large chunks 
 $nd$ and small amount of work (low $nm$).
 
 \begin{figure}
