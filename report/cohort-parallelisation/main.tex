@@ -284,8 +284,8 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
 
         \Comment{Assign ready tasks to any available worker}    
         \For{taskid in taskQueue}
-            \State taskDependencies = getTaskStepDepenencies{taskid}
-            bool ready = true;
+            \State taskDependencies = getTaskStepDependencies{taskid}
+            \State bool ready = true
             \For{dep in taskDependencies}
                 \If{completed.find(dep) == completed.end()}
                     \State ready = false
@@ -392,7 +392,7 @@ when remote memory access operations take place. The retrived data are guarantee
 to synchronize operations within a period.)
 
 In Fig. \ref{fig:async} we compare the  execution time of MPI \verb|get| operations using 
-the blocking and non-blocking variants. Each test involves reading $N$ chunks ($=$ number of workers) 
+the blocking and non-blocking variants. Each test (implemented in \verb|testAsyncPutGet|) involves reading $N$ chunks ($=$ number of workers) 
 of $nd$ values from rank 0 and summing the result. In the blocking test, the chunks are read one at a 
 time, followed by a sleep operation lasting $nm$ milliseconds and a sum operation over the chunk. 
 In the nonblocking test, a big array is filled by reading the chunks asynchronously, followed by the 
