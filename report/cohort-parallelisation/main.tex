@@ -467,6 +467,23 @@ additional ranks, (4) disk and I/O contention may be decreased.
 
 \section{Summary and future work}
 
+A parallel library was developed to parallelize the SEAPODYM code. While the library has been tested independently and a version
+of SEAPODYM now links to this library, more checks are warranted. The SEAPODYM code comes in different flavours, parallelization 
+was added only to the version that evolves the fish densities in time. Extending parallelization to other SEAPODYM versions, including one 
+that maximizes the likelihood function remains to be done. 
+
+The parallelization is based on a task farming approach with specific peculiarities: (1) tasks have sub-tasks (steps), (2) tasks 
+can be started only when other tasks and once their steps have completed and (3) data is sent to the manager at the end of each step. The 
+manager stores and distributes the data on request using one-sided MPI communication with passive targets. This double exchange of 
+data (workers to manager and then manager to workers) will facilitate the implementation of the library into other versions of 
+SEAPODYM. 
+
+Parallel efficiency of 84 \% was achieved for 36 age groups and one worker per age group using blocking communication. The corresponding 
+reduction of manager execution time was from 60 to 2 seconds ($\approx 30$x speed improvement). Additional gains can potentially
+be attained by using non-blocking communication, a feature supported by our parallel library. However, care should be taken to ensure 
+correct synchronization. A common type of error is to use the fetched data before the ``get'' operation has completed. Another pitfall 
+is to fetch data from the manager that have not yet been filled in. Therefore, we recommend careful profiling and replace blocking to 
+non-blocking calls only to the regions that are known to be performance bottlenecks after comprehensive testing. 
 
    
 
