@@ -70,15 +70,15 @@ giveninits=true]{biblatex}
 % Fill in your details
 \author{Alexander Pletzer, Chris Scott (NeSI/REANNZ), \\
 Inna Senina, Lucas Bonnin and Romain Forestier (SPC)}
-\title{Implementation of cohort parallelisation in the Seapodym code}
+\title{Implementation of cohort parallelisation in the SEAPODYM code}
 
 \maketitle
 
 \begin{abstract}
 This report describes NeSI/REANNZ's consultancy project entitled ``SEAPODYM cohort parallelisation'' 
 whose work was performed from May to September 2025. The outcome of this work is a C++ library,
-\verb|seapodym-parallel|, which can be leveraged by the SEAPODYM code to parallelize the spatio-temporal
-evolution of tuna fish densities in the Pacific. The \verb|seapodym-parallel| library implements a 
+\verb|SEAPODYM-parallel|, which can be leveraged by the SEAPODYM code to parallelize the spatio-temporal
+evolution of tuna fish densities in the Pacific. The \verb|SEAPODYM-parallel| library implements a 
 variation of the manager/worker setup whereby workers create new fish age cohorts and advances these in time. 
 The manager distributes tasks to the workers and stores results. The implemented manager/worker design differs from 
 traditional implementations in that tasks can only be started when other tasks have completed specific internal steps. 
@@ -100,11 +100,11 @@ datasets obtained from industrial fishing and scientific campaigns.
 
 The objective of this work is to parallelise the SEAPODYM code over cohorts. 
 This was achieved by designing and implementing the sepodym-parallel library 
-(\url{github.com/PacificCommunity/seapodym-parallel.git}), a collection of 
+(\url{github.com/PacificCommunity/SEAPODYM-parallel.git}), a collection of 
 C++ classes that abstract parallelization. This library comes with a 
 \verb|CMake| build system, unit tests and continuous integration via 
 GitHub actions. The documentation of the API can be found at 
-\url{https://pacificcommunity.github.io/seapodym-parallel/}.
+\url{https://pacificcommunity.github.io/SEAPODYM-parallel/}.
 
 \section{What is a cohort?}
 
@@ -381,36 +381,52 @@ improve the speedup from 40 to 60.
 \section{The cost of initialization}
 
 Scalability can be affected by load balancing. Some concurrently executed tasks may take longer than others
-to complete. When synchronization occurs, which is the case at every time step in Seapodym, then 
+to complete. When synchronization occurs, which is the case at every time step in SEAPODYM, then 
 workers whose task has finished need to wait for the slowest woprker to finish their task. While the evolution of
 the reaction-diffusion equations takes the same time for all cohorts, the initialization of a new cohort, which occurs
 at every time step, can lead to severe load imbalance and can thus affect the parallel speedup. 
 Fig. \ref{fig:c2i} shows the the ratio of the compute time over the initialization time, the higher the 
 better. Initialization involves reading data from file and other one off operations. 
 
-There are different ways to amortize the high cost of initialization. One possibility is to avoid constructing a new 
-cohort at every time step. Instead a ``vanilla'' cohort is created initially, when the simulation start. This cohort,
-reads the restart files, the input files and set things up. Only the final stage of the construction, which 
-involves reading forcing data and spawning, is executed when launching the new cohort. 
-
+Let $I$ denote the time it takes to initialize a cohort, $C$ the compute time advancing one time step and $N$ the 
+number of workers. The parallel speedup, defined as the ratio of single worker execution over the 
+parallel execution, is
+\begin{equation}
+    S = \frac{I + N C}{I + C} = N \frac{I/(NC) + 1}{I/C + 1}
+\end{equation}
+Note that for large number of workers $S \approx N \frac{1}{I/C + 1}$ and thus the cost of initialization is to reduce the slope 
+the speedup ($I/C > 0$). Figure \ref{fig:c2i} shows the ratio $(I/C)^{-1}$ for our initial implementation. This ratio, though increasing for 
+large $N$s, can be close to 1 for moderate $N$ values. To mitigate the initialization effect on parallel scalability, the cohort 
+initializationstep was split into cohort independent and dependent steps. The cohort independent initialization can be performed 
+for all cohorts at the start of the simulation. Since there are $\sim N$ cohorts, this has the effect of amortizing the initialization 
+cost. Only the final stage of cohort construction, which 
+involves reading forcing data and spawning, is executed when launching a new cohort. 
 
 \begin{figure}
     \includegraphics[width=15cm]{c2i.png}
-    \caption{Ratio of compute over initialization time for Seapodym.}
+    \caption{Ratio of compute over initialization time for SEAPODYM.}
     \label{fig:c2i}
 \end{figure}
 
 \section{Comparing blocking and non-blocking get operations}
 
-A significant part for the initialization time involves fetching data from the manager. 
-Our library support asynchronous get operations, which allow one to 
-overlap communication with computation. 
+A significant part for the initialization time involves fetching data from the manager. Assuming the number of age groups 
+to match the number of workers $N$, the speedup becomes 
+\begin{equation}
+    S = N \frac{I/(NC) + 1}{I/C + D N/C + 1}
+\end{equation}
+where the term $D$ represents the time it takes to gather spawning data from a previous time cohort. The term
+$D N/C$ is the relative cost of communicating the spawning data of the $N$ previous cohorts relative to the compute time of 
+a step. Clearly, the communication effect is to flatten the speedup curve as $N$ increases. In contrast to the initialization
+effect, the flattening gets more pronounced with large number of workers.
 
-The default mode to \verb|get| data is blocking, that is the retrieved data are ready when the call
-completes. Alternatively, the programmer may rely on \verb|getAsync| calls. In this case the programmer 
-indicates his/her desire to fetch the data but the data need not be immediately available. A \verb|startEpoch|
-and \verb|endEpoch| calls around the \verb|getAsync| operations determine the time interval 
-when remote memory access operations take place. The retrived data are guaranteed to be available only when
+One way to lessen the impact of communication is to allow communication and computation to overlap. 
+Our library support asynchronous get operations. The default mode to \verb|get| data is blocking, the retrieved data are ready when the call
+completes. Alternatively, the programmer may rely on \verb|getAsync| calls in which case the programmer 
+{\it indicates} his/her desire to fetch the data to be used sometimes in the future. In this case, 
+the data need not be immediately available. A \verb|startEpoch|
+and \verb|endEpoch| calls around the \verb|getAsync| \verb|getAsync| operations determine the time interval 
+when remote memory access operations take place. The retrieved data are guaranteed to be available only when
 \verb|endEpoch| is called. (An additional ``flush'' medthod can be invoked
 to synchronize operations within a period.)
 
@@ -432,8 +448,26 @@ $nd$ and small amount of work (low $nm$).
 \label{fig:async}
 \end{figure}
 
+\section{Parallel Scaling for SEAPODYM}
+
+The parallelization strategies presented in the previous sections have been implemented into the SEAPODYM code. Below we 
+describe a first scalibility test, involving 36 age groups advanced for X time. 
+All the runs (Fig. \ref{fig:seapodym_scalability}) were performed on REANNZ AMD Milan
+platform using a single node. Note the better than linear scalability between 3-18 workers. Possible reasons for this behaviour are:
+(1) with more workers processes handle smaller amounts of data which may fit better in cache, (2) with more workers the 
+scheduling overhead distributes work more evenly (reduction of load imbalance), (3) MPI may pipeline messages more efficiently with 
+additional ranks, (4) disk and I/O contention may be decreased.
+
+\begin{figure}
+    \includegraphics[width=15cm]{results_seapodym/seapodym_cohort_speedup.png}
+    \caption{Parallel speedup relative to a single worker run for a SEAPODYM test.}
+    \label{fig:seapodym_scalability}
+\end{figure}
+
 
 \section{Summary and future work}
+
+
    
 
 \end{document}
