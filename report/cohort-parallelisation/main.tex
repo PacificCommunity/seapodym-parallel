@@ -77,8 +77,8 @@ Inna Senina, Lucas Bonnin and Romain Forestier (SPC)}
 \begin{abstract}
 This report describes NeSI/REANNZ's consultancy project entitled ``SEAPODYM cohort parallelisation'' 
 whose work was performed from May to September 2025. The outcome of this work is a C++ library,
-\verb|SEAPODYM-parallel|, which can be leveraged by the SEAPODYM code to parallelize the spatio-temporal
-evolution of tuna fish densities in the Pacific. The \verb|SEAPODYM-parallel| library implements a 
+\verb|seapodym-parallel|, which can be leveraged by the SEAPODYM code to parallelize the spatio-temporal
+evolution of tuna fish densities in the Pacific. The \verb|seapodym-parallel| library implements a 
 variation of the manager/worker setup whereby workers create new fish age cohorts and advances these in time. 
 The manager distributes tasks to the workers and stores results. The implemented manager/worker design differs from 
 traditional implementations in that tasks can only be started when other tasks have completed specific internal steps. 
@@ -98,19 +98,19 @@ The model is parameterized using a maximum
 likelihood estimation approach that integrates georeferenced 
 datasets obtained from industrial fishing and scientific campaigns.
 
-The objective of this work is to parallelise the SEAPODYM code over cohorts. 
+The objective of this work is to parallelise the SEAPODYM code to achieve higher performance. 
 This was achieved by designing and implementing the sepodym-parallel library 
-(\url{github.com/PacificCommunity/SEAPODYM-parallel.git}), a collection of 
-C++ classes that abstract parallelization. This library comes with a 
+(\url{github.com/PacificCommunity/seapodym-parallel.git}), a collection of 
+C++ classes that abstract parallelization. The library comes with a 
 \verb|CMake| build system, unit tests and continuous integration via 
 GitHub actions. The documentation of the API can be found at 
-\url{https://pacificcommunity.github.io/SEAPODYM-parallel/}.
+\url{https://pacificcommunity.github.io/seapodym-parallel/}.
 
 \section{What is a cohort?}
 
 A cohort is a group of fish that are born at the same time. Each cohort 
 can be integrated forward in time independently of other cohorts, until the cohort reaches a certain age and dies. 
-At the next time step, a new cohort is born and integrated forward in time until it dies. Except 
+At the next time step, a new cohort is born and integrated forward in time until it, too, dies. Except 
 at the first time step, the initial condition of each cohort depends on 
 the density of the other cohorts at the previous time step. Thus, the integration of 
 each cohort must take into account the state of the other cohorts and this requires 
@@ -128,15 +128,14 @@ An example of cohort time integration is shown below:
 \end{array}
 \end{equation}
 Here, the vertical axis represents time increasing from top to bottom ($N_t = 6$). The horizontal axis represents the 
-tasks than can be performed concurrently. Each row represents different age groups ($N_a = 3$). 
+tasks than can be performed concurrently. Each row represents different age groups (here $N_a = 3$). 
 Each cohort is identified by an integer ($0, 1, \cdots 7$). 
-
 Cohort 1 is one unit time older than cohort 2. Therefore cohort 1 dies one time step before cohort 2. 
 The number of time steps 
-a cohort is integrated is $i = i_{beg} \cdots i_{end} - 1$ where $i_{beg} \geq 0$  and $i_{end} <= N_a$. In our example, we have
+a cohort is integrated is $i = i_{beg} \cdots i_{end} - 1$ where $i_{beg} \geq 0$  and $i_{end} <= N_a$.
 \begin{table}[htbp]
     \centering % Centers the table horizontally
-    \caption{Start and end integration indices for each cohort}
+    \caption{Start and end integration indices for each cohort of example (\ref{eq:cohorts})}
     \label{tab:cohort_indices}
     \begin{tabular}{c|cc} % Three centered columns
         \toprule % Top rule (from booktabs)
@@ -153,13 +152,14 @@ a cohort is integrated is $i = i_{beg} \cdots i_{end} - 1$ where $i_{beg} \geq 0
         \bottomrule % Bottom rule (from booktabs)
     \end{tabular}
 \end{table}
-When a cohort dies, it is replaced by a new cohort at the next time step. To instantiate the new cohort, data will need 
-to be communicated from the cohorts at the previous time step. 
+When a cohort dies, it is replaced by a new cohort at the next time step. 
 
 \section{Cohort task dependencies}
 
+To instantiate the new cohort, data will need 
+to be communicated from the cohorts at the previous time step.  
 Figure \ref{fig:cohort_deps} shows the dependency of the new cohorts on the older 
-cohorts at different steps.
+cohorts at different steps of example (\ref{eq:cohorts}).
 \begin{figure}[htbp]
     \centering
 \begin{tikzpicture}[main/.style = {draw, circle}, node distance=2cm]
@@ -217,20 +217,22 @@ cohorts at different steps.
 
 \section{Parallel task farming with dependencies}
 
-We opted for a task farming approach. This involves creating a pool of tasks that can be executed concurrently
+We opted for a task farming approach, which involves creating a pool of tasks that can be executed concurrently,
 and a manager that assigns the tasks to the workers. Each task consists of advancing a cohort in time.
 
-In classical task farming, the manager starts by assigning tasks to the workers. This involves sending a message to each worker, along with 
+In classical task farming, the manager starts by assigning tasks to the workers. The manager sends a message to each worker, along with 
 some input parameters. Each worker then executes the task and reports the results back to the manager, who then assigns a new task to the worker. 
-When no more tasks are available, the manager sends a message to the workers to shut down. Task farming is particularly suitable when tasks 
-take a various amount of time to execute.
+When no more tasks are available, the manager sends a message to the workers to shut down. The advantage of task farming over other approaches is
+that resources (workers) and tasks are dynamically matched, often allowing for better load balancing. A possible drawback of task farming is the 
+additional complexity of coordinating the assignment of tasks, additional communication and the need to reserve an MPI rank for the manager.
 
-Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:cohort_deps} prevents us from using such a naive task farming approach. 
-In our case, tasks can only be started when other tasks' particular steps have completed
-(as indicated by the arrows in Fig. \ref{fig:cohort_deps}). This requires the manager to keep track of task-step dependencies.
+Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:cohort_deps} prevent us from using a naive task farming approach. 
+since tasks can only be started when other tasks' particular steps have completed
+(as indicated by the arrows). This requires the manager to keep track of task-step dependencies.
 
-We start by describing a worker's task. A worker waits for a task to be assigned by the manager. A task has a identification number \verb|taskid| 
-that fully describes the task to accomplish. The worker reports back the status of the execution of each task to the manager. 
+We start by describing a worker's task. A task has a identification number \verb|taskid| 
+that fully describes the task to accomplish. A worker waits for a task to be assigned by the manager. 
+The worker reports back the status of the execution of each task to the manager. 
 The corresponding pseudo-code is shown in Algorithm \ref{algo:worker}.
 
 \begin{algorithm}
@@ -238,7 +240,7 @@ The corresponding pseudo-code is shown in Algorithm \ref{algo:worker}.
     \begin{algorithmic}[1] % [1] for line numbering
     \While {true}
 
-        taskid = \Call{getTaskIdFromManager}{};
+        taskid = \Call getTaskIdFromManager{}
         \If {taskid $< 0$}
             Break
         \EndIf
@@ -271,11 +273,10 @@ The task function defined in Algorithm \ref{algo:worker} is responsible for adva
 \label{algo:worker}
 \end{algorithm}
 Note the call to \verb|sendStepCompleteMessageToManager| which informs the manager that a specific step for a task has been completed. 
-This is crucial for managing task dependencies.
 
 The manager code orchestrates the work. It maintains a list of all active workers, a task queue, a list of completed tasks and stores the results. 
 Since workers will be sending various types of messages (``worker is available'' or ``result of task-step X''), the manager needs to be able to 
-distinguish between them. This is done using message tags.
+distinguish between these. This is done by using message tags.
 The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
 
 \begin{algorithm}
@@ -294,32 +295,32 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
             \EndIf
 
             \Comment{Store the result}
-            \State results.insert{msg.output}
+            \Call results.insert{msg.output}
             \State taskid = output[0]
             \State step = output[1]
-            completed.insert{taskid, step}
+            \State completed.insert(taskid, step)
 
             \If{step == stepEnd - 1}
-                assigned.erase{taskid};
+                \State assigned.erase(taskid)
             \EndIf
         \EndWhile
 
         \Comment{Assign ready tasks to any available worker}    
         \For{taskid in taskQueue}
-            \State taskDependencies = getTaskStepDependencies{taskid}
+            \State taskDependencies = getTaskStepDependencies(taskid)
             \State bool ready = true
             \For{dep in taskDependencies}
-                \If{completed.find{dep} == completed.end{}}
+                \If{ completed.find(dep) == completed.end()}
                     \State ready = false
                     \State break
                 \EndIf
             \EndFor
-            \If{ready and !activeWorkers.empty{}}
-                \State worker = activeWorkers.begin{}
-                \State activeWorkers.erase{worker}
+            \If{ready and not activeWorkers.empty()}
+                \State worker = activeWorkers.begin()
+                \State activeWorkers.erase(worker)
                 \State \Call{sendTaskToWorker}{taskid, worker}
-                \State assigned.insert{taskid}
-                \State taskQueue.erase{taskid}
+                \State assigned.insert(taskid)
+                \State taskQueue.erase(taskid)
             \EndIf
         \EndFor
 
@@ -336,7 +337,7 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
     \Comment{Send stop signal to workers}
     \State stop = -1
     \For{worker in workers}
-        \Call sendStopSignalToWorker{worker}
+        \State sendStopSignalToWorker(worker)
     \EndFor
 
 \end{algorithmic}
@@ -347,7 +348,7 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
 
 \begin{figure}
     \includegraphics[width=15cm]{results/speedup_vs_workers.png}
-    \caption{Parallel scalability for different step execution 
+    \caption{Parallel scaling as a function of the number of workers, for different step execution 
     times and number of doubles initially fetched from the manager. 
     The number of age groups matches the number of workers. These results 
     assume no initialisation setup time.}
@@ -366,9 +367,9 @@ is shown as the black dashed line. Good scalability depends on the time taken to
 each step and the amount of data fetched from the manager at the start of each task. Parallel 
 efficiency $> 50\%$ is achieved for time step times $\geq 10$ms and initial data sizes 
 $\leq 10000$ doubles. For instance, a time step taking $10$ms and an initial data size of 
-$10000$ doubles gives a speedup of 60, when using $80$ workers, i.e. $75\%$ parallel efficiency.
+$10000$ doubles yields a speedup of 60 when using $80$ workers, i.e. $75\%$ parallel efficiency.
 
-Note that at every step the worker sends data to the manager, as well as a message 
+At every step, the worker sends data to the manager, as well as a message 
 to inform the manager that the step has been completed. This introduces a communication overhead
 that limits parallel scalability. 
 Taking the example of $20,000$ doubles sent by 80 workers to the manager at a cadence of 
@@ -380,27 +381,30 @@ improve the speedup from 40 to 60.
 
 \section{The cost of initialization}
 
-Scalability can be affected by load balancing. Some concurrently executed tasks may take longer than others
+Scalability can be affected by load imbalance. Some concurrently executing tasks may take longer than others
 to complete. When synchronization occurs, which is the case at every time step in SEAPODYM, then 
-workers whose task has finished need to wait for the slowest woprker to finish their task. While the evolution of
-the reaction-diffusion equations takes the same time for all cohorts, the initialization of a new cohort, which occurs
-at every time step, can lead to severe load imbalance and can thus affect the parallel speedup. 
+workers whose task has finished need to wait for the slowest worker to finish their task. While the solution of
+the reaction-diffusion equations takes the same time for all cohorts, the initialization of a new cohort
+can lead to severe load imbalance and can thus affect the parallel speedup. 
 Fig. \ref{fig:c2i} shows the the ratio of the compute time over the initialization time, the higher the 
 better. Initialization involves reading data from file and other one off operations. 
 
-Let $I$ denote the time it takes to initialize a cohort, $C$ the compute time advancing one time step and $N$ the 
+Let us estimate the effect of a high initialization time on parallel scalability. 
+Let $I$ denote the time it takes to initialize a cohort, $C$ the compute time required to advance the density one time step and $N$ the 
 number of workers. The parallel speedup, defined as the ratio of single worker execution over the 
 parallel execution, is
 \begin{equation}
     S = \frac{I + N C}{I + C} = N \frac{I/(NC) + 1}{I/C + 1}
 \end{equation}
-Note that for large number of workers $S \approx N \frac{1}{I/C + 1}$ and thus the cost of initialization is to reduce the slope 
-the speedup ($I/C > 0$). Figure \ref{fig:c2i} shows the ratio $(I/C)^{-1}$ for our initial implementation. This ratio, though increasing for 
-large $N$s, can be close to 1 for moderate $N$ values. To mitigate the initialization effect on parallel scalability, the cohort 
-initializationstep was split into cohort independent and dependent steps. The cohort independent initialization can be performed 
+Note that for large numbers of workers $S \approx N \frac{1}{I/C + 1}$ and thus the impact of initialization is to reduce the speedup slope 
+($I/C > 0$). Figure \ref{fig:c2i} shows the ratio $(I/C)^{-1}$ for our initial implementation. This ratio, though increasing for 
+large $N$s, was close to 1 for moderate $N$ values. 
+
+To mitigate the initialization effect on parallel scalability, the cohort 
+initialization step was split into cohort independent and dependent steps. The cohort independent initialization can be performed 
 for all cohorts at the start of the simulation. Since there are $\sim N$ cohorts, this has the effect of amortizing the initialization 
 cost. Only the final stage of cohort construction, which 
-involves reading forcing data and spawning, is executed when launching a new cohort. 
+involves reading forcing and spawning data, is executed when launching a new cohort. 
 
 \begin{figure}
     \includegraphics[width=15cm]{c2i.png}
@@ -410,23 +414,24 @@ involves reading forcing data and spawning, is executed when launching a new coh
 
 \section{Comparing blocking and non-blocking get operations}
 
-A significant part for the initialization time involves fetching data from the manager. Assuming the number of age groups 
+A significant part of initialing a cohort is spent {\it fetching} data from the manager. Assuming the number of age groups 
 to match the number of workers $N$, the speedup becomes 
 \begin{equation}
     S = N \frac{I/(NC) + 1}{I/C + D N/C + 1}
 \end{equation}
 where the term $D$ represents the time it takes to gather spawning data from a previous time cohort. The term
 $D N/C$ is the relative cost of communicating the spawning data of the $N$ previous cohorts relative to the compute time of 
-a step. Clearly, the communication effect is to flatten the speedup curve as $N$ increases. In contrast to the initialization
-effect, the flattening gets more pronounced with large number of workers.
+a step. Clearly, communication flattens the speedup curve as $N$ increases. In contrast to the initialization
+effect, the flattening gets more pronounced with a large number of workers.
 
 One way to lessen the impact of communication is to allow communication and computation to overlap. 
-Our library support asynchronous get operations. The default mode to \verb|get| data is blocking, the retrieved data are ready when the call
+Our library supports both synchronous and asynchronous \verb|get| operations. The default mode to \verb|get| data is blocking 
+and in this case the retrieved data is ready when the call
 completes. Alternatively, the programmer may rely on \verb|getAsync| calls in which case the programmer 
-{\it indicates} his/her desire to fetch the data to be used sometimes in the future. In this case, 
-the data need not be immediately available. A \verb|startEpoch|
-and \verb|endEpoch| calls around the \verb|getAsync| \verb|getAsync| operations determine the time interval 
-when remote memory access operations take place. The retrieved data are guaranteed to be available only when
+{\it indicates} his/her desire to fetch the data to be used sometimes in the future. Upon completion of 
+\verb|getAsync|, the data is not immediately available. \verb|startEpoch|
+and \verb|endEpoch| calls before, respectively after \verb|getAsync|, determine the earliest moment the data can be requested and the latest 
+time data must be available. The retrieved data are guaranteed to be available only when
 \verb|endEpoch| is called. (An additional ``flush'' medthod can be invoked
 to synchronize operations within a period.)
 
@@ -451,12 +456,14 @@ $nd$ and small amount of work (low $nm$).
 \section{Parallel Scaling for SEAPODYM}
 
 The parallelization strategies presented in the previous sections have been implemented into the SEAPODYM code. Below we 
-describe a first scalibility test, involving 36 age groups advanced for X time. 
+describe a first scalibility test, involving 36 age groups (96 cohorts) advanced over the period 1979-1983 (60 time steps). 
 All the runs (Fig. \ref{fig:seapodym_scalability}) were performed on REANNZ AMD Milan
-platform using a single node. Note the better than linear scalability between 3-18 workers. Possible reasons for this behaviour are:
+platform using a single node. 
+
+Note the better than linear scalability between 3-18 workers. Possible reasons for this behaviour are:
 (1) with more workers processes handle smaller amounts of data which may fit better in cache, (2) with more workers the 
 scheduling overhead distributes work more evenly (reduction of load imbalance), (3) MPI may pipeline messages more efficiently with 
-additional ranks, (4) disk and I/O contention may be decreased.
+additional ranks and (4) disk and I/O contention may be decreased.
 
 \begin{figure}
     \includegraphics[width=15cm]{results_seapodym/seapodym_cohort_speedup.png}
@@ -467,24 +474,27 @@ additional ranks, (4) disk and I/O contention may be decreased.
 
 \section{Summary and future work}
 
-A parallel library was developed to parallelize the SEAPODYM code. While the library has been tested independently and a version
-of SEAPODYM now links to this library, more checks are warranted. The SEAPODYM code comes in different flavours, parallelization 
-was added only to the version that evolves the fish densities in time. Extending parallelization to other SEAPODYM versions, including one 
+A parallel library (\verb|seapodym-parallel|) has been developed to parallelize the SEAPODYM code. While the library has been tested independently and a version
+of SEAPODYM now runs with this library, more checks are warranted. The SEAPODYM code comes in different flavours, parallelization 
+has been added at present only to the version that evolves the fish densities in time. Extending parallelization to other SEAPODYM versions, including one 
 that maximizes the likelihood function remains to be done. 
 
-The parallelization is based on a task farming approach with specific peculiarities: (1) tasks have sub-tasks (steps), (2) tasks 
-can be started only when other tasks and once their steps have completed and (3) data is sent to the manager at the end of each step. The 
-manager stores and distributes the data on request using one-sided MPI communication with passive targets. This double exchange of 
-data (workers to manager and then manager to workers) will facilitate the implementation of the library into other versions of 
-SEAPODYM. 
+The parallelization is based on a task farming approach with additional features: (1) tasks have sub-tasks (steps), (2) tasks 
+can be started only when other tasks' specific steps have completed and (3) data is sent to the manager at the end of each step. The 
+manager stores and distributes the data to workers on request using one-sided MPI communication with passive targets. As such,
+the manager does not actively contribute to the the data exchange, it is the workers who decide when to fetch and send data.
 
-Parallel efficiency of 84 \% was achieved for 36 age groups and one worker per age group using blocking communication. The corresponding 
-reduction of manager execution time was from 60 to 2 seconds ($\approx 30$x speed improvement). Additional gains can potentially
-be attained by using non-blocking communication, a feature supported by our parallel library. However, care should be taken to ensure 
-correct synchronization. A common type of error is to use the fetched data before the ``get'' operation has completed. Another pitfall 
-is to fetch data from the manager that have not yet been filled in. Therefore, we recommend careful profiling and replace blocking to 
-non-blocking calls only to the regions that are known to be performance bottlenecks after comprehensive testing. 
+A conscious choice in the design of the task farming implementation is to have all data exchanges channeled through the manager. 
+This means that the (spawning) data required by workers at the start of a new cohort cannot be directly received from other 
+cohorts (or worers) but must go through the manager first. The rationale for this choice is to facilitate the implementation of parallelism
+in other versions of SEAPODYM.
 
-   
+Nevertheless, we demonstrated that parallel efficiency of 84 \% can be achieved for 36 age groups and one worker per age group using blocking communication. 
+The corresponding reduction of manager execution time was from 60 to 2 seconds, a $\approx 30$x speed improvement. Additional gains can potentially
+be attained by using non-blocking communication, a feature supported by \verb|seapodym-parallel|. However, care should be taken to ensure 
+correct synchronization. A common type of error is to consume the fetched data before the ``get'' operation has completed. Another pitfall 
+is to fetch data from the manager that has not yet been filled in. Therefore, we recommend careful profiling, and replacing blocking by
+non-blocking calls only in the regions that are known to be performance intensive. 
+
 
 \end{document}
