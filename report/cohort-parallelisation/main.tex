@@ -128,7 +128,7 @@ An example of cohort time integration is shown below:
 \end{array}
 \end{equation}
 Here, the vertical axis represents time increasing from top to bottom ($N_t = 6$). The horizontal axis represents the 
-tasks than can be performed concurrently. Each row represents different age groups (here $N_a = 3$). 
+tasks that can be performed concurrently. Each row represents different age groups (here $N_a = 3$). 
 Each cohort is identified by an integer ($0, 1, \cdots 7$). 
 Cohort 1 is one unit time older than cohort 2. Therefore cohort 1 dies one time step before cohort 2. 
 The number of time steps 
@@ -226,7 +226,7 @@ When no more tasks are available, the manager sends a message to the workers to 
 that resources (workers) and tasks are dynamically matched, often allowing for better load balancing. A possible drawback of task farming is the 
 additional complexity of coordinating the assignment of tasks, additional communication and the need to reserve an MPI rank for the manager.
 
-Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:cohort_deps} prevent us from using a naive task farming approach. 
+Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:cohort_deps} prevent us from using a naive task farming approach,
 since tasks can only be started when other tasks' particular steps have completed
 (as indicated by the arrows). This requires the manager to keep track of task-step dependencies.
 
@@ -270,7 +270,7 @@ The task function defined in Algorithm \ref{algo:worker} is responsible for adva
     \EndFor
 \EndFunction
 \end{algorithmic}
-\label{algo:worker}
+\label{algo:task}
 \end{algorithm}
 Note the call to \verb|sendStepCompleteMessageToManager| which informs the manager that a specific step for a task has been completed. 
 
@@ -386,8 +386,8 @@ to complete. When synchronization occurs, which is the case at every time step i
 workers whose task has finished need to wait for the slowest worker to finish their task. While the solution of
 the reaction-diffusion equations takes the same time for all cohorts, the initialization of a new cohort
 can lead to severe load imbalance and can thus affect the parallel speedup. 
-Fig. \ref{fig:c2i} shows the the ratio of the compute time over the initialization time, the higher the 
-better. Initialization involves reading data from file and other one off operations. 
+Fig. \ref{fig:c2i} shows the ratio of the compute time over the initialization time, the higher the 
+better. Initialization involves reading data from file and other one-off operations. 
 
 Let us estimate the effect of a high initialization time on parallel scalability. 
 Let $I$ denote the time it takes to initialize a cohort, $C$ the compute time required to advance the density one time step and $N$ the 
@@ -414,7 +414,7 @@ involves reading forcing and spawning data, is executed when launching a new coh
 
 \section{Comparing blocking and non-blocking get operations}
 
-A significant part of initialing a cohort is spent {\it fetching} data from the manager. Assuming the number of age groups 
+A significant part of initializing a cohort is spent {\it fetching} data from the manager. Assuming the number of age groups 
 to match the number of workers $N$, the speedup becomes 
 \begin{equation}
     S = N \frac{I/(NC) + 1}{I/C + D N/C + 1}
@@ -432,7 +432,7 @@ completes. Alternatively, the programmer may rely on \verb|getAsync| calls in wh
 \verb|getAsync|, the data is not immediately available. \verb|startEpoch|
 and \verb|endEpoch| calls before, respectively after \verb|getAsync|, determine the earliest moment the data can be requested and the latest 
 time data must be available. The retrieved data are guaranteed to be available only when
-\verb|endEpoch| is called. (An additional ``flush'' medthod can be invoked
+\verb|endEpoch| is called. (An additional ``flush'' method can be invoked
 to synchronize operations within a period.)
 
 In Fig. \ref{fig:async} we compare the  execution time of MPI \verb|get| operations using 
@@ -441,7 +441,7 @@ of $nd$ values from rank 0 and summing the result. In the blocking test, the chu
 time, followed by a sleep operation lasting $nm$ milliseconds and a sum operation over the chunk. 
 In the nonblocking test, a big array is filled by reading the chunks asynchronously, followed by the 
 sleep operation -- these two operations are within a single epoch. The final step then involves summing up the values
-of the big array. The benefit of using non-blocking \verb|get| calls is particulalry apparent for large chunks 
+of the big array. The benefit of using non-blocking \verb|get| calls is particulary apparent for large chunks 
 $nd$ and small amount of work (low $nm$).
 
 \begin{figure}
@@ -456,7 +456,7 @@ $nd$ and small amount of work (low $nm$).
 \section{Parallel Scaling for SEAPODYM}
 
 The parallelization strategies presented in the previous sections have been implemented into the SEAPODYM code. Below we 
-describe a first scalibility test, involving 36 age groups (96 cohorts) advanced over the period 1979-1983 (60 time steps). 
+describe a first scalability test, involving 36 age groups (96 cohorts) advanced over the period 1979-1983 (60 time steps). 
 All the runs (Fig. \ref{fig:seapodym_scalability}) were performed on REANNZ AMD Milan
 platform using a single node. 
 
@@ -486,7 +486,7 @@ the manager does not actively contribute to the the data exchange, it is the wor
 
 A conscious choice in the design of the task farming implementation is to have all data exchanges channeled through the manager. 
 This means that the (spawning) data required by workers at the start of a new cohort cannot be directly received from other 
-cohorts (or worers) but must go through the manager first. The rationale for this choice is to facilitate the implementation of parallelism
+cohorts (or workers) but must go through the manager first. The rationale for this choice is to facilitate the implementation of parallelism
 in other versions of SEAPODYM.
 
 Nevertheless, we demonstrated that parallel efficiency of 84 \% can be achieved for 36 age groups and one worker per age group using blocking communication. 
