@@ -124,8 +124,8 @@ An example of cohort time integration is shown below:
 3 & 1 & 2 \\
 3 & 4 & 2 \\
 3 & 4 & 5 \\
-6 & 4 & 6 \\
-6 & 7 & 6
+6 & 4 & 5 \\
+6 & 7 & 5
 \end{array}
 \end{equation}
 Here, the vertical axis represents time increasing from top to bottom ($N_t = 6$). The horizontal axis represents the 
@@ -241,7 +241,7 @@ The corresponding pseudo-code is shown in Algorithm \ref{algo:worker}.
     \begin{algorithmic}[1] % [1] for line numbering
     \While {true}
 
-        taskid = \Call getTaskIdFromManager{}
+        \State taskid = getTaskIdFromManager()
         \If {taskid $< 0$}
             Break
         \EndIf
@@ -250,7 +250,7 @@ The corresponding pseudo-code is shown in Algorithm \ref{algo:worker}.
         \State \Call{taskFunc}{taskid, stepBeg, stepEnd}
 
         \Comment{Notify the manager that this worker is available again}
-        \State \Call{sendSignalToManager}{DONE}
+        \State \Call{sendSignalToManager}{``done''}
     
     \EndWhile
 \end{algorithmic}
@@ -460,7 +460,8 @@ and chunk/data sizes ($nd$ is the number of doubles). Values $> 1$ indicate a be
 The parallelization strategies presented in the previous sections have been implemented into the SEAPODYM code. 
 We report a scalability test involving 36 age groups (96 cohorts), run over the period 1979-1983 (60 time steps). 
 All the runs (Fig. \ref{fig:seapodym_scalability}) were performed on REANNZ AMD Milan
-platform using a single node. 
+platform using a single node. All reported timings are for the manager. The baseline is the manager execution time 
+with a single worker.
 
 Note the better than linear scalability between 3-18 workers. Possible reasons for this behaviour are:
 (1) with more workers processes handle smaller amounts of data which may fit better in cache, (2) with more workers the 
@@ -496,7 +497,13 @@ The manager's execution time dropped from 60 to 2 seconds, approximately a $30$x
 be attained by using non-blocking communication, a feature supported by \verb|seapodym-parallel|. However, care should be taken to ensure 
 correct synchronization. A common mistake is to consuming fetched data before the ``get'' operation has completed; another
 is requesting data from the manager that has not yet been populated. Therefore, we recommend careful profiling, and replacing blocking by
-non-blocking calls only in the regions that are known to be performance intensive. 
+non-blocking calls only in the regions that are known to be performance intensive.
+
+Currently the task-famring implemention of the density evolution is about six times slower than 
+the serial code when using a single worker, despite a significant reduction of initialization
+time. Further investigations are required to identify the source of this performance difference.
+
+
 
 
 \end{document}
