@@ -445,11 +445,13 @@ of the big array. The benefit of using non-blocking \verb|get| calls is particul
 $nd$ and small amount of work (low $nm$).
 
 \begin{figure}
-\begin{tabular}{|c|c|}
+\begin{tabular}{cc}
       % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
-      \includegraphics[width=60mm]{speedup_async_N20.png} & \includegraphics[width=60mm]{speedup_async_N40.png} \\
-      \includegraphics[width=60mm]{speedup_async_N80.png} & \includegraphics[width=60mm]{speedup_async_N160.png} \\
+      \includegraphics[width=70mm]{speedup_async_N20.png} & \includegraphics[width=70mm]{speedup_async_N40.png} \\
+      \includegraphics[width=70mm]{speedup_async_N80.png} & \includegraphics[width=70mm]{speedup_async_N160.png} \\
 \end{tabular}
+\caption{Comparing non-blocking with blocking communication for different execution time steps ($nm$ in milliseconds) 
+and data sizes ($nd$ is the number of doubles). Values $> 1$ indicate a benefit of using non-blocking ``get'' operations.}
 \label{fig:async}
 \end{figure}
 
@@ -492,8 +494,8 @@ in other versions of SEAPODYM.
 Nevertheless, we demonstrated that parallel efficiency of $\approx 84$ \% can be achieved for 36 age groups and one worker per age group using blocking communication. 
 The manager's execution time dropped from 60 to 2 seconds, approximately a $30$x speedup. Additional gains can potentially
 be attained by using non-blocking communication, a feature supported by \verb|seapodym-parallel|. However, care should be taken to ensure 
-correct synchronization. A common type of error is to consume the fetched data before the ``get'' operation has completed. Another pitfall 
-is to fetch data from the manager that has not yet been filled in. Therefore, we recommend careful profiling, and replacing blocking by
+correct synchronization. A common mistake is to consuming fetched data before the ``get'' operation has completed; another
+is requesting data from the manager that has not yet been populated. Therefore, we recommend careful profiling, and replacing blocking by
 non-blocking calls only in the regions that are known to be performance intensive. 
 
 
