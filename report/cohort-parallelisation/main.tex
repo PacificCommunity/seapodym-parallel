@@ -78,10 +78,11 @@ Inna Senina, Lucas Bonnin and Romain Forestier (SPC)}
 This report describes NeSI/REANNZ's consultancy project entitled ``SEAPODYM cohort parallelisation'' 
 whose work was performed from May to September 2025. The outcome of this work is a C++ library,
 \verb|seapodym-parallel|, which can be leveraged by the SEAPODYM code to parallelize the spatio-temporal
-evolution of tuna fish densities in the Pacific. The \verb|seapodym-parallel| library implements a 
+evolution of tuna densities in the Pacific. The \verb|seapodym-parallel| library implements a 
 variation of the manager/worker setup whereby workers create new fish age cohorts and advances these in time. 
-The manager distributes tasks to the workers and stores results. The implemented manager/worker design differs from 
-traditional implementations in that tasks can only be started when other tasks have completed specific internal steps. 
+The manager distributes tasks to the workers and stores results. 
+Our manager-worker design differs from traditional ones by enforcing that tasks only start after certain 
+internal steps of other tasks have completed.
 \end{abstract}
 
 %\frontmatter
@@ -132,7 +133,7 @@ tasks that can be performed concurrently. Each row represents different age grou
 Each cohort is identified by an integer ($0, 1, \cdots 7$). 
 Cohort 1 is one unit time older than cohort 2. Therefore cohort 1 dies one time step before cohort 2. 
 The number of time steps 
-a cohort is integrated is $i = i_{beg} \cdots i_{end} - 1$ where $i_{beg} \geq 0$  and $i_{end} <= N_a$.
+a cohort is integrated is $i = i_{beg} \cdots i_{end} - 1$ where $i_{beg} \geq 0$  and $i_{end} \leq N_a$.
 \begin{table}[htbp]
     \centering % Centers the table horizontally
     \caption{Start and end integration indices for each cohort of example (\ref{eq:cohorts})}
@@ -230,8 +231,8 @@ Clearly, the dependencies between tasks and sub-tasks shown in Fig. \ref{fig:coh
 since tasks can only be started when other tasks' particular steps have completed
 (as indicated by the arrows). This requires the manager to keep track of task-step dependencies.
 
-We start by describing a worker's task. A task has a identification number \verb|taskid| 
-that fully describes the task to accomplish. A worker waits for a task to be assigned by the manager. 
+We start by describing a worker's task. Each task has an identifier \verb|taskid| hat fully describes what the task will do.
+A worker waits for a task to be assigned by the manager. 
 The worker reports back the status of the execution of each task to the manager. 
 The corresponding pseudo-code is shown in Algorithm \ref{algo:worker}.
 
@@ -350,8 +351,8 @@ The manager's pseudo-code is shown in Algorithm \ref{algo:manager}.
     \includegraphics[width=15cm]{results/speedup_vs_workers.png}
     \caption{Parallel scaling as a function of the number of workers, for different step execution 
     times and number of doubles initially fetched from the manager. 
-    The number of age groups matches the number of workers. These results 
-    assume no initialisation setup time.}
+    Here the number of age groups equals the number of workers, and these results 
+    assume no initialisation/setup overhead.}
     \label{fig:speedup}
 \end{figure}
 
@@ -365,7 +366,7 @@ In all cases the number of workers was chosen to match the number of age groups 
 Perfect parallel scaling 
 is shown as the black dashed line. Good scalability depends on the time taken to execute 
 each step and the amount of data fetched from the manager at the start of each task. Parallel 
-efficiency $> 50\%$ is achieved for time step times $\geq 10$ms and initial data sizes 
+efficiency above $50\%$ is achieved for time step times $\geq 10$ms and initial data sizes 
 $\leq 10000$ doubles. For instance, a time step taking $10$ms and an initial data size of 
 $10000$ doubles yields a speedup of 60 when using $80$ workers, i.e. $75\%$ parallel efficiency.
 
@@ -427,8 +428,7 @@ effect, the flattening gets more pronounced with a large number of workers.
 One way to lessen the impact of communication is to allow communication and computation to overlap. 
 Our library supports both synchronous and asynchronous \verb|get| operations. The default mode to \verb|get| data is blocking 
 and in this case the retrieved data is ready when the call
-completes. Alternatively, the programmer may rely on \verb|getAsync| calls in which case the programmer 
-{\it indicates} his/her desire to fetch the data to be used sometimes in the future. Upon completion of 
+completes. Alternatively, the programmer may use \verb|getAsync| calls, indicating that the data will be used in the future. After calling
 \verb|getAsync|, the data is not immediately available. \verb|startEpoch|
 and \verb|endEpoch| calls before, respectively after \verb|getAsync|, determine the earliest moment the data can be requested and the latest 
 time data must be available. The retrieved data are guaranteed to be available only when
@@ -455,8 +455,8 @@ $nd$ and small amount of work (low $nm$).
 
 \section{Parallel Scaling for SEAPODYM}
 
-The parallelization strategies presented in the previous sections have been implemented into the SEAPODYM code. Below we 
-describe a first scalability test, involving 36 age groups (96 cohorts) advanced over the period 1979-1983 (60 time steps). 
+The parallelization strategies presented in the previous sections have been implemented into the SEAPODYM code. 
+We report a scalability test involving 36 age groups (96 cohorts), run over the period 1979-1983 (60 time steps). 
 All the runs (Fig. \ref{fig:seapodym_scalability}) were performed on REANNZ AMD Milan
 platform using a single node. 
 
@@ -482,15 +482,15 @@ that maximizes the likelihood function remains to be done.
 The parallelization is based on a task farming approach with additional features: (1) tasks have sub-tasks (steps), (2) tasks 
 can be started only when other tasks' specific steps have completed and (3) data is sent to the manager at the end of each step. The 
 manager stores and distributes the data to workers on request using one-sided MPI communication with passive targets. As such,
-the manager does not actively contribute to the the data exchange, it is the workers who decide when to fetch and send data.
+the manager does not actively contribute to the data exchange, it is the workers who decide when to fetch and send data.
 
-A conscious choice in the design of the task farming implementation is to have all data exchanges channeled through the manager. 
-This means that the (spawning) data required by workers at the start of a new cohort cannot be directly received from other 
-cohorts (or workers) but must go through the manager first. The rationale for this choice is to facilitate the implementation of parallelism
+In our design, all data exchanges are channeled through the manager. 
+Hence, the (spawning) data required by workers at the start of a new cohort cannot be directly received from other 
+cohorts (or workers) but always pass through the manager. The rationale for this choice is to facilitate the implementation of parallelism
 in other versions of SEAPODYM.
 
-Nevertheless, we demonstrated that parallel efficiency of 84 \% can be achieved for 36 age groups and one worker per age group using blocking communication. 
-The corresponding reduction of manager execution time was from 60 to 2 seconds, a $\approx 30$x speed improvement. Additional gains can potentially
+Nevertheless, we demonstrated that parallel efficiency of $\approx 84$ \% can be achieved for 36 age groups and one worker per age group using blocking communication. 
+The manager's execution time dropped from 60 to 2 seconds, approximately a $30$x speedup. Additional gains can potentially
 be attained by using non-blocking communication, a feature supported by \verb|seapodym-parallel|. However, care should be taken to ensure 
 correct synchronization. A common type of error is to consume the fetched data before the ``get'' operation has completed. Another pitfall 
 is to fetch data from the manager that has not yet been filled in. Therefore, we recommend careful profiling, and replacing blocking by
