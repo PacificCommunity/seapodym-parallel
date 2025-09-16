@@ -463,10 +463,9 @@ All the runs (Fig. \ref{fig:seapodym_scalability}) were performed on REANNZ AMD 
 platform using a single node. All reported timings are for the manager. The baseline is the execution time 
 obtained with a single worker.
 
-Note the slightly better than linear scalability for 2 workers. Possible reasons for this behaviour are:
-(1) with more workers processes handle smaller amounts of data which may fit better in cache, (2) with more workers the 
-scheduling overhead distributes work more evenly (reduction of load imbalance), (3) MPI may pipeline messages more efficiently with 
-additional ranks and (4) disk and I/O contention may be decreased.
+Scalability follows closely the ideal curve up until 12 workers. Parallel effiency then drops to 55 \% 
+and 45 \% for 18, respectively 36 workers. A likely reason is the cost of initializing a cohort, which is 1.6 times
+the time it takes for a cohort to cover all the steps. Work is underway to reduce the initialization penalty.
 
 \begin{figure}
     \includegraphics[width=15cm]{results_seapodym/seapodym_cohort_speedup.png}
@@ -498,10 +497,6 @@ be attained by using non-blocking communication, a feature supported by \verb|se
 correct synchronization. A common mistake is to consuming fetched data before the ``get'' operation has completed; another
 is requesting data from the manager that has not yet been populated. Therefore, we recommend careful profiling, and replacing blocking by
 non-blocking calls only in the regions that are known to be performance intensive.
-
-Currently the task-famring implemention of the density evolution is about six times slower than 
-the serial code when using a single worker, despite a significant reduction of initialization
-time. Further investigations are required to identify the source of this performance difference.
 
 
 
