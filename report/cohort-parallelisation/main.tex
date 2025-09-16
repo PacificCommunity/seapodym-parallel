@@ -460,10 +460,10 @@ and chunk/data sizes ($nd$ is the number of doubles). Values $> 1$ indicate a be
 The parallelization strategies presented in the previous sections have been implemented into the SEAPODYM code. 
 We report a scalability test involving 36 age groups (96 cohorts), run over the period 1979-1983 (60 time steps). 
 All the runs (Fig. \ref{fig:seapodym_scalability}) were performed on REANNZ AMD Milan
-platform using a single node. All reported timings are for the manager. The baseline is the manager execution time 
-with a single worker.
+platform using a single node. All reported timings are for the manager. The baseline is the execution time 
+obtained with a single worker.
 
-Note the better than linear scalability between 3-18 workers. Possible reasons for this behaviour are:
+Note the slightly better than linear scalability for 2 workers. Possible reasons for this behaviour are:
 (1) with more workers processes handle smaller amounts of data which may fit better in cache, (2) with more workers the 
 scheduling overhead distributes work more evenly (reduction of load imbalance), (3) MPI may pipeline messages more efficiently with 
 additional ranks and (4) disk and I/O contention may be decreased.
