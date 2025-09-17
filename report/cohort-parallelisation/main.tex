@@ -385,7 +385,7 @@ improve the speedup from 40 to 60.
 Scalability can be affected by load imbalance. Some concurrently executing tasks may take longer than others
 to complete. When synchronization occurs, which is the case at every time step in SEAPODYM, then 
 workers whose task has finished need to wait for the slowest worker to finish their task. While the solution of
-the reaction-diffusion equations takes the same time for all cohorts, the initialization of a new cohort
+the reaction-diffusion equations can be assumed to take about the same amount of time all cohorts, the initialization of a new cohort
 can lead to severe load imbalance and can thus affect the parallel speedup. 
 Fig. \ref{fig:c2i} shows the ratio of the compute time over the initialization time, the higher the 
 better. Initialization involves reading data from file and other one-off operations. 
@@ -458,27 +458,31 @@ and chunk/data sizes ($nd$ is the number of doubles). Values $> 1$ indicate a be
 \section{Parallel Scaling for SEAPODYM}
 
 The parallelization strategies presented in the previous sections have been implemented into the SEAPODYM code. 
-We report a scalability test involving 36 age groups (96 cohorts), run over the period 1979-1983 (60 time steps). 
-All the runs (Fig. \ref{fig:seapodym_scalability}) were performed on REANNZ AMD Milan
-platform using a single node. All reported timings are for the manager. The baseline is the execution time 
-obtained with a single worker.
+In Fig. \ref{fig:seapodym_scalability} we report the parallel speedup, defined as the ratio of the 
+manager time using one worker over the time obtained using multiple workers. The results were obtained using 36 (on REANNZ's AMD Milan cluster), 
+75 and 150 age groups (on SPC's cluster). In all cases a single node was used. 
 
-Scalability follows closely the ideal curve up to 12 workers. 
-Beyond 12 workers, the parallel efficiency drops to 55 \% (18 workers) and 45 \% 
-(36 workers).
-A likely reason for the diminished scalability above $12$ worker
-is the cost of initializing a cohort ($1.6$ larger than the time it 
-takes for a cohort to loop over all the steps). In this 
-particular example, the MPI communicatinon cost remains modest for all 
-worker counts ($< 2$ \% of the computational cost).
+Scalability follows closely the ideal curve up to 12 workers. A maximum speedup of 12-15x is observed for the three cases. Interestingly, the
+maximum speedup occurs between 30-40 workers. 
+
+Some preliminary investigations suggest that the flattening of the speedup curve is due to
+initializing a new cohort. In Fig. \ref{fig:seapodym_times}, the initialization (init) can be seen to 
+take twice longer, on average, than advancing the solution (step). During the simulation, at least one cohort is created at each time 
+step by one worker and other workers will have to wait for this initialization to complete. 
 
 \begin{figure}
     \includegraphics[width=15cm]{results_seapodym/seapodym_cohort_speedup.png}
-    \caption{Parallel speedup relative to a single worker run for a SEAPODYM test
-    with 36 age groups, 60 time steps and 96 cohorts.}
+    \caption{Parallel speedup relative to a single worker run for seapodym_cohort.}
     \label{fig:seapodym_scalability}
 \end{figure}
 
+\begin{figure}
+    \includegraphics[width=15cm]{results_seapodym/seapodym_cohort_times.png}
+    \caption{Distribution of execution times across workers for the case $na = 36$. The ``init'' time occurs each time a new cohort is created.
+    The ``step'' time captures the total time spent calling the ``stepForward'' method. The ``comm'' time measures the total MPI communication time for each worker.
+    }
+    \label{fig:seapodym_times}
+\end{figure}
 
 \section{Summary and future work}
 
