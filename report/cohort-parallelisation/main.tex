@@ -82,7 +82,8 @@ evolution of tuna densities in the Pacific. The \verb|seapodym-parallel| library
 variation of the manager/worker setup whereby workers create new fish age cohorts and advances these in time. 
 The manager distributes tasks to the workers and stores results. 
 Our manager-worker design differs from traditional ones by enforcing that tasks only start after certain 
-internal steps of other tasks have completed.
+internal steps of other tasks have completed. The farm tasking has been implemented and first results of a 
+parallel implementation of SEAPODYM are reported. 
 \end{abstract}
 
 %\frontmatter
@@ -465,14 +466,14 @@ manager time using one worker over the time obtained using multiple workers. The
 Scalability follows closely the ideal curve up to 12 workers. A maximum speedup of 12-15x is observed for the three cases. Interestingly, the
 maximum speedup occurs between 30-40 workers. 
 
-Some preliminary investigations suggest that the flattening of the speedup curve is due to
+Some preliminary investigations suggest that the flattening of the speedup curve is, at least partially, due to
 initializing a new cohort. In Fig. \ref{fig:seapodym_times}, the initialization (init) can be seen to 
 take twice longer, on average, than advancing the solution (step). During the simulation, at least one cohort is created at each time 
 step by one worker and other workers will have to wait for this initialization to complete. 
 
 \begin{figure}
     \includegraphics[width=15cm]{results_seapodym/seapodym_cohort_speedup.png}
-    \caption{Parallel speedup relative to a single worker run for seapodym_cohort.}
+    \caption{Parallel speedup relative to a single worker run for seapodym\_cohort.}
     \label{fig:seapodym_scalability}
 \end{figure}
 
@@ -501,12 +502,17 @@ Hence, the (spawning) data required by workers at the start of a new cohort cann
 cohorts (or workers) but always pass through the manager. The rationale for this choice is to facilitate the implementation of parallelism
 in other versions of SEAPODYM.
 
-Nevertheless, we demonstrated that parallel efficiency of $\approx 84$ \% can be achieved for 36 age groups and one worker per age group using blocking communication. 
-The manager's execution time dropped from 60 to 2 seconds, approximately a $30$x speedup. Additional gains can potentially
-be attained by using non-blocking communication, a feature supported by \verb|seapodym-parallel|. However, care should be taken to ensure 
-correct synchronization. A common mistake is to consuming fetched data before the ``get'' operation has completed; another
-is requesting data from the manager that has not yet been populated. Therefore, we recommend careful profiling, and replacing blocking by
-non-blocking calls only in the regions that are known to be performance intensive.
+Nevertheless, we demonstrated that a parallel efficiency of $\approx 40$ \% (15x speedup) can be achieved for 36 age groups and one worker per age group 
+using blocking communication.  
+The manager's execution time then dropped from 11 seconds to less than one second, approximately a $15$x speedup. 
+Better than 90 \% parallel efficiency was observed for 12 or fewer workers in this case. 
+
+While more investigation is required, the initialization time of a new cohort may be one reason for the suboptimal speedup. In addition
+to the initialization time, there is a factor 3x variability in the stepping time, which could also contribute to load balancing issues. These 
+could be addressed in part by relying on non-blocking communication, a feature supported by \verb|seapodym-parallel|. However, care should be taken to ensure 
+correct synchronization. A common mistake is to consume data before the ``get'' operation has completed; another
+is to request data from the manager that has not yet been populated. Therefore, we recommend careful profiling, and replacing blocking by
+non-blocking calls only in the regions that are known to be performance intensive and/or lead to severe load balancing issues.
 
 
 
