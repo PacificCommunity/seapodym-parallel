@@ -77,9 +77,9 @@ Inna Senina, Lucas Bonnin and Romain Forestier (SPC)}
 \begin{abstract}
 This report describes NeSI/REANNZ's consultancy project entitled ``SEAPODYM cohort parallelisation'' 
 whose work was performed from May to September 2025. The outcome of this work is a C++ library,
-\verb|seapodym-parallel|, which can be leveraged by the SEAPODYM code to parallelize the spatio-temporal
+\verb|seapodym-parallel|, which can be leveraged by SEAPODYM to parallelize the spatio-temporal
 evolution of tuna densities in the Pacific. The \verb|seapodym-parallel| library implements a 
-variation of the manager/worker setup whereby workers create new fish age cohorts and advances these in time. 
+variation of the manager/worker setup whereby workers create new fish age cohorts and advances them in time. 
 The manager distributes tasks to the workers and stores results. 
 Our manager-worker design differs from traditional ones by enforcing that tasks only start after certain 
 internal steps of other tasks have completed. The farm tasking has been implemented and first results of a 
@@ -509,7 +509,7 @@ Better than 90 \% parallel efficiency was observed for 12 or fewer workers in th
 
 While more investigation is required, the initialization time of a new cohort may be one reason for the suboptimal speedup. In addition
 to the initialization time, there is a factor 3x variability in the stepping time, which could also contribute to load balancing issues. These 
-could be addressed in part by relying on non-blocking communication, a feature supported by \verb|seapodym-parallel|. However, care should be taken to ensure 
+could be addressed in part by relying on non-blocking communication, a feature supported by \verb|seapodym-parallel|. However, care must be taken to ensure 
 correct synchronization. A common mistake is to consume data before the ``get'' operation has completed; another
 is to request data from the manager that has not yet been populated. Therefore, we recommend careful profiling, and replacing blocking by
 non-blocking calls only in the regions that are known to be performance intensive and/or lead to severe load balancing issues.
