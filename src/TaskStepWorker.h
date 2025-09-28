@@ -31,6 +31,9 @@ class TaskStepWorker {
         // task Id to last step index + 1 map
         std::map<int, int> stepEndMap;
 
+        // local rank;
+        int rank;
+
     public:
 
         /**
