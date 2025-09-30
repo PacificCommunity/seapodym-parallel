@@ -2,7 +2,7 @@ import re
 import glob
 
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+import matplotlib.ticker as ticker
 from datetime import datetime
 
 
@@ -45,6 +45,11 @@ for task in data:
     task["Start"] = datetime.strptime(task["Start"], "%Y-%m-%d %H:%M:%S.%f")
     task["End"] = datetime.strptime(task["End"], "%Y-%m-%d %H:%M:%S.%f")
 
+
+
+# Determine the earliest start time
+min_start = min(task["Start"] for task in data)
+
 # Map workers to y-axis positions
 workers = sorted(set(task["Worker"] for task in data))
 worker_pos = {worker: i for i, worker in enumerate(workers)}
@@ -54,25 +59,29 @@ fig, ax = plt.subplots(figsize=(10, 6))
 
 # Plot each task
 for task in data:
-    start = mdates.date2num(task["Start"])
-    end = mdates.date2num(task["End"])
-    duration = end - start
-    ax.barh(worker_pos[task["Worker"]], duration, left=start, height=0.4, label=task["Task"])
+    start_sec = (task["Start"] - min_start).total_seconds()
+    end_sec = (task["End"] - min_start).total_seconds()
+    duration = end_sec - start_sec
+    ax.barh(worker_pos[task["Worker"]], duration, left=start_sec, height=0.4, label=task["Task"])
 
 # Format axes
 ax.set_yticks(list(worker_pos.values()))
 ax.set_yticklabels(workers)
-ax.set_xlabel("Time")
+ax.set_xlabel("Seconds")
 ax.set_ylabel("Worker")
 ax.set_title("Gantt Chart of Task Execution per Worker")
-ax.xaxis_date()
-ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+#ax.xaxis_date()
+#ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
 
 # Remove duplicate legend entries
 handles, labels = ax.get_legend_handles_labels()
 unique = dict(zip(labels, handles))
 #ax.legend(unique.values(), unique.keys(), title="Tasks", loc="upper right")
 
+# Use integer ticks for seconds
+ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
 plt.tight_layout()
-plt.show()
+#plt.show()
+plt.savefig('gantt.png')
 
