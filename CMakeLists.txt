@@ -9,16 +9,6 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# handle spdlog dependency
-include(FetchContent)
-FetchContent_Declare(
-  spdlog
-  GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG v1.13.0  # Use the latest stable version or a specific one
-)
-FetchContent_MakeAvailable(spdlog)
-
-
 find_package(MPI REQUIRED)
 find_program(VALGRIND_EXECUTABLE valgrind)
 

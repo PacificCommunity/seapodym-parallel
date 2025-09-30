@@ -9,7 +9,8 @@ You will need:
  * A C++ compiler (e.g. g++) and MPI libraries installed (e.g. OpenMPI)
  * CMake
  * ADMB
- * [spdlog](https://github.com/gabime/spdlog)
+ * [spdlog](https://github.com/gabime/spdlog). On Ubuntu: `apt install libspdlog-dev`.
+ * libfmt. On Ubuntu: `apt isntall libfmt-dev`
 
 
 ## How to build the seapodym-parallel
