@@ -10,7 +10,7 @@ You will need:
  * CMake
  * ADMB
  * [spdlog](https://github.com/gabime/spdlog). On Ubuntu: `apt install libspdlog-dev`.
- * libfmt. On Ubuntu: `apt isntall libfmt-dev`
+ * libfmt. On Ubuntu: `apt install libfmt-dev`
 
 
 ## How to build the seapodym-parallel

@@ -17,6 +17,8 @@ jobs:
       - uses: mpi4py/setup-mpi@v1
       - uses: ssciwr/doxygen-install@v1
       - uses: tlylt/install-graphviz@v1
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libfmt-dev libspdlog-dev
       - name: Download ADMB
         run: "wget https://github.com/admb-project/admb/releases/download/admb-13.1/admb-13.1-linux.zip"
       - name: Extract ADMB
