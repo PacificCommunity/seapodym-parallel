@@ -67,7 +67,8 @@ int main(int argc, char** argv) {
     }
 
     std::string sworkerId = std::to_string(workerId);
-    auto logger = spdlog::basic_logger_mt(sworkerId, "logs/log_worker" + sworkerId + ".txt");
+    // Use true to clobber the previously written log files
+    auto logger = spdlog::basic_logger_mt(sworkerId, "logs/log_worker" + sworkerId + ".txt", true);
     logger->set_level(spdlog::level::debug);
 
     if (workerId == 0) {

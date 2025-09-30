@@ -25,7 +25,8 @@ TaskStepWorker::run() const {
     const int managerRank = 0;
 
     std::string sworkerId = std::to_string(workerId);
-    auto logger = spdlog::basic_logger_mt(sworkerId, "log_worker" + sworkerId + ".txt");
+    // Use true to let logs be overwritten, otherwise the logs will be appended
+    auto logger = spdlog::basic_logger_mt(sworkerId, "log_worker" + sworkerId + ".txt", true);
     logger->set_level(spdlog::level::debug);
     logger->info("Starting loop");
     while (true) {
