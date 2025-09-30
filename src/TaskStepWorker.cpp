@@ -1,6 +1,8 @@
 #include "TaskStepWorker.h"
 #include "Tags.h"
 #include <array>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 TaskStepWorker::TaskStepWorker(MPI_Comm comm, 
   std::function<void(int, int, int, MPI_Comm)> taskFunc,
@@ -21,18 +23,22 @@ TaskStepWorker::run() const {
     MPI_Comm_rank(this->comm, &workerId);
 
     const int managerRank = 0;
-    double time_waitForTask = 0, time_taskComplete = 0, tic;
 
+    std::string sworkerId = std::to_string(workerId);
+    auto logger = spdlog::basic_logger_mt(sworkerId, "log_worker" + sworkerId + ".txt");
+    logger->set_level(spdlog::level::debug);
+    logger->info("Starting loop");
     while (true) {
 
         // Get the task_id to operate on
-        tic = MPI_Wtime();
         int task_id;
+        logger->info("Waiting for manager to send a task...");
         MPI_Recv(&task_id, 1, MPI_INT, managerRank, START_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
-        time_waitForTask += MPI_Wtime() - tic;
+        logger->info("Received task {}", task_id);
 
         if (task_id == -1) {
             // Shutdown
+            logger->info("Shutting down.");
             break;
         }
 
@@ -41,16 +47,15 @@ TaskStepWorker::run() const {
 
         // Perform the task, which includes stepping from stepBeg to stepEnd - 1.
         // This function should notify the manager at the end of each step
+        logger->info("Running task {} from step {} to {}", task_id, stepBeg, stepEnd);
         this->taskFunc(task_id, stepBeg, stepEnd, this->comm);
+        logger->info("Finished task {}", task_id);
 
         // Notify the manager that this worker is available again
-        tic = MPI_Wtime();
         int done = 1;
+        logger->info("Notifying manager");
         MPI_Send(&done, 1, MPI_INT, managerRank, WORKER_AVAILABLE_TAG, MPI_COMM_WORLD);
-        time_taskComplete += MPI_Wtime() - tic;
+        logger->info("Done.");
     }
-
-    printf("[%d] time wait for task/task complete msg: %.3lf/%.3lf s\n", 
-        this->rank, time_waitForTask, time_taskComplete);
  
 }

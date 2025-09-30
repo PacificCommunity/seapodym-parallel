@@ -34,6 +34,6 @@ set(HEADERS
 )
 
 add_library(seapodym_api ${SRCS})
-target_link_libraries(seapodym_api admb ${MPI_LIBRARIES})
+target_link_libraries(seapodym_api admb spdlog::spdlog ${MPI_LIBRARIES})
 install(TARGETS seapodym_api DESTINATION lib)
 install(FILES ${HEADERS} DESTINATION include)
