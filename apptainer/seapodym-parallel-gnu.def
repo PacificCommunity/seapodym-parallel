@@ -63,6 +63,7 @@ From: ubuntu:latest
     make install
 
     # Build TAU
+    cd $BUILD_DIR
     wget http://tau.uoregon.edu/tau.tgz
     tar xf tau.tgz
     cd tau-2.34.1
@@ -79,15 +80,15 @@ From: ubuntu:latest
     make -j 4
     make install
 
-    # Build instrumented version of seapodym-parallel
-    cd $BUILD_DIR/seapodym-parallel
-    mkdir build-tau && cd build-tau
-    export TAU_MAKEFILE=/usr/local/build/tau-2.34.1/x86_64/lib/Makefile.tau-ompt-mpi-pdt-openmp
-    export TAU_VERBOSE=1
-    export PATH=/usr/local/build/tau-2.34.1/x86_64/bin:$PATH
-    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DADMB_HOME=$BUILD_DIR/admb -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
-          -DCMAKE_CXX_COMPILER=tau_cxx.sh -DMPI_CXX_COMPILER=tau_cxx.sh ..
-    make -j 4
-    make install
+    # # Build instrumented version of seapodym-parallel
+    # cd $BUILD_DIR/seapodym-parallel
+    # mkdir build-tau && cd build-tau
+    # export TAU_MAKEFILE=/usr/local/build/tau-2.34.1/x86_64/lib/Makefile.tau-ompt-mpi-pdt-openmp
+    # export TAU_VERBOSE=1
+    # export PATH=/usr/local/build/tau-2.34.1/x86_64/bin:$PATH
+    # cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DADMB_HOME=$BUILD_DIR/admb -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
+    #       -DCMAKE_CXX_COMPILER=tau_cxx.sh -DMPI_CXX_COMPILER=tau_cxx.sh ..
+    # make -j 4
+    # make install
     
 

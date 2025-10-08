@@ -1,0 +1,28 @@
+# to upload
+# git tag v1.0.0
+# git push origin v1.0.0
+name: Build and release Apptainer image
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Apptainer
+        run: |
+          sudo apt-get update && sudo apt-get install -y apptainer
+
+      - name: Build image
+        run: |
+          apptainer build seapodym-parallel-gnu.aif apptainer/seapodym-parallel-gnu.def
+
+      - name: Upload image to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: seapodym-parallel-gnu.aif
