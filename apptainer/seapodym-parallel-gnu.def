@@ -1,0 +1,53 @@
+BootStrap: docker
+From: ubuntu:latest
+
+%help
+    Build a portable environment for the seapodym-parallel code
+
+%setup
+    # create directory to build chombo and other packages in the container
+
+%files
+    # copy files from host to the container prior to calling %post
+
+%environment
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+%post
+
+    apt-get update && apt-get upgrade -y
+
+    apt-get install -y git vim perl python3 wget file cmake cmake-curses-gui apt-file zip
+    apt-get install -y gcc gfortran g++
+
+    # MPI
+    apt-get install -y openmpi-bin libopenmpi-dev
+
+    # spdlog
+    apt-get install -y libspdlog-dev
+
+    ln -s /usr/bin/python3 /usr/bin/python
+
+    export BUILD_DIR=/usr/local/build
+    export INSTALL_DIR=/usr/local/
+    mkdir -p $BUILD_DIR
+
+    echo "\n\nBuilding ADMB..."
+    cd $BUILD_DIR
+    wget https://github.com/admb-project/admb/releases/download/admb-13.1/admb-13.1-linux.zip
+    unzip admb-13.1-linux.zip
+    mv admb-13.1 admb
+    cd admb/lib
+    ln -s libadmb-x86_64-linux-g++11.so libadmb.so
+    ln -s libadmbo-x86_64-linux-g++11.so libadmbo.so
+    ln -s libadmb-contrib-x86_64-linux-g++11.so libadmb-contrib.so
+    ln -s libadmb-contribo-x86_64-linux-g++11.so libadmb-contribo.so
+     
+    # Build seapodym-parallel
+    cd $BUILD_DIR
+    git clone https://github.com/PacificCommunity/seapodym-parallel
+    cd seapodym-parallel
+    mkdir build && cd build
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DADMB_HOME=$BUILD_DIR/admb -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR ..
+    make -j 4
+    make install
