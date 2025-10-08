@@ -16,10 +16,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Apptainer
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y apptainer
+          sudo apt-get install -y \
+            build-essential \
+            libseccomp-dev \
+            pkg-config \
+            squashfs-tools \
+            cryptsetup \
+            git \
+            wget \
+            uuid-dev \
+            libgpgme-dev \
+            libglib2.0-dev \
+            libssl-dev \
+            libselinux1-dev \
+            libzstd-dev \
+            liblzma-dev \
+            libcap-dev \
+            libpam0g-dev \
+            golang-go
+
+      - name: Build Apptainer from source
+        run: |
+          git clone https://github.com/apptainer/apptainer.git
+          cd apptainer
+          ./mconfig
+          make -C builddir
+          sudo make -C builddir install
 
       - name: Build Apptainer image
         run: |
@@ -30,3 +55,4 @@ jobs:
         with:
           name: apptainer-image
           path: seapodym-parallel-gnu.sif
+
