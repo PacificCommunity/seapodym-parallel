@@ -12,6 +12,9 @@ From: ubuntu:latest
 
 %environment
     export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    export TAU_MAKEFILE=/usr/local/build/tau-2.34.1/x86_64/lib/Makefile.tau-ompt-mpi-pdt-openmp
+    export TAU_VERBOSE=1
+    export PATH=/usr/local/build/tau-2.34.1/x86_64/bin:$PATH
 
 %post
 
@@ -19,6 +22,13 @@ From: ubuntu:latest
 
     apt-get install -y git vim perl python3 wget file cmake cmake-curses-gui apt-file zip
     apt-get install -y gcc gfortran g++
+
+    # Java
+    apt-get install -y default-jdk
+
+    # X
+    apt-get install -y x11-apps xauth
+    apt-get install -y gedit
 
     # MPI
     apt-get install -y openmpi-bin libopenmpi-dev
@@ -42,6 +52,23 @@ From: ubuntu:latest
     ln -s libadmbo-x86_64-linux-g++11.so libadmbo.so
     ln -s libadmb-contrib-x86_64-linux-g++11.so libadmb-contrib.so
     ln -s libadmb-contribo-x86_64-linux-g++11.so libadmb-contribo.so
+
+    # Build PDT
+    cd $BUILD_DIR
+    wget http://tau.uoregon.edu/pdt.tgz
+    tar xf pdt.tgz
+    cd pdtoolkit-3.25.2
+    ./configure
+    make
+    make install
+
+    # Build TAU
+    wget http://tau.uoregon.edu/tau.tgz
+    tar xf tau.tgz
+    cd tau-2.34.1
+    ./configure -c++=mpicxx -cc=mpicc -fortran=mpif90 -mpi -ompt -iowrapper -bfd=download -dwarf=download \
+        -otf=download -unwind=download -pdt=$BUILD_DIR/pdtoolkit-3.25.2
+
      
     # Build seapodym-parallel
     cd $BUILD_DIR
@@ -51,3 +78,16 @@ From: ubuntu:latest
     cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DADMB_HOME=$BUILD_DIR/admb -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR ..
     make -j 4
     make install
+
+    # Build instrumented version of seapodym-parallel
+    cd $BUILD_DIR/seapodym-parallel
+    mkdir build-tau && cd build-tau
+    export TAU_MAKEFILE=/usr/local/build/tau-2.34.1/x86_64/lib/Makefile.tau-ompt-mpi-pdt-openmp
+    export TAU_VERBOSE=1
+    export PATH=/usr/local/build/tau-2.34.1/x86_64/bin:$PATH
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DADMB_HOME=$BUILD_DIR/admb -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
+          -DCMAKE_CXX_COMPILER=tau_cxx.sh -DMPI_CXX_COMPILER=tau_cxx.sh ..
+    make -j 4
+    make install
+    
+
