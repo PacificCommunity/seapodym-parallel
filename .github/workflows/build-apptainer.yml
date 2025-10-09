@@ -12,6 +12,9 @@ jobs:
   build-apptainer:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write  # Required to upload release assets
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,7 +50,7 @@ jobs:
           make -C builddir
           sudo make -C builddir install
 
-      - name: Debug List files
+      - name: Debug list files
         run: |
           echo "Current directory: $(pwd)"
           ls -l
@@ -57,9 +60,9 @@ jobs:
         run: |
           sudo apptainer build seapodym-parallel-gnu.sif defs/seapodym-parallel-gnu.def
 
-      - name: Upload image artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload image to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: apptainer-image
-          path: seapodym-parallel-gnu.sif
+          files: seapodym-parallel-gnu.sif
+
 
