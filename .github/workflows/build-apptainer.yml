@@ -51,11 +51,10 @@ jobs:
         run: |
           echo "Current directory: $(pwd)"
           ls -l
-          ls -l apptainer
+          ls -l defs
 
       - name: Build Apptainer image
         run: |
-          working-directory: ${{ github.workspace }}
           apptainer build seapodym-parallel-gnu.sif defs/seapodym-parallel-gnu.def
 
       - name: Upload image artifact
