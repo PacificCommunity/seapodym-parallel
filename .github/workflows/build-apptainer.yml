@@ -47,7 +47,7 @@ jobs:
           make -C builddir
           sudo make -C builddir install
 
-      - name: Debug: List files
+      - name: Debug List files
         run: |
           echo "Current directory: $(pwd)"
           ls -l
