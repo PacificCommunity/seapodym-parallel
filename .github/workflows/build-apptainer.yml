@@ -47,6 +47,12 @@ jobs:
           make -C builddir
           sudo make -C builddir install
 
+      - name: Debug: List files
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -l
+          ls -l apptainer
+
       - name: Build Apptainer image
         run: |
           apptainer build seapodym-parallel-gnu.sif apptainer/seapodym-parallel-gnu.def
