@@ -20,7 +20,7 @@ for logfile in glob.glob('log_worker*.txt'):
     for line in open(logfile).readlines():
         
         if in_task:
-            m = re.match(pat_beg, line)
+            m = re.match(pat_end, line)
             if m: 
                 time_end = m.group(1)
                 data.append({'Worker': workerId, 'Task': task, "Start": time_beg, "End": time_end})
