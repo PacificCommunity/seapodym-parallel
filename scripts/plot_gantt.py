@@ -62,7 +62,8 @@ for task in data:
     start_sec = (task["Start"] - min_start).total_seconds()
     end_sec = (task["End"] - min_start).total_seconds()
     duration = end_sec - start_sec
-    ax.barh(worker_pos[task["Worker"]], duration, left=start_sec, height=0.4, label=task["Task"])
+    ax.barh(worker_pos[task["Worker"]], duration, left=start_sec, height=1, label=task["Task"])
+    ax.plot([start_sec, start_sec], [0 - 0.5, task["Worker"] - 0.5,], '--')
 
 # Format axes
 ax.set_yticks(list(worker_pos.values()))
@@ -76,7 +77,7 @@ ax.set_title("Gantt Chart of Task Execution per Worker")
 # Remove duplicate legend entries
 handles, labels = ax.get_legend_handles_labels()
 unique = dict(zip(labels, handles))
-#ax.legend(unique.values(), unique.keys(), title="Tasks", loc="upper right")
+ax.legend(unique.values(), unique.keys(), title="Tasks", loc="upper right")
 
 # Use integer ticks for seconds
 ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))

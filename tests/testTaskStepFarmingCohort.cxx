@@ -162,6 +162,12 @@ int main(int argc, char** argv) {
         &dataCollect,
         &dependencyMap);
 
+    
+
+    TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
+    // sync the manager and workers
+    MPI_Barrier(MPI_COMM_WORLD);
+
     if (workerId == 0) {
 
         // Manager
@@ -194,7 +200,6 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
         worker.run();
 
     }
