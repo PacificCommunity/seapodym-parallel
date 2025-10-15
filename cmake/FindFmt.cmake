@@ -3,12 +3,13 @@
 #   FMT_FOUND          - TRUE if found
 #   FMT_INCLUDE_DIRS   - Where include files reside
 #   FMT_LIBRARIES      - Library to link against (if needed)
+#   fmt::fmt           - Imported target (for target_link_libraries)
 
 # Typical locations:
 # Ubuntu (apt):    /usr/include/fmt
 # Mac (brew):      /usr/local/include/fmt or /opt/homebrew/include/fmt
 
-# --- Find fmt (spdlog dependency) ---
+# --- Find fmt include directory ---
 find_path(
     FMT_INCLUDE_DIR
     NAMES fmt/core.h
