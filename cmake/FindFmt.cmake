@@ -29,7 +29,7 @@ find_library(
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-    Fmt
+    fmt
     REQUIRED_VARS FMT_INCLUDE_DIR
     # Library is optional, so no REQUIRED_VARS for FMT_LIBRARY
 )
