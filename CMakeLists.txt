@@ -9,6 +9,14 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+find_package(fmt REQUIRED)
+find_package(Spdlog REQUIRED)
+include_directories(${SPDLOG_INCLUDE_DIRS}
+                    ${FMT_INCLUDE_DIRS})
+# link_directories(${SPDLOG_LIBRARY_DIRS}
+#                  ${FMT_LIBRARY_DIRS})
+
 find_package(MPI REQUIRED)
 find_program(VALGRIND_EXECUTABLE valgrind)
 
