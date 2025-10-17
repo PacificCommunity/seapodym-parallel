@@ -10,11 +10,6 @@
 # Ubuntu (apt):    /usr/include/spdlog
 # Mac (brew):      /usr/local/include/spdlog or /opt/homebrew/include/spdlog
 
-# spdlog depends on fmt, so make sure fmt is found first
-if(NOT FMT_FOUND)
-    message(FATAL_ERROR "Could not find fmt, which is required by spdlog. Please install fmt.")
-endif()
-
 find_path(
     SPDLOG_INCLUDE_DIR
     NAMES spdlog/spdlog.h

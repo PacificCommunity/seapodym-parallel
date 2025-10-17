@@ -11,9 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 find_package(fmt REQUIRED)
+include_directories(${FMT_INCLUDE_DIRS})
 find_package(Spdlog REQUIRED)
-include_directories(${SPDLOG_INCLUDE_DIRS}
-                    ${FMT_INCLUDE_DIRS})
+include_directories(${SPDLOG_INCLUDE_DIRS})
 # link_directories(${SPDLOG_LIBRARY_DIRS}
 #                  ${FMT_LIBRARY_DIRS})
 

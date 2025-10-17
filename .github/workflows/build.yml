@@ -21,6 +21,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libfmt-dev libspdlog-dev
+          find /usr -name '*fmt*'
+          find /usr -name '*spdlog*'
       - name: Download ADMB
         run: "wget https://github.com/admb-project/admb/releases/download/admb-13.1/admb-13.1-linux.zip"
       - name: Extract ADMB
