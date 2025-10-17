@@ -11,7 +11,8 @@ jobs:
     strategy:
       matrix:
         #os: [ubuntu-latest, macos-latest, windows-latest]
-        os: [ubuntu-latest]
+        # ADMB 13.1 only supports gcc up to version 12 on Linux
+        os: [ubuntu-22.04]
     steps:
       - uses: actions/checkout@v4
       - uses: mpi4py/setup-mpi@v1
