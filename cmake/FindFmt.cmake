@@ -58,4 +58,12 @@ if(FMT_FOUND)
             )
         endif()
     endif()
+    # --- Optional status messages ---
+    if(FMT_LIBRARY)
+         message(STATUS "Found fmt library: ${FMT_LIBRARY}")
+    else()
+        message(STATUS "Found fmt headers only (header-only mode)")
+    endif()
+    # --- Mark variables as advanced for GUI cleanliness ---
+    mark_as_advanced(FMT_INCLUDE_DIR FMT_LIBRARY)
 endif()
