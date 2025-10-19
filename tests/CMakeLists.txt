@@ -22,7 +22,7 @@ add_executable(testSeapodymCourier testSeapodymCourier.cxx)
 target_link_libraries(testSeapodymCourier PRIVATE seapodym_api)
 
 add_executable(testParallel testParallel.cxx)
-target_link_libraries(testParallel PRIVATE seapodym_api spdlog fmt)
+target_link_libraries(testParallel PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
 add_executable(testTaskFarming testTaskFarming.cxx)
 target_link_libraries(testTaskFarming PRIVATE seapodym_api)
@@ -31,10 +31,10 @@ add_executable(testTaskDepFarming testTaskDepFarming.cxx)
 target_link_libraries(testTaskDepFarming PRIVATE seapodym_api)
 
 add_executable(testTaskStepFarming testTaskStepFarming.cxx)
-target_link_libraries(testTaskStepFarming PRIVATE seapodym_api spdlog fmt)
+target_link_libraries(testTaskStepFarming PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
 add_executable(testTaskStepFarmingCohort testTaskStepFarmingCohort.cxx)
-target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog fmt)
+target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
 add_executable(testDistDataCollector testDistDataCollector.cxx)
 target_link_libraries(testDistDataCollector PRIVATE seapodym_api)

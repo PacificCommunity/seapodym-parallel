@@ -57,6 +57,8 @@ void test(int numSize, int numChunksPerRank) {
         timeGet += toc - tic;
     }
 
+    MPI_Barrier(MPI_COMM_WORLD);
+
     if (rank == 0) {
         int numChunk = ddc.getNumChunks();
         int numSize = ddc.getNumSize();
