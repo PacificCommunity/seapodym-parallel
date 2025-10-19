@@ -17,13 +17,13 @@ class SeapodymCohortManager {
     private:
 
         // number of age groups for each time step, ideally matching the number of workers
-        int numAgeGroups; 
+        int numAgeGroups = 0; 
 
         // number of workers 0...numWorkers-1
-        int numWorkers;
+        int numWorkers = 0;
 
         // total number of time steps across all cohorts
-        int numTimeSteps;
+        int numTimeSteps = 0;
 
         // number of cohorts
         int numCohorts = this->numAgeGroups + this->numTimeSteps - 1;
