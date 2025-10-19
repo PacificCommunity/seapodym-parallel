@@ -38,6 +38,10 @@ for logfile in glob.glob('log_worker*.txt'):
                 in_task = True
             
 print(data)
+print(f"Total tasks recorded: {len(data)}")
+
+# sort the data by task
+data.sort(key=lambda x: x["Task"])
 
 
 # Convert time strings to datetime objects
@@ -83,6 +87,6 @@ ax.legend(unique.values(), unique.keys(), title="Tasks", loc="upper right")
 ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
 plt.tight_layout()
-#plt.show()
 plt.savefig('gantt.png')
+#plt.show()
 
