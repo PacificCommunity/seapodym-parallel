@@ -33,7 +33,7 @@ SeapodymCohortFake::stepForward(const dvar_vector& paramVector) {
 }
 
 void SeapodymCohortFake::setStateFromArray(const std::vector<double>& array) {
-  this->data = data; // copy
+  this->data = array; // copy
 }
 
 std::vector<double>
