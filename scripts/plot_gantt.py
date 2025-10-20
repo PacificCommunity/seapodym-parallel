@@ -88,5 +88,5 @@ ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
 plt.tight_layout()
 plt.savefig('gantt.png')
-#plt.show()
+plt.show()
 

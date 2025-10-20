@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <random>
 #include <CmdLineArgParser.h>
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
@@ -39,7 +40,8 @@ void inline
 taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
     int ms, int numAgeGroups, int numData, 
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
-    std::map<int, std::set<std::array<int, 2>>>* dependencyMap) {
+    std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
+    std::mt19937* rng, std::gamma_distribution<double>* dist) {
 
     std::vector<double> localData(numData);
     std::vector<double> data(numData);
@@ -69,7 +71,8 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     for (auto step = stepBeg; step < stepEnd; ++step) {
 
         // Perform the work, just sleeping here zzzzzzz
-        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+        int tsleep = static_cast<int>( std::round( (*dist)(*rng) ) );
+        std::this_thread::sleep_for( std::chrono::milliseconds(tsleep) );
 
         // Pretend we are computing some data
         std::fill(localData.begin(), localData.end(), double(task_id));
@@ -105,6 +108,8 @@ int main(int argc, char** argv) {
     cmdLine.set("-na", 5, "Number of age groups");
     cmdLine.set("-nt", 5, "Total number of steps");
     cmdLine.set("-nm", 100, "Sleep milliseconds");
+    cmdLine.set("-sd", 0.1, "Sleep standard deviation in milliseconds (> 0)");
+    cmdLine.set("-seed", 123456789, "Random seed");
     cmdLine.set("-nd", 10000, "Number of data values to send from worker to manager at each step");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
@@ -124,6 +129,14 @@ int main(int argc, char** argv) {
     int numTimeSteps = cmdLine.get<int>("-nt");
     int milliseconds = cmdLine.get<int>("-nm");
     int numData = cmdLine.get<int>("-nd");
+    int seed = cmdLine.get<int>("-seed") + workerId;
+    double sd = cmdLine.get<double>("-sd");
+
+    std::mt19937 rng;              // Could also seed with std::random_device
+    rng.seed(seed);
+    double k = (milliseconds * milliseconds) / (sd * sd); // mu^2/sigma^2
+    double theta = (sd * sd) / double(milliseconds);
+    std::gamma_distribution<double> dist(k, theta);
 
     // analyze the cohort Id task dependencies
     SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps);
@@ -160,7 +173,9 @@ int main(int argc, char** argv) {
         numAgeGroups,
         numData,
         &dataCollect,
-        &dependencyMap);
+        &dependencyMap,
+        &rng,
+        &dist);
 
     
 
