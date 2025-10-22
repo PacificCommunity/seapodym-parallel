@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cstdio>
 #include <random>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include <CmdLineArgParser.h>
 #include "TaskStepManager.h"
 #include "TaskStepWorker.h"
@@ -38,13 +40,15 @@ int inline getChunkId(int task_id, int step, int numAgeGroups) {
  */
 void inline 
 taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
-    int ms, int numAgeGroups, int numData, 
+    const std::shared_ptr<spdlog::logger>& logger, int ms, int numAgeGroups, int numData, 
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
     std::mt19937* rng, std::gamma_distribution<double>* dist) {
 
     std::vector<double> localData(numData);
     std::vector<double> data(numData);
+
+    logger->info("Running task {} from step {} to {}", task_id, stepBeg, stepEnd);
 
     // Initial conditions from the other cohorts
 
@@ -91,6 +95,9 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         const int endTaskTag = 1;
         MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
     }
+
+    logger->info("Finished task {}", task_id);
+
 }
 
 int main(int argc, char** argv) {
@@ -124,6 +131,12 @@ int main(int argc, char** argv) {
         MPI_Finalize();
         return 1;
     }
+
+    // logger
+    // Use true to let logs be overwritten, otherwise the logs will be appended
+    std::string sworkerId = std::to_string(workerId);
+    auto logger = spdlog::basic_logger_mt(sworkerId, "log_worker" + sworkerId + ".txt", true);
+    logger->set_level(spdlog::level::debug);
 
     int numAgeGroups = cmdLine.get<int>("-na");
     int numTimeSteps = cmdLine.get<int>("-nt");
@@ -169,6 +182,7 @@ int main(int argc, char** argv) {
         std::placeholders::_2, // stepBeg
         std::placeholders::_3, // stepEnd
         std::placeholders::_4, // comm
+        logger,
         milliseconds,
         numAgeGroups,
         numData,
