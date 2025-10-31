@@ -112,9 +112,9 @@ ax.set_title("Gantt Chart of Task Execution per Worker")
 #ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
 
 # Remove duplicate legend entries
-handles, labels = ax.get_legend_handles_labels()
-unique = dict(zip(labels, handles))
-ax.legend(unique.values(), unique.keys(), title="Tasks", loc="upper right")
+#handles, labels = ax.get_legend_handles_labels()
+#unique = dict(zip(labels, handles))
+#ax.legend(unique.values(), unique.keys(), title="Tasks", loc="upper right")
 
 # Use integer ticks for seconds
 ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
