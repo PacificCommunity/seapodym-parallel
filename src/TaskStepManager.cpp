@@ -6,6 +6,8 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 
 TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
@@ -61,13 +63,31 @@ TaskStepManager::run() const {
                 break;
             }
 
-            MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, END_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
+            MPI_Status recv_status;
+            MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, END_TASK_TAG, this->comm, &recv_status);
+
 
             // Store the result
             results.insert(output);
             int task_id = output[0];
             int step = output[1];
             completed.insert(std::array<int,2>{task_id, step});
+
+
+            int worker_id = recv_status.MPI_SOURCE;
+            std::string sworkerId = std::to_string(worker_id);
+            std::string loggerName = "manager_" + sworkerId;
+            std::string filename = "log_manager" + sworkerId + ".txt";
+            // Reuse or create the logger
+            auto logger = spdlog::get(loggerName);
+            if (!logger) {
+                logger = spdlog::basic_logger_mt(loggerName, filename, /*truncate=*/false);
+                logger->set_level(spdlog::level::debug);
+                logger->flush_on(spdlog::level::info);
+            }
+            
+            // Log the event
+            logger->info("Worker {} - Task {}: step {} done", worker_id, task_id, step);
 
             if (step == this->stepEndMap.at(task_id) - 1) {
                 assigned.erase(task_id);
