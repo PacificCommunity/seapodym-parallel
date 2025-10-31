@@ -4,8 +4,6 @@
 #include <CmdLineArgParser.h>
 #include <mpi.h>
 #include <admodel.h>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
 #include <iostream>
 
 int main(int argc, char** argv) {
@@ -68,12 +66,12 @@ int main(int argc, char** argv) {
 
     std::string sworkerId = std::to_string(workerId);
     // Use true to clobber the previously written log files
-    auto logger = spdlog::basic_logger_mt(sworkerId, "logs/log_worker" + sworkerId + ".txt", true);
-    logger->set_level(spdlog::level::debug);
+    //auto logger = spdlog::basic_logger_mt(sworkerId, "logs/log_worker" + sworkerId + ".txt", true);
+    //logger->set_level(spdlog::level::debug);
 
     if (workerId == 0) {
-        logger->info("Running with {} workers", numWorkers);
-        logger->info("Number of age groups: {}, Total number of time steps: {}", numAgeGroups, numTimeSteps);
+        //logger->info("Running with {} workers", numWorkers);
+        //logger->info("Number of age groups: {}, Total number of time steps: {}", numAgeGroups, numTimeSteps);
     }
 
     SeapodymCohortManager cohortManager(numAgeGroups, numWorkers, numTimeSteps);
@@ -110,7 +108,7 @@ int main(int argc, char** argv) {
             int numSteps = cohortNumSteps[icohort];
 
             int age = (istep + ageIndices[icohort]) % numAgeGroups;
-            logger->info("starting processing cohort {} (age {}) at time step {}...", cohortId, age, istep);  
+            //logger->info("starting processing cohort {} (age {}) at time step {}...", cohortId, age, istep);  
             
             // Simulate the time taken for a step
             tic = MPI_Wtime();
@@ -120,7 +118,7 @@ int main(int argc, char** argv) {
             // Update the data for this step
             data.assign(dataSize, 100*workerId + istep);
 
-            logger->info("done processing cohort {} at time step {}", cohortId, istep);  
+            //logger->info("done processing cohort {} at time step {}", cohortId, istep);  
 
             // Done with the step
             step_counter[icohort]++;
@@ -137,35 +135,35 @@ int main(int argc, char** argv) {
 
         // Accumulate the data from all workers
         int newCohortWorkerId = cohortManager.getNewCohortWorker(istep);
-        logger->info("new cohort created by worker {} after time step {}", 
-            newCohortWorkerId, istep);
+        //logger->info("new cohort created by worker {} after time step {}", 
+            //newCohortWorkerId, istep);
 
 #ifdef SEAPODYM_FETCH
         // Individual fetches
         MPI_Barrier(MPI_COMM_WORLD); // Ensure all workers are synchronized before fetching
-        logger->info("starting fetching data from all workers at time step {}", istep);
+        //logger->info("starting fetching data from all workers at time step {}", istep);
         std::vector<double> sum_data(dataSize, 0);
         if (workerId == newCohortWorkerId) {
             for (auto iw = 0; iw < numWorkers; ++iw) {
                 tic = MPI_Wtime();
                 std::vector<double> fetchedData = courier.fetch(iw);
-                logger->info("fetched data from worker {} at time step {}", iw, istep);
+                //logger->info("fetched data from worker {} at time step {}", iw, istep);
                 for (int i = 0; i < dataSize; ++i) {
                     sum_data[i] += fetchedData[i]; // Sum the data from all workers
                 }
                 ttotComm += MPI_Wtime() - tic;
             }
-            logger->info("done fetching data after time step {}", istep);
+            //logger->info("done fetching data after time step {}", istep);
         }
 #else
         // Accumulate
-        logger->info("starting accumulation of data from all workers at time step {}", istep);
+        //logger->info("starting accumulation of data from all workers at time step {}", istep);
 
         tic = MPI_Wtime();
         std::vector<double> sum_data = courier.accumulate(newCohortWorkerId);
         ttotComm += MPI_Wtime() - tic;
         if (workerId == newCohortWorkerId) {
-            logger->info("done accumulating data after time step {}", istep);
+            //logger->info("done accumulating data after time step {}", istep);
         }
 #endif            
 
@@ -175,8 +173,8 @@ int main(int argc, char** argv) {
             for (int i = 0; i < dataSize; ++i) {
                 checksum += sum_data[i];
             }
-            logger->info("checksum from all workers at end of time step {}: {}", 
-                istep, checksum);
+            //logger->info("checksum from all workers at end of time step {}: {}", 
+                //istep, checksum);
             std::cout << "[" << workerId << "] @ step: " << istep << " checksum: " << checksum << '\n';
         }
 

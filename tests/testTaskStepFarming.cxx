@@ -35,7 +35,7 @@ void taskFunc2(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, int ms) {
 }
 
 int main(int argc, char** argv) {
-
+    /*
     // MPI initialization
     MPI_Init(&argc, &argv);
     int numWorkers, size;
@@ -143,12 +143,12 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, stepBegMap, stepEndMap);
-        worker.run();
+        //TaskStepWorker worker(MPI_COMM_WORLD, taskFunc1, stepBegMap, stepEndMap);
+        //worker.run();
 
     }
     
     // Clean up
-    MPI_Finalize();
+    MPI_Finalize();*/
     return 0;
 }

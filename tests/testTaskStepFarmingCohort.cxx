@@ -94,7 +94,7 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
 }
 
 int main(int argc, char** argv) {
-
+/*
     // MPI initialization
     MPI_Init(&argc, &argv);
     int numWorkers, size;
@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
 
     
 
-    TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
+    //TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
     // sync the manager and workers
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
     } else {
 
         // Worker
-        worker.run();
+        //worker.run();
 
     }
 
@@ -237,6 +237,6 @@ int main(int argc, char** argv) {
     dataCollect.free();
     
     // Clean up
-    MPI_Finalize();
+    MPI_Finalize();*/
     return 0;
 }
