@@ -56,9 +56,11 @@ class DistDataCollector {
     }
 
     /** 
-     * Make sure the received data are ready to be used 
+     * Active target synchronization
+     * @note call this before and after a put operation to ensure that the target data are visible.
+     * All ranks must call this method.
      */
-    void sync(); 
+    void fence();
 
     /**
      * @brief Start an epoch for RMA operations

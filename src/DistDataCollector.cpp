@@ -23,12 +23,9 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) 
     if (rank == 0) {
         std::fill(this->collectedData, this->collectedData + (numChunks * numSize), BAD_VALUE);
     }
-
-    MPI_Win_lock_all(0, this->win);
 }
 
 DistDataCollector::~DistDataCollector() {
-    MPI_Win_unlock_all(this->win);
     if (this->win != MPI_WIN_NULL) {
         MPI_Win_free(&this->win);
     }
@@ -37,8 +34,8 @@ DistDataCollector::~DistDataCollector() {
 }
 
 void 
-DistDataCollector::sync() {
-    MPI_Win_sync(this->win);
+DistDataCollector::fence() {
+    MPI_Win_fence(0, this->win);
 }
 
 void

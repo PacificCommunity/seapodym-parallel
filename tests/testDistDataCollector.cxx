@@ -18,7 +18,9 @@ void test(int numSize, int numChunksPerRank) {
 
     double tic = MPI_Wtime();
 
-    // all ranks contribute, including rank 0
+    ddc.fence();
+
+    // all ranks call put, including rank 0
     for (auto i = 0; i < numChunksPerRank; ++i) {
 
         int chunkId = rank * numChunksPerRank + i;
@@ -30,19 +32,15 @@ void test(int numSize, int numChunksPerRank) {
         localData.clear();
     }
 
+    // Make sure all the chunks have been received. All the above "put" operations
+    // must have completed. Now the data cane be read.
+    ddc.fence();
+
     double toc = MPI_Wtime();
     timePut += toc - tic;
 
-    // Make sure all the chunks have been received. All the above "put" operations
-    // must have completed. 
-    MPI_Win_flush_all(ddc.getWin());
-    MPI_Win_sync(ddc.getWin());
-    MPI_Barrier(MPI_COMM_WORLD);
-
     if (rank > 0) {
 
-        ddc.sync();  // <--- ADD THIS
-        
         double tic = MPI_Wtime();
 
         for (auto i = 0; i < numChunksPerRank; ++i) {
@@ -62,12 +60,9 @@ void test(int numSize, int numChunksPerRank) {
         timeGet += toc - tic;
     }
 
-    MPI_Win_flush_all(ddc.getWin());
-    MPI_Win_sync(ddc.getWin());
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0) {
-        ddc.sync();  // <--- ADD THIS
         int numChunk = ddc.getNumChunks();
         int numSize = ddc.getNumSize();
         double* data = ddc.getCollectedDataPtr();
@@ -83,8 +78,6 @@ void test(int numSize, int numChunksPerRank) {
         std::cout << "checksum: " << checksum << std::endl;
         assert(checksum == numSize * numChunks * (numChunks - 1) / 2);
     }
-
-    //ddc.free();
 
     double timePutTotal, timeGetTotal;
     MPI_Reduce(&timePut, &timePutTotal, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
