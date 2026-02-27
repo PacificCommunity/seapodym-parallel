@@ -45,7 +45,12 @@ target_link_libraries(testAsyncPutGet PRIVATE seapodym_api)
 add_executable(testTaskScore testTaskScore.cxx)
 target_link_libraries(testTaskScore PRIVATE seapodym_api)
 
+add_executable(testCollect testCollect.cxx)
+target_link_libraries(testCollect PRIVATE seapodym_api)
+
 # Register the tests
+
+add_test(NAME testCollect COMMAND mpiexec -n 2 testCollect)
 
 add_test(NAME testSeapodymCohort COMMAND testSeapodymCohort)
 

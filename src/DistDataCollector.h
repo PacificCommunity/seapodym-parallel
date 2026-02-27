@@ -49,6 +49,18 @@ class DistDataCollector {
     ~DistDataCollector();
 
     /**
+     * Get the MPI window
+     */
+    MPI_Win &getWin(){
+        return this->win;
+    }
+
+    /** 
+     * Make sure the received data are ready to be used 
+     */
+    void sync(); 
+
+    /**
      * @brief Start an epoch for RMA operations
      */
     void inline startEpoch() {
@@ -143,10 +155,10 @@ class DistDataCollector {
     /**
      * @brief Free the MPI window and empty the collected data
      */
-    void free() {
-        if (this->win != MPI_WIN_NULL) {
-            MPI_Win_free(&this->win);
-        }
+    void free() { // This should be removed
+        // if (this->win != MPI_WIN_NULL) {
+        //     MPI_Win_free(&this->win);
+        // }
         // No need to free the data, MPI_Win_free will free the pointer
         //MPI_Free_mem(this->collectedData);
     }
