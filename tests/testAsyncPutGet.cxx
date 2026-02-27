@@ -141,14 +141,20 @@ void testPutGet(int num_chunks, int num_size, int ms) {
     // make sure data has been initialized before remote memory accesses are issued
     MPI_Barrier(MPI_COMM_WORLD);
 
+    std::vector<double> localData(num_size);
+    dataCollector1.fence();
     if (rank > 0) {
         int chunk_id = rank;
-        std::vector<double> localData(num_size);
-
-        dataCollector1.get(chunk_id, localData.data());
-
-        dataCollector2.put(chunk_id, localData.data());
+        dataCollector1.getAsync(chunk_id, localData.data());
     }
+    dataCollector1.fence();
+
+    dataCollector2.fence();
+    if (rank > 0) {
+        int chunk_id = rank;
+        dataCollector2.putAsync(chunk_id, localData.data());
+    }
+    dataCollector2.fence();
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -161,7 +167,7 @@ void testPutGet(int num_chunks, int num_size, int ms) {
         for (auto i = 0; i < num_chunks; ++i) {
 
             // fetch a chunk asynchronously
-            dataCollector2.get(i, localData.data());
+            dataCollector2.getAsync(i, localData.data());
 
             // ... do some work ...
             std::this_thread::sleep_for(std::chrono::milliseconds(ms));

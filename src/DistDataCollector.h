@@ -157,11 +157,11 @@ class DistDataCollector {
     /**
      * @brief Free the MPI window and empty the collected data
      */
-    void free() { // This should be removed
-        // if (this->win != MPI_WIN_NULL) {
-        //     MPI_Win_free(&this->win);
-        // }
-        // No need to free the data, MPI_Win_free will free the pointer
+    void free() { // Should this be removed and just implemented in the destructor?
+        if (this->win != MPI_WIN_NULL) {
+            MPI_Win_free(&this->win);
+        }
+        //No need to free the data, MPI_Win_free will free the pointer
         //MPI_Free_mem(this->collectedData);
     }
 

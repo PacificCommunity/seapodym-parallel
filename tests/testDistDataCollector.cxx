@@ -33,7 +33,7 @@ void test(int numSize, int numChunksPerRank) {
     }
 
     // Make sure all the chunks have been received. All the above "put" operations
-    // must have completed. Now the data cane be read.
+    // must have completed. Now the data can be read.
     ddc.fence();
 
     double toc = MPI_Wtime();
@@ -49,18 +49,16 @@ void test(int numSize, int numChunksPerRank) {
             std::vector<double> localData = ddc.get(chunkId);
 
             for (auto val : localData) {
-                //assert(val == chunkId); // this sometimes fails
                 if (val != chunkId) {
                     std::cout << "rank = " << rank << " val = " << val << " should have been " << chunkId << '\n';
                 }
+                assert(val == chunkId);
             }
         }
 
         double toc = MPI_Wtime();
         timeGet += toc - tic;
     }
-
-    MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0) {
         int numChunk = ddc.getNumChunks();
@@ -98,7 +96,7 @@ int main(int argc, char* argv[]) {
 
     // Parse the command line arguments
     CmdLineArgParser cmdLine;
-    cmdLine.set("-numSize", 15000, "Size of the data to put/get");
+    cmdLine.set("-numSize", 100000, "Size of the data to put/get");
     cmdLine.set("-numChunksPerRank", 1, "Number of chunks per rank");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
