@@ -43,7 +43,7 @@ DistDataCollector::put(int chunkId, const double* data) {
 
     // Synchronize before RMA operation. Each rank will write
     // disjoint pieces of data, so we can use shared locks
-    //MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
+    MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
 
     // Put local_data into the appropriate slice on rank 0
     MPI_Put(data, this->numSize, MPI_DOUBLE,
@@ -51,24 +51,14 @@ DistDataCollector::put(int chunkId, const double* data) {
     MPI_Win_flush(0, this->win);
 
     // Synchronize after RMA operations
-    //MPI_Win_unlock(0, this-> win);
+    MPI_Win_unlock(0, this-> win);
 }
 
 std::vector<double>
 DistDataCollector::get(int chunkId) {
 
-    // Synchronize before RMA operation. Each rank will read
-    // disjoint pieces of data, so we can use shared locks
-    //MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
-
-    // Get the appropriate slice from rank 0
     std::vector<double> data(this->numSize);
-    MPI_Get(data.data(), this->numSize, MPI_DOUBLE,
-                0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
-    MPI_Win_flush(0, this->win);
-
-    // Synchronize after RMA operations
-    //MPI_Win_unlock(0, this-> win);
+    this->get(chunkId, data.data());
 
     return data;
 }
@@ -78,7 +68,7 @@ DistDataCollector::get(int chunkId, double* buffer) {
 
     // Synchronize before RMA operation. Each rank will read
     // disjoint pieces of data, so we can use shared locks
-    //MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
+    MPI_Win_lock(MPI_LOCK_SHARED, 0, 0, win);
 
     // Get the appropriate slice from rank 0
     MPI_Get(buffer, this->numSize, MPI_DOUBLE,
@@ -86,6 +76,6 @@ DistDataCollector::get(int chunkId, double* buffer) {
     MPI_Win_flush(0, win);
 
     // Synchronize after RMA operations
-    //MPI_Win_unlock(0, this-> win);
+    MPI_Win_unlock(0, this-> win);
 }
 
