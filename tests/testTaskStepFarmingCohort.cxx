@@ -198,9 +198,11 @@ int main(int argc, char** argv) {
         double toc = MPI_Wtime();
 
         auto numTotalSteps = results.size();
+        double speedup = 0.001*double(numTotalSteps * milliseconds)/(toc - tic);
         std::cout << "Execution time: " << toc - tic << 
-            " Speedup: " << 0.001*double(numTotalSteps * milliseconds)/(toc - tic) << 
-            " Ideal: " << numWorkers << std::endl;
+            " Speedup: " << speedup << 
+            " Ideal: " << numWorkers << 
+            " Parallel eff: " << speedup/double(numWorkers) << std::endl;
 
 
         // make sure there are no duplicate tasks and all the tasks have been executed
