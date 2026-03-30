@@ -117,6 +117,9 @@ void testAsyncPutGet(int num_chunks, int num_size, int ms) {
         std::cout << "Rank " << rank << " checksum = " << checksum << std::endl;    
     }
 
+    // make sure every rank reaches this point before freeing the mpi window
+    MPI_Barrier(MPI_COMM_WORLD);
+
     // check
     checkData("Async", dataCollector1, dataCollector2, num_chunks, num_size);
 }
