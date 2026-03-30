@@ -54,7 +54,8 @@ jobs:
       - run: ls -l build/src
       - run: ls -l build/tests
       - name: Test with cmake
-        run: ctest --output-on-failure
+        # run: ctest --output-on-failure
+        run: ctest -V
         working-directory: build
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v4
