@@ -26,8 +26,6 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) 
 }
 
 DistDataCollector::~DistDataCollector() {
-
-    MPI_Barrier(this->comm);
     
     if (this->win != MPI_WIN_NULL) {
         MPI_Win_free(&this->win);
