@@ -26,8 +26,12 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize) 
 }
 
 DistDataCollector::~DistDataCollector() {
+
+    MPI_Barrier(this->comm);
+    
     if (this->win != MPI_WIN_NULL) {
         MPI_Win_free(&this->win);
+        this->win = MPI_WIN_NULL;
     }
     // No need to free the data, MPI_Win_free will free the pointer
     //MPI_Free_mem(this->collectedData);
