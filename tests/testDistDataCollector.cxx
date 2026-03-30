@@ -16,28 +16,28 @@ void test(int numSize, int numChunksPerRank) {
 
     double timePut = 0, timeGet = 0;
 
-    if (rank >= 0) {
+    double tic = MPI_Wtime();
 
-        double tic = MPI_Wtime();
+    ddc.fence();
 
-        for (auto i = 0; i < numChunksPerRank; ++i) {
+    // all ranks call put, including rank 0
+    for (auto i = 0; i < numChunksPerRank; ++i) {
 
-            int chunkId = rank * numChunksPerRank + i;
-            std::vector<double> localData(numSize, chunkId);
+        int chunkId = rank * numChunksPerRank + i;
+        std::vector<double> localData(numSize, chunkId);
 
-            ddc.put(chunkId, localData.data());
+        ddc.put(chunkId, localData.data());
 
-            // At this point the data have been sent and we can modify the local data
-            localData.clear();
-        }
-
-        double toc = MPI_Wtime();
-        timePut += toc - tic;
+        // At this point the data have been sent and we can modify the local data
+        localData.clear();
     }
 
     // Make sure all the chunks have been received. All the above "put" operations
-    // must have completed. 
-    MPI_Barrier(MPI_COMM_WORLD);
+    // must have completed. Now the data can be read.
+    ddc.fence();
+
+    double toc = MPI_Wtime();
+    timePut += toc - tic;
 
     if (rank > 0) {
 
@@ -49,6 +49,9 @@ void test(int numSize, int numChunksPerRank) {
             std::vector<double> localData = ddc.get(chunkId);
 
             for (auto val : localData) {
+                if (val != chunkId) {
+                    std::cout << "rank = " << rank << " val = " << val << " should have been " << chunkId << '\n';
+                }
                 assert(val == chunkId);
             }
         }
@@ -56,8 +59,6 @@ void test(int numSize, int numChunksPerRank) {
         double toc = MPI_Wtime();
         timeGet += toc - tic;
     }
-
-    MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0) {
         int numChunk = ddc.getNumChunks();
@@ -67,7 +68,7 @@ void test(int numSize, int numChunksPerRank) {
         for (auto chunk = 0; chunk < numChunk; ++chunk) {
             std::cout << "chunk " << chunk << ": ";
             for (auto i = 0; i < numSize; ++i) {
-                std::cout << data[chunk*numSize + i] << ", ";
+                //std::cout << data[chunk*numSize + i] << ", ";
                 checksum += data[chunk*numSize + i];
             }
             std::cout << std::endl;
@@ -75,8 +76,6 @@ void test(int numSize, int numChunksPerRank) {
         std::cout << "checksum: " << checksum << std::endl;
         assert(checksum == numSize * numChunks * (numChunks - 1) / 2);
     }
-
-    ddc.free();
 
     double timePutTotal, timeGetTotal;
     MPI_Reduce(&timePut, &timePutTotal, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -97,7 +96,7 @@ int main(int argc, char* argv[]) {
 
     // Parse the command line arguments
     CmdLineArgParser cmdLine;
-    cmdLine.set("-numSize", 15000, "Size of the data to put/get");
+    cmdLine.set("-numSize", 100000, "Size of the data to put/get");
     cmdLine.set("-numChunksPerRank", 1, "Number of chunks per rank");
     bool success = cmdLine.parse(argc, argv);
     bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");

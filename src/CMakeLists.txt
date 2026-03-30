@@ -7,7 +7,6 @@ set(SRCS
    SeapodymCohortDependencyAnalyzer.cpp
    TaskStepManager.cpp
    TaskStepWorker.cpp
-   TaskScore.cpp
    TaskDependencyManager.cpp
    TaskManager.cpp
    TaskWorker.cpp
@@ -22,7 +21,6 @@ set(HEADERS
    SeapodymCohortDependencyAnalyzer.h
    TaskStepManager.h
    TaskStepWorker.h
-   TaskScore.h
    TaskDependencyManager.h
    TaskManager.h
    TaskWorker.h

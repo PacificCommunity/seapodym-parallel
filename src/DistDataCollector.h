@@ -49,9 +49,24 @@ class DistDataCollector {
     ~DistDataCollector();
 
     /**
+     * Get the MPI window
+     */
+    MPI_Win &getWin(){
+        return this->win;
+    }
+
+    /** 
+     * Active target synchronization
+     * @note call this before and after a put operation to ensure that the target data are visible.
+     * All ranks must call this method.
+     */
+    void fence();
+
+    /**
      * @brief Start an epoch for RMA operations
      */
     void inline startEpoch() {
+        // Start a passive target shared local access epoch for all processes in the communicator
         MPI_Win_lock_all(MPI_MODE_NOCHECK, this->win);
     }
 
@@ -143,11 +158,11 @@ class DistDataCollector {
     /**
      * @brief Free the MPI window and empty the collected data
      */
-    void free() {
+    void free() { // Should this be removed and just implemented in the destructor?
         if (this->win != MPI_WIN_NULL) {
             MPI_Win_free(&this->win);
         }
-        // No need to free the data, MPI_Win_free will free the pointer
+        //No need to free the data, MPI_Win_free will free the pointer
         //MPI_Free_mem(this->collectedData);
     }
 
