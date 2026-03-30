@@ -192,6 +192,9 @@ void testPutGet(int num_chunks, int num_size, int ms) {
 
     // check
     checkData("", dataCollector1, dataCollector2, num_chunks, num_size);
+
+    // make sure every rank reaches this point before freeing the mpi window
+    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
@@ -225,7 +228,7 @@ int main(int argc, char** argv) {
     const int ms = cmdLine.get<int>("-nm");
 
     testAsyncPutGet(num_chunks, num_size, ms);
-    //testPutGet(num_chunks, num_size, ms);
+    testPutGet(num_chunks, num_size, ms);
 
     if (rank == 0) {
         std::cout << "Success\n";
