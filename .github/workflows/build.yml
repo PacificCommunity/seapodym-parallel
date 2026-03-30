@@ -53,9 +53,9 @@ jobs:
       - run: ls -l build
       - run: ls -l build/src
       - run: ls -l build/tests
-#      - name: Test with cmake
-#        run: ctest --output-on-failure
-#        working-directory: build
+      - name: Test with cmake
+        run: ctest --output-on-failure
+        working-directory: build
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.ref == 'refs/heads/main' }}
