@@ -98,7 +98,7 @@ void testAsyncPutGet(int num_chunks, int num_size, int ms) {
             dataCollector2.getAsync(i, &bigData[i*num_size]);
 
             // .. do some work ...
-            //dataCollector2.flush(); // required if the work needs to access the slice of data 
+            dataCollector2.flush(); // required if the work needs to access the slice of data 
             std::this_thread::sleep_for(std::chrono::milliseconds(ms));
         }
         // no need to flush
