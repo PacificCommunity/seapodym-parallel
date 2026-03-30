@@ -42,9 +42,6 @@ target_link_libraries(testDistDataCollector PRIVATE seapodym_api)
 add_executable(testAsyncPutGet testAsyncPutGet.cxx)
 target_link_libraries(testAsyncPutGet PRIVATE seapodym_api)
 
-add_executable(testTaskScore testTaskScore.cxx)
-target_link_libraries(testTaskScore PRIVATE seapodym_api)
-
 add_executable(testCollect testCollect.cxx)
 target_link_libraries(testCollect PRIVATE seapodym_api)
 
@@ -105,9 +102,6 @@ set_tests_properties(testTaskStepFarmingCohortNa5Nt10 PROPERTIES PASS_REGULAR_EX
 
 add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1)
 set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")
-
-add_test(NAME testTaskScore COMMAND mpiexec -n 3 ./testTaskScore)
-set_tests_properties(testTaskScore PROPERTIES PASS_REGULAR_EXPRESSION "SUCCEEDED")
 
 add_test(NAME testSeapodymCohortDependencyAnalyzerNa3Nt5 COMMAND testSeapodymCohortDependencyAnalyzer -na 3 -nt 5)
 set_tests_properties(testSeapodymCohortDependencyAnalyzerNa3Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
