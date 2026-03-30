@@ -66,6 +66,7 @@ class DistDataCollector {
      * @brief Start an epoch for RMA operations
      */
     void inline startEpoch() {
+        // Start a passive target shared local access epoch for all processes in the communicator
         MPI_Win_lock_all(MPI_MODE_NOCHECK, this->win);
     }
 
