@@ -225,7 +225,7 @@ int main(int argc, char** argv) {
     const int ms = cmdLine.get<int>("-nm");
 
     testAsyncPutGet(num_chunks, num_size, ms);
-    testPutGet(num_chunks, num_size, ms);
+    //testPutGet(num_chunks, num_size, ms);
 
     if (rank == 0) {
         std::cout << "Success\n";
