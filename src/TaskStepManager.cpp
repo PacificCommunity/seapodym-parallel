@@ -28,7 +28,10 @@ TaskStepManager::run() const {
     int size;
     MPI_Comm_size(this->comm, &size);
 
+    // task_id, step, return code
     std::set<std::array<int,3>> results;
+
+    // task_id, step
     std::set<std::array<int,2>> completed;
 
     std::set<int> assigned;
@@ -42,8 +45,8 @@ TaskStepManager::run() const {
     std::array<int, 3> output;
 
     // Declare all workers to be active initially
-    for (int i = 1; i < size; ++i) {
-        active_workers.insert(i);
+    for (int worker = 1; worker < size; ++worker) {
+        active_workers.insert(worker);
     }
 
     while (!task_queue.empty() || !assigned.empty()) {
@@ -96,21 +99,27 @@ TaskStepManager::run() const {
             }
         }
 
-        // Drain all worker-available messages (tag WORKER_AVAILABLE_TAG)
-        for (int worker = 1; worker < size; ++worker) {
+        // Drain ALL worker-available messages in a single loop
+        while (true) {
             int flag = 0;
-            MPI_Iprobe(worker, WORKER_AVAILABLE_TAG, this->comm, &flag, &status);
-            if (flag) {
-                int dummy;
-                MPI_Recv(&dummy, 1, MPI_INT, worker, WORKER_AVAILABLE_TAG, this->comm, MPI_STATUS_IGNORE);
-                active_workers.insert(worker);
+            MPI_Status status;
+            MPI_Iprobe(MPI_ANY_SOURCE, WORKER_AVAILABLE_TAG, this->comm, &flag, &status);
+            if (!flag) {
+                break;  // No more messages
             }
+
+            int dummy;
+            int worker = status.MPI_SOURCE;  // Extract worker rank from status
+            MPI_Recv(&dummy, 1, MPI_INT, worker, WORKER_AVAILABLE_TAG, this->comm, MPI_STATUS_IGNORE);
+            active_workers.insert(worker);
         }
 
-        // (optional) avoid hot-spinning if nothing to do
-        //if (active_workers.empty() && assigned.empty()) {
-        //    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        //}
+        // avoid hot-spinning if nothing to do
+        if (active_workers.empty() && assigned.empty()) {
+           // 2-10 ms seems to be a good choice for now. On power constrained 
+           // platforms may want to increase to 20-50ms
+           std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
     }
 
     // Send stop signal
