@@ -20,7 +20,8 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
     this->deps = dependencyMap;
 }
 
-std::unordered_set< std::array<int, 3> >
+//std::unordered_set< std::array<int, 3> >
+std::set< std::array<int, 3> >
 TaskStepManager::run() const {
 
     int size;
