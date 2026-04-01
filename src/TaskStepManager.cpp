@@ -8,24 +8,6 @@
 #include <thread>
 #include <iostream>
 
-namespace std {
-    template <>
-    struct hash<std::array<int, 2>> {
-        size_t operator()(const std::array<int, 2>& arr) const {
-            size_t h1 = std::hash<int>{}(arr[0]);
-            size_t h2 = std::hash<int>{}(arr[1]);
-            return h1 ^ (h2 << 1);
-        }
-        size_t operator()(const std::array<int, 3>& arr) const {
-            size_t h1 = std::hash<int>{}(arr[0]);
-            size_t h2 = std::hash<int>{}(arr[1]);
-            size_t h3 = std::hash<int>{}(arr[2]);
-            return h1 ^ (h2 << 1) ^ (h3 << 2);
-        }
-    };
-}
-
-
 TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
       const std::map<int, int>& stepBegMap, 
       const std::map<int, int>& stepEndMap,
@@ -38,14 +20,14 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
     this->deps = dependencyMap;
 }
 
-std::set< std::array<int, 3> >
+std::unordered_set< std::array<int, 3> >
 TaskStepManager::run() const {
 
     int size;
     MPI_Comm_size(this->comm, &size);
 
     // task_id, step, return code
-    std::set<std::array<int,3>> results;
+    std::unordered_set<std::array<int,3>> results;
 
     // task_id, step
     std::unordered_set<std::array<int,2>> completed;

@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <map>
+#include <unordered_set>
 #include <set>
 #include <array>
 
@@ -22,6 +23,26 @@
 
 // TaskId 
 using dep_type = std::array<int, 2>;
+
+namespace std {
+    template <>
+    struct hash<std::array<int, 2>> {
+        size_t operator()(const std::array<int, 2>& arr) const {
+            size_t h1 = std::hash<int>{}(arr[0]);
+            size_t h2 = std::hash<int>{}(arr[1]);
+            return h1 ^ (h2 << 1);
+        }
+    };
+    template <>
+    struct hash<std::array<int, 3>> {
+        size_t operator()(const std::array<int, 3>& arr) const {
+            size_t h1 = std::hash<int>{}(arr[0]);
+            size_t h2 = std::hash<int>{}(arr[1]);
+            size_t h3 = std::hash<int>{}(arr[2]);
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
+        }
+    };
+}
 
 /**
  * @brief The TaskStepManager orchestrates tasks that depend on other tasks' steps. Use 
@@ -67,7 +88,7 @@ class TaskStepManager {
          * Run the manager
          * @return (taskId, step, result) tuples for each task
          */
-        std::set< std::array<int, 3> > run() const;
+        std::unordered_set< std::array<int, 3> > run() const;
 
 };
 
