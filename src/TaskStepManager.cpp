@@ -8,6 +8,23 @@
 #include <thread>
 #include <iostream>
 
+namespace std {
+    template <>
+    struct hash<std::array<int, 2>> {
+        size_t operator()(const std::array<int, 2>& arr) const {
+            size_t h1 = std::hash<int>{}(arr[0]);
+            size_t h2 = std::hash<int>{}(arr[1]);
+            return h1 ^ (h2 << 1);
+        }
+        size_t operator()(const std::array<int, 3>& arr) const {
+            size_t h1 = std::hash<int>{}(arr[0]);
+            size_t h2 = std::hash<int>{}(arr[1]);
+            size_t h3 = std::hash<int>{}(arr[2]);
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
+        }
+    };
+}
+
 
 TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
       const std::map<int, int>& stepBegMap, 
@@ -33,7 +50,7 @@ TaskStepManager::run() const {
     std::set<std::array<int,3>> results;
 
     // task_id, step
-    std::set<std::array<int,2>> completed;
+    std::unordered_set<std::array<int,2>> completed;
 
     std::unordered_set<int> assigned;
     std::vector<int> task_queue(this->numTasks);
