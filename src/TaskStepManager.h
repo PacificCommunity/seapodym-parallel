@@ -88,7 +88,8 @@ class TaskStepManager {
          * Run the manager
          * @return (taskId, step, result) tuples for each task
          */
-        std::unordered_set< std::array<int, 3> > run() const;
+        //std::unordered_set< std::array<int, 3> > run() const;
+        std::set< std::array<int, 3> > run() const;
 
 };
 

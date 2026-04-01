@@ -27,7 +27,8 @@ TaskStepManager::run() const {
     MPI_Comm_size(this->comm, &size);
 
     // task_id, step, return code
-    std::unordered_set<std::array<int,3>> results;
+    //std::unordered_set<std::array<int,3>> results;
+    std::set<std::array<int,3>> results;
 
     // task_id, step
     std::unordered_set<std::array<int,2>> completed;
