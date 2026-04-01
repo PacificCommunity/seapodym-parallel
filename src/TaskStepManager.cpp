@@ -53,9 +53,9 @@ TaskStepManager::run() const {
     std::unordered_set<std::array<int,2>> completed;
 
     std::unordered_set<int> assigned;
-    std::vector<int> task_queue(this->numTasks);
+    std::unordered_set<int> task_queue;
     for (int i = 0; i < this->numTasks; ++i) {
-        task_queue[i] = i;
+        task_queue.insert(i);
     }
     std::unordered_set<int> active_workers;
 
