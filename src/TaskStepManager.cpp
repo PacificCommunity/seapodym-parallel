@@ -41,8 +41,6 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
 std::set< std::array<int, 3> >
 TaskStepManager::run() const {
 
-    const int managerRank = 0;
-
     int size;
     MPI_Comm_size(this->comm, &size);
 
@@ -53,9 +51,11 @@ TaskStepManager::run() const {
     std::unordered_set<std::array<int,2>> completed;
 
     std::unordered_set<int> assigned;
-    std::unordered_set<int> task_queue;
+    //std::unordered_set<int> task_queue;
+    std::vector<int> task_queue(this->numTasks);
     for (int i = 0; i < this->numTasks; ++i) {
-        task_queue.insert(i);
+        //task_queue.insert(i);
+        task_queue[i] = i;
     }
     std::unordered_set<int> active_workers;
 
