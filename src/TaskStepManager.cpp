@@ -1,6 +1,7 @@
 #include "TaskStepManager.h"
 #include "Tags.h"
 #include <set>
+#include <unordered_set>
 #include <vector>
 #include <map>
 #include <chrono>
@@ -34,12 +35,12 @@ TaskStepManager::run() const {
     // task_id, step
     std::set<std::array<int,2>> completed;
 
-    std::set<int> assigned;
+    std::unordered_set<int> assigned;
     std::vector<int> task_queue(this->numTasks);
     for (int i = 0; i < this->numTasks; ++i) {
         task_queue[i] = i;
     }
-    std::set<int> active_workers;
+    std::unordered_set<int> active_workers;
 
     // task_id, step, result
     std::array<int, 3> output;
