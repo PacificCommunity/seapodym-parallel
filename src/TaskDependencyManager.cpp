@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-bool isReady(int taskId, const std::map<int, std::set<int> >& dependencies, const std::set<int>& completed) {
+bool isReady(int taskId, const std::map<int, std::vector<int> >& dependencies, const std::set<int>& completed) {
     for (int dep : dependencies.at(taskId)) {
         if (completed.find(dep) == completed.end()) {
             return false;
@@ -14,7 +14,7 @@ bool isReady(int taskId, const std::map<int, std::set<int> >& dependencies, cons
 }
 
 std::vector<int>
-getReadyTasks(const std::map<int, std::set<int> >& dependencies,
+getReadyTasks(const std::map<int, std::vector<int> >& dependencies,
                             const std::set<int>& completed,
                             const std::set<int>& assigned) {
     std::vector<int> ready;
@@ -33,8 +33,8 @@ TaskDependencyManager::TaskDependencyManager(MPI_Comm comm, int numTasks) {
 }
 
 void
-TaskDependencyManager::addDependencies(int taskId, const std::set<int>& otherTaskIds) {
-    this->deps.insert( std::pair<int, std::set<int> >(taskId, otherTaskIds) );
+TaskDependencyManager::addDependencies(int taskId, const std::vector<int>& otherTaskIds) {
+    this->deps.insert( std::pair<int, std::vector<int> >(taskId, otherTaskIds) );
 }
 
 std::map<int, int>

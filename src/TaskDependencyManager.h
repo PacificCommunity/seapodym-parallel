@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <map>
+#include <vector>
 #include <set>
 
 #ifndef TASK_DEPENDENCY_MANAGER
@@ -23,7 +24,7 @@ class TaskDependencyManager {
         int numTasks;
 
         // dependencies
-        std::map<int, std::set<int> > deps;
+        std::map<int, std::vector<int> > deps;
 
     public:
 
@@ -39,7 +40,7 @@ class TaskDependencyManager {
          * @param taskId Id of the dependent task
          * @param otherTaskIds Dependencies
          */
-        void addDependencies(int taskId, const std::set<int>& otherTaskIds);
+        void addDependencies(int taskId, const std::vector<int>& otherTaskIds);
 
         /**
          * Run the manager

@@ -45,15 +45,15 @@ SeapodymCohortManager::getNumSteps(int cohortId) const {
     }
 }
 
-std::set<int> 
+std::vector<int> 
 SeapodymCohortManager::getDependencies(int cohortId) const {
 
-    std::set<int> res;
+    std::vector<int> res;
     
     if (cohortId > 2*this->numAgeGroups - 1) {
                 
         for (auto i = cohortId - this->numAgeGroups + 1; i < cohortId; ++i) {
-            res.insert(i);
+            res.push_back(i);
         }
 
     }
@@ -61,12 +61,12 @@ SeapodymCohortManager::getDependencies(int cohortId) const {
 
         // first range: 0 to (2*na - 1 - cohort_id - 1)
         for (int i = 0; i < 2 * this->numAgeGroups - 1 - cohortId; ++i) {
-            res.insert(i);
+            res.push_back(i);
         }
 
         // second range: na to (cohort_id - 1)
         for (int i = this->numAgeGroups; i < cohortId; ++i) {
-            res.insert(i);
+            res.push_back(i);
         }
     }
         

@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
         // build the dependency table
         for (int taskId = 0; taskId < numTasks; ++taskId) {
-            std::set<int> deps = cohortManager.getDependencies(taskId);
+            std::vector<int> deps = cohortManager.getDependencies(taskId);
             manager.addDependencies(taskId, deps);
 
             std::cout << "Task " << taskId << " => ";

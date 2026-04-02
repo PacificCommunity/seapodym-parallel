@@ -64,7 +64,7 @@ class SeapodymCohortManager {
          * @param cohortId cohort task ID
          * @return all the other cohort tasks that feed into this cohort task
          */
-        std::set<int> getDependencies(int cohortId) const;
+        std::vector<int> getDependencies(int cohortId) const;
 
         /**
          * Get the cohort task that follows a terminated cohort task
