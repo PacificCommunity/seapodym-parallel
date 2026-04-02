@@ -1,10 +1,9 @@
 #include "TaskDependencyManager.h"
 #include "Tags.h"
 #include <set>
-#include <vector>
 #include <iostream>
 
-bool isReady(int taskId, const std::map<int, std::vector<int> >& dependencies, const std::set<int>& completed) {
+bool isReady(int taskId, const std::unordered_map<int, std::vector<int> >& dependencies, const std::set<int>& completed) {
     for (int dep : dependencies.at(taskId)) {
         if (completed.find(dep) == completed.end()) {
             return false;
@@ -14,7 +13,7 @@ bool isReady(int taskId, const std::map<int, std::vector<int> >& dependencies, c
 }
 
 std::vector<int>
-getReadyTasks(const std::map<int, std::vector<int> >& dependencies,
+getReadyTasks(const std::unordered_map<int, std::vector<int> >& dependencies,
                             const std::set<int>& completed,
                             const std::set<int>& assigned) {
     std::vector<int> ready;
@@ -37,7 +36,7 @@ TaskDependencyManager::addDependencies(int taskId, const std::vector<int>& other
     this->deps.insert( std::pair<int, std::vector<int> >(taskId, otherTaskIds) );
 }
 
-std::map<int, int>
+std::unordered_map<int, int>
 TaskDependencyManager::run() const {
 
     const int shutdown = -1;
@@ -47,7 +46,7 @@ TaskDependencyManager::run() const {
 
     std::set<int> completed;
     std::set<int> assigned;
-    std::map<int, int> results;
+    std::unordered_map<int, int> results;
 
     std::vector<int> ready = getReadyTasks(this->deps, completed, assigned);
 

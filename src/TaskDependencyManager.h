@@ -1,7 +1,6 @@
 #include <mpi.h>
-#include <map>
+#include <unordered_map>
 #include <vector>
-#include <set>
 
 #ifndef TASK_DEPENDENCY_MANAGER
 #define TASK_DEPENDENCY_MANAGER
@@ -24,7 +23,7 @@ class TaskDependencyManager {
         int numTasks;
 
         // dependencies
-        std::map<int, std::vector<int> > deps;
+        std::unordered_map<int, std::vector<int> > deps;
 
     public:
 
@@ -46,7 +45,7 @@ class TaskDependencyManager {
          * Run the manager
          * @return the result of each task
          */
-        std::map<int, int> run() const;
+        std::unordered_map<int, int> run() const;
 
 };
 

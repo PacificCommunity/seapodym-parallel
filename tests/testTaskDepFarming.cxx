@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
             std::cout << std::endl;
         }
 
-        std::map<int, int> results = manager.run();
+        auto results = manager.run();
 
         double toc = MPI_Wtime();
         std::cout << "Execution time: " << toc - tic << 
