@@ -101,19 +101,15 @@ TaskStepManager::run() const {
             }
         }
 
-        // Drain ALL worker-available messages in a single loop
-        while (true) {
+        // Drain all worker-available messages (tag WORKER_AVAILABLE_TAG)
+        for (int worker = 1; worker < size; ++worker) {
             int flag = 0;
-            MPI_Status status;
-            MPI_Iprobe(MPI_ANY_SOURCE, WORKER_AVAILABLE_TAG, this->comm, &flag, &status);
-            if (!flag) {
-                break;  // No more messages
+            MPI_Iprobe(worker, WORKER_AVAILABLE_TAG, this->comm, &flag, &status);
+            if (flag) {
+                int dummy;
+                MPI_Recv(&dummy, 1, MPI_INT, worker, WORKER_AVAILABLE_TAG, this->comm, MPI_STATUS_IGNORE);
+                active_workers.insert(worker);
             }
-
-            int dummy;
-            int worker = status.MPI_SOURCE;  // Extract worker rank from status
-            MPI_Recv(&dummy, 1, MPI_INT, worker, WORKER_AVAILABLE_TAG, this->comm, MPI_STATUS_IGNORE);
-            active_workers.insert(worker);
         }
 
         // avoid hot-spinning if nothing to do
