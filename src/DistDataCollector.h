@@ -74,7 +74,9 @@ class DistDataCollector {
      * @brief Ensure that all RMA operations are completed
      */
     void inline flush() {
-        MPI_Win_flush_all(this->win);
+        // Flush the manager (rank zero)
+        MPI_Win_flush(0, this->win);
+        // Data are now ready to be used
     }
 
     /** 

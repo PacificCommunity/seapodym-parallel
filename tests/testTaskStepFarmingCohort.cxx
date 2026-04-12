@@ -47,16 +47,19 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     std::vector<double> data(numData);
 
     // Initial conditions from the other cohorts
-
     std::fill(localData.begin(), localData.end(), 0.0);
+
     for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
+
+        dataCollector->startEpoch();
 
         int chunk_id = getChunkId(task_id2, step, numAgeGroups);
 
         // fetch the data
-        dataCollector->get(chunk_id, data.data());
+        dataCollector->getAsync(chunk_id, data.data());
 
         // check that the data are valid
+        dataCollector->flush();
         if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
             // The data have not been previously populated. This could indicate that
             // the worker has not yet produced any output for this cohort or the manager
@@ -65,7 +68,13 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         }
         // sum up the cohort data at the previous time step
         std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
+
+        dataCollector->endEpoch();
     }
+
+    MPI_Request request;
+    MPI_Status status;
+    const int endTaskTag = 1;
 
     // step through...
     for (auto step = stepBeg; step < stepEnd; ++step) {
@@ -74,22 +83,34 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         int tsleep = static_cast<int>( std::round( (*dist)(*rng) ) );
         std::this_thread::sleep_for( std::chrono::milliseconds(tsleep) );
 
+        dataCollector->startEpoch();
+
+        // Notify manager that this step has finished
+        int success = task_id; // for instance
+        int output[3] = {task_id, step, success};
+        MPI_Isend(output,        // buffer
+                  3,             // count
+                  MPI_INT,       // datatype
+                  0,             // destination rank
+                  endTaskTag,    // tag
+                  comm,          // communicator
+                  &request);     // request handle
+
+
+
         // Pretend we are computing some data
         std::fill(localData.begin(), localData.end(), double(task_id));
-        
         // Send the data to the manager. Here, the data are 
         // collected row by row. The entry into the collected 
         // array is at index chunk_id.
         int chunk_id = getChunkId(task_id, step, numAgeGroups);
-        dataCollector->put(chunk_id, localData.data());
+        dataCollector->putAsync(chunk_id, localData.data());
 
-        // E.g.
-        int success = task_id;
+        dataCollector->flush();
+        dataCollector->endEpoch();
 
-        // Notify the manager at the end of each step
-        int output[3] = {task_id, step, success};
-        const int endTaskTag = 1;
-        MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
+        // Now the send async send must have succeeded
+        MPI_Wait(&request, &status);
     }
 }
 

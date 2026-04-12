@@ -24,6 +24,7 @@
 // TaskId 
 using dep_type = std::array<int, 2>;
 
+// required in orde rto be able to use unordered_set
 namespace std {
     template <>
     struct hash<std::array<int, 2>> {

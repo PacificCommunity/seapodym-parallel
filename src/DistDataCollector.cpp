@@ -53,7 +53,7 @@ DistDataCollector::put(int chunkId, const double* data) {
     MPI_Win_flush(0, this->win);
 
     // Synchronize after RMA operations
-    MPI_Win_unlock(0, this-> win);
+    MPI_Win_unlock(0, this->win);
 }
 
 std::vector<double>
@@ -78,6 +78,6 @@ DistDataCollector::get(int chunkId, double* buffer) {
     MPI_Win_flush(0, win);
 
     // Synchronize after RMA operations
-    MPI_Win_unlock(0, this-> win);
+    MPI_Win_unlock(0, this->win);
 }
 
