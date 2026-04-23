@@ -9,6 +9,9 @@ configure_file(testSeapodymCohort.cpp testSeapodymCohort.cxx)
 add_executable(testSeapodymCohort testSeapodymCohort.cxx)
 target_link_libraries(testSeapodymCohort PRIVATE seapodym_api)
 
+add_executable(testGet testGet.cxx)
+target_link_libraries(testGet PRIVATE seapodym_api)
+
 add_executable(testSeapodymCohortDependencyAnalyzer testSeapodymCohortDependencyAnalyzer.cxx)
 target_link_libraries(testSeapodymCohortDependencyAnalyzer PRIVATE seapodym_api)
 
@@ -114,3 +117,6 @@ set_tests_properties(testDistDataCollector PROPERTIES PASS_REGULAR_EXPRESSION "S
 
 add_test(NAME testAsyncPutGet COMMAND mpiexec -n 6 ./testAsyncPutGet -nd 100000 -nm 100)
 set_tests_properties(testAsyncPutGet PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+
+add_test(NAME testGet COMMAND mpiexec -n 6 ./testGet)
+set_tests_properties(testGet PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED")
