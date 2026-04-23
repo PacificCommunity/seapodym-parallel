@@ -9,6 +9,9 @@ configure_file(testSeapodymCohort.cpp testSeapodymCohort.cxx)
 add_executable(testSeapodymCohort testSeapodymCohort.cxx)
 target_link_libraries(testSeapodymCohort PRIVATE seapodym_api)
 
+add_executable(testPut testPut.cxx)
+target_link_libraries(testPut PRIVATE seapodym_api)
+
 add_executable(testGet testGet.cxx)
 target_link_libraries(testGet PRIVATE seapodym_api)
 
@@ -120,3 +123,6 @@ set_tests_properties(testAsyncPutGet PROPERTIES PASS_REGULAR_EXPRESSION "Success
 
 add_test(NAME testGet COMMAND mpiexec -n 6 ./testGet)
 set_tests_properties(testGet PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED")
+
+add_test(NAME testPut COMMAND mpiexec -n 6 ./testPut)
+set_tests_properties(testPut PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED")
