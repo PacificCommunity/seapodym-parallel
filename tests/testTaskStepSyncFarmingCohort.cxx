@@ -1,0 +1,265 @@
+#include <mpi.h>
+#include <iostream>
+#include <functional>
+#include <thread>
+#include <chrono>
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <random>
+#include <CmdLineArgParser.h>
+#include "TaskStepManager.h"
+#include "TaskStepWorker.h"
+#include "SeapodymCohortDependencyAnalyzer.h"
+#include "DistDataCollector.h"
+#undef NDEBUG
+#include <cassert>
+
+/** 
+ * Return the chunk Id
+ * @param task_id Id of the task (same as cohort Id)
+ * @param step step in the task
+ * @return index
+ */
+int inline getChunkId(int task_id, int step, int numAgeGroups) {
+    int row = task_id + step - numAgeGroups + 1;
+    int col = task_id % numAgeGroups;
+    return row * numAgeGroups + col;
+}
+
+// Task for the workers to execute
+/**
+ * Task
+ * @param task_id index 0.. numTasks - 1
+ * @param stepBeg first step index (inclusive)
+ * @param stepEnd last step index (exclusive)
+ * @param comm MPI communicator
+ * @param ms Sleep # milliseconds
+ */
+void inline 
+taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
+    int ms, int numAgeGroups, int numData, 
+    DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
+    std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
+    std::mt19937* rng, std::gamma_distribution<double>* dist) {
+
+    std::vector<double> localData(numData);
+    std::vector<double> data(numData);
+
+    // Initial conditions from the other cohorts
+    std::fill(localData.begin(), localData.end(), 0.0);
+
+    for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
+
+        dataCollector->startEpoch();
+
+        int chunk_id = getChunkId(task_id2, step, numAgeGroups);
+
+        // fetch the data
+        dataCollector->getAsync(chunk_id, data.data());
+
+        // check that the data are valid
+        dataCollector->flush();
+        if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
+            // The data have not been previously populated. This could indicate that
+            // the worker has not yet produced any output for this cohort or the manager
+            // has not yet received the data.
+            MPI_Abort(comm, 1);
+        }
+        // sum up the cohort data at the previous time step
+        std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
+
+        dataCollector->endEpoch();
+    }
+
+    MPI_Request request;
+    MPI_Status status;
+    const int endTaskTag = 1;
+
+    // step through...
+    for (auto step = stepBeg; step < stepEnd; ++step) {
+
+        // Perform the work, just sleeping here zzzzzzz
+        int tsleep = static_cast<int>( std::round( (*dist)(*rng) ) );
+        std::this_thread::sleep_for( std::chrono::milliseconds(tsleep) );
+
+        dataCollector->startEpoch();
+
+        // Notify manager that this step has finished
+        int success = task_id; // for instance
+        int output[3] = {task_id, step, success};
+        MPI_Isend(output,        // buffer
+                  3,             // count
+                  MPI_INT,       // datatype
+                  0,             // destination rank
+                  endTaskTag,    // tag
+                  comm,          // communicator
+                  &request);     // request handle
+
+
+
+        // Pretend we are computing some data
+        std::fill(localData.begin(), localData.end(), double(task_id));
+        // Send the data to the manager. Here, the data are 
+        // collected row by row. The entry into the collected 
+        // array is at index chunk_id.
+        int chunk_id = getChunkId(task_id, step, numAgeGroups);
+        dataCollector->putAsync(chunk_id, localData.data());
+
+        dataCollector->flush();
+        dataCollector->endEpoch();
+
+        // Now the send async send must have succeeded
+        MPI_Wait(&request, &status);
+    }
+}
+
+int main(int argc, char** argv) {
+
+    // MPI initialization
+    MPI_Init(&argc, &argv);
+    int numWorkers, size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    numWorkers = size - 1;
+    int workerId;
+    MPI_Comm_rank(MPI_COMM_WORLD, &workerId);
+    
+    // Parse the command line arguments
+    CmdLineArgParser cmdLine;
+    cmdLine.set("-na", 5, "Number of age groups");
+    cmdLine.set("-nt", 5, "Total number of steps");
+    cmdLine.set("-nm", 100, "Sleep milliseconds");
+    cmdLine.set("-sd", 0.1, "Sleep standard deviation in milliseconds (> 0)");
+    cmdLine.set("-seed", 123456789, "Random seed");
+    cmdLine.set("-nd", 10000, "Number of data values to send from worker to manager at each step");
+    bool success = cmdLine.parse(argc, argv);
+    bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
+    if (!success) {
+        std::cerr << "Error parsing command line arguments." << std::endl;
+        cmdLine.help();
+        MPI_Finalize();
+        return 1;
+    }
+    if (help) {
+        cmdLine.help();
+        MPI_Finalize();
+        return 1;
+    }
+
+    int numAgeGroups = cmdLine.get<int>("-na");
+    int numTimeSteps = cmdLine.get<int>("-nt");
+    int milliseconds = cmdLine.get<int>("-nm");
+    int numData = cmdLine.get<int>("-nd");
+    int seed = cmdLine.get<int>("-seed") + workerId;
+    double sd = cmdLine.get<double>("-sd");
+
+    std::mt19937 rng;              // Could also seed with std::random_device
+    rng.seed(seed);
+    double k = (milliseconds * milliseconds) / (sd * sd); // mu^2/sigma^2
+    double theta = (sd * sd) / double(milliseconds);
+    std::gamma_distribution<double> dist(k, theta);
+
+    // analyze the cohort Id task dependencies
+    SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps);
+    int numCohorts = taskDeps.getNumberOfCohorts();
+    int numCohortSteps = taskDeps.getNumberOfCohortSteps();
+    std::map<int, int> stepBegMap = taskDeps.getStepBegMap();
+    std::map<int, int> stepEndMap = taskDeps.getStepEndMap();
+    std::map<int, std::set<std::array<int, 2>>> dependencyMap = taskDeps.getDependencyMap();
+
+    // print the dependencies for debugging
+    if (workerId == 0) {
+        for (const auto& [task_id, stepBeg] : stepBegMap) {
+            int globalTimeIndex = std::max(0, task_id - numAgeGroups + 1);
+            std::cout << "At time " << globalTimeIndex << " Task " << task_id << " has steps " << stepBeg << "..." << stepEndMap.at(task_id) - 1 << " and depends on: ";
+            for (const auto& [task_id2, step] : dependencyMap.at(task_id)) {
+                std::cout << task_id2 << ":" << step << ", ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
+    // set up the data collector
+    int numChunks = numAgeGroups * numTimeSteps;
+    DistDataCollector dataCollect(MPI_COMM_WORLD, numChunks, numData);
+
+    // workers expect a function that takes a 4 arguments. We bind the last
+    // argument to milliseconds
+    auto taskFunc = std::bind(taskFunction, 
+        std::placeholders::_1, // task_id
+        std::placeholders::_2, // stepBeg
+        std::placeholders::_3, // stepEnd
+        std::placeholders::_4, // comm
+        milliseconds,
+        numAgeGroups,
+        numData,
+        &dataCollect,
+        &dependencyMap,
+        &rng,
+        &dist);
+
+    
+
+    TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
+    // sync the manager and workers
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (workerId == 0) {
+
+        // Manager
+        
+        // note: the number of tasks is the number of cohorts
+        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap);
+
+        double tic = MPI_Wtime();
+
+        // container stores the results TaskId, step, result
+        const auto results = manager.run();
+
+        double toc = MPI_Wtime();
+
+        auto numTotalSteps = results.size();
+        double speedup = 0.001*double(numTotalSteps * milliseconds)/(toc - tic);
+        std::cout << "Execution time: " << toc - tic << 
+            " Speedup: " << speedup << 
+            " Ideal: " << numWorkers << 
+            " Parallel eff: " << speedup/double(numWorkers) << std::endl;
+
+
+        // make sure there are no duplicate tasks and all the tasks have been executed
+        assert(numTotalSteps == numCohortSteps);
+        for (auto [taskId, step, res] : results) {
+            // in this test we return the task_id when we're finished
+            assert(taskId == res);
+        }
+
+        std::cout << "Success\n";
+
+    } else {
+
+        // Worker
+        worker.run();
+
+    }
+
+    // Do we need this?
+    //MPI_Barrier(MPI_COMM_WORLD);
+
+    if (workerId == 0) {
+        double* data = dataCollect.getCollectedDataPtr();
+        int numSize = dataCollect.getNumSize();
+        double checksum = 0;
+        for (auto chunk = 0; chunk < dataCollect.getNumChunks(); ++chunk) {\
+            for (auto i = 0; i < numSize; ++i) {
+                checksum += data[chunk*numSize + i];
+            }
+        }
+        printf("\nchecksum: %.0lf\n", checksum);
+    }
+
+    dataCollect.free();
+    
+    // Clean up
+    MPI_Finalize();
+    return 0;
+}

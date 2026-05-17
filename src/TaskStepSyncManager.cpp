@@ -83,16 +83,14 @@ TaskStepManager::run() const {
         for (auto it = task_queue.begin(); it != task_queue.end();) {
             int task_id = *it;
             const auto& deps = this->deps.at(task_id);
-            bool ready = true;
             for (auto& dep : deps) {
                 // Has this dependent task completed?
                 if (completed.find(dep) == completed.end()) {
-                    ready = false;
                     // No, task is not yet ready to be submitted...
                     break;
                 }
             }
-            if (ready && !active_workers.empty()) {
+            if (!active_workers.empty()) {
                 int worker = *active_workers.begin();
                 active_workers.erase(worker);
                 // Trigger task
@@ -116,12 +114,12 @@ TaskStepManager::run() const {
             }
         }
 
-        // // avoid hot-spinning if nothing to do
-        // if (active_workers.empty() && assigned.empty()) {
-        //    // 2-10 ms seems to be a good choice for now. On power constrained 
-        //    // platforms may want to increase to 20-50ms
-        //    std::this_thread::sleep_for(std::chrono::milliseconds(2));
-        // }
+        // avoid hot-spinning if nothing to do
+        if (active_workers.empty() && assigned.empty()) {
+           // 2-10 ms seems to be a good choice for now. On power constrained 
+           // platforms may want to increase to 20-50ms
+           std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
     }
 
     // Send stop signal
