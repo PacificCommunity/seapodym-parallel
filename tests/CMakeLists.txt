@@ -5,6 +5,9 @@ include_directories(
 )
 
 # Add the test executables
+add_executable(testMpiSharedPtr testMpiSharedPtr.cxx)
+target_link_libraries(testMpiSharedPtr PRIVATE MPI::MPI_CXX)
+
 configure_file(testSeapodymCohort.cpp testSeapodymCohort.cxx)
 add_executable(testSeapodymCohort testSeapodymCohort.cxx)
 target_link_libraries(testSeapodymCohort PRIVATE seapodym_api)
