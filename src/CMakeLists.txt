@@ -5,6 +5,7 @@ include_directories(
 set(SRCS
    DistDataCollector.cpp
    SeapodymCohortDependencyAnalyzer.cpp
+   TaskStepSyncManager.cpp
    TaskStepManager.cpp
    TaskStepWorker.cpp
    TaskDependencyManager.cpp
@@ -19,6 +20,7 @@ set(HEADERS
    Tags.h
    DistDataCollector.h
    SeapodymCohortDependencyAnalyzer.h
+   TaskStepSyncManager.h
    TaskStepManager.h
    TaskStepWorker.h
    TaskDependencyManager.h

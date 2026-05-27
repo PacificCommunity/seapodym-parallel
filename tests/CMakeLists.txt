@@ -42,6 +42,9 @@ target_link_libraries(testTaskStepFarming PRIVATE seapodym_api spdlog::spdlog fm
 add_executable(testTaskStepFarmingCohort testTaskStepFarmingCohort.cxx)
 target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
+add_executable(testTaskStepSyncFarmingCohort testTaskStepSyncFarmingCohort.cxx)
+target_link_libraries(testTaskStepSyncFarmingCohort PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
+
 add_executable(testDistDataCollector testDistDataCollector.cxx)
 target_link_libraries(testDistDataCollector PRIVATE seapodym_api)
 
@@ -97,6 +100,9 @@ set_tests_properties(testTaskDepFarmingNa3Nt6 PROPERTIES PASS_REGULAR_EXPRESSION
 add_test(NAME testTaskStepFarmingNT16Ns10 COMMAND mpiexec -n 5 ./testTaskStepFarming -nT 16 -ns 10)
 set_tests_properties(testTaskStepFarmingNT16Ns10 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 
+add_test(NAME testTaskStepFarmingCohortNa10Nt2 COMMAND mpiexec -n 5 ./testTaskStepFarmingCohort -na 10 -nt 2)
+set_tests_properties(testTaskStepFarmingCohortNa10Nt2 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 1000000")
+
 add_test(NAME testTaskStepFarmingCohortNa3Nt5 COMMAND mpiexec -n 5 ./testTaskStepFarmingCohort -na 3 -nt 5)
 set_tests_properties(testTaskStepFarmingCohortNa3Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 450")
 
@@ -108,6 +114,9 @@ set_tests_properties(testTaskStepFarmingCohortNa5Nt10 PROPERTIES PASS_REGULAR_EX
 
 add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1)
 set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")
+
+add_test(NAME testTaskStepSyncFarmingCohortNa5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepSyncFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1)
+set_tests_properties(testTaskStepSyncFarmingCohortNa5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")
 
 add_test(NAME testSeapodymCohortDependencyAnalyzerNa3Nt5 COMMAND testSeapodymCohortDependencyAnalyzer -na 3 -nt 5)
 set_tests_properties(testSeapodymCohortDependencyAnalyzerNa3Nt5 PROPERTIES PASS_REGULAR_EXPRESSION "Success")

@@ -85,7 +85,18 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
 
         dataCollector->startEpoch();
 
-        // Notify manager that this step has finished
+        // Pretend we are computing some data
+        std::fill(localData.begin(), localData.end(), double(task_id));
+        // Send the data to the manager. Here, the data are 
+        // collected row by row. The entry into the collected 
+        // array is at index chunk_id.
+        int chunk_id = getChunkId(task_id, step, numAgeGroups);
+        dataCollector->putAsync(chunk_id, localData.data());
+
+        dataCollector->flush();
+        dataCollector->endEpoch(); // this could be moved down, flush should make sure the data are visible to the manager
+        
+        // Notify manager that this step completed
         int success = task_id; // for instance
         int output[3] = {task_id, step, success};
         MPI_Isend(output,        // buffer
@@ -96,21 +107,9 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
                   comm,          // communicator
                   &request);     // request handle
 
-
-
-        // Pretend we are computing some data
-        std::fill(localData.begin(), localData.end(), double(task_id));
-        // Send the data to the manager. Here, the data are 
-        // collected row by row. The entry into the collected 
-        // array is at index chunk_id.
-        int chunk_id = getChunkId(task_id, step, numAgeGroups);
-        dataCollector->putAsync(chunk_id, localData.data());
-
-        dataCollector->flush();
-        dataCollector->endEpoch();
-
         // Now the send async send must have succeeded
         MPI_Wait(&request, &status);
+
     }
 }
 
@@ -184,7 +183,7 @@ int main(int argc, char** argv) {
     DistDataCollector dataCollect(MPI_COMM_WORLD, numChunks, numData);
 
     // workers expect a function that takes a 4 arguments. We bind the last
-    // argument to milliseconds
+    // arguments
     auto taskFunc = std::bind(taskFunction, 
         std::placeholders::_1, // task_id
         std::placeholders::_2, // stepBeg

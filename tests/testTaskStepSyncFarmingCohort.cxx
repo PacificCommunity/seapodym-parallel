@@ -7,8 +7,9 @@
 #include <cmath>
 #include <cstdio>
 #include <random>
+#include <limits>
 #include <CmdLineArgParser.h>
-#include "TaskStepManager.h"
+#include "TaskStepSyncManager.h"
 #include "TaskStepWorker.h"
 #include "SeapodymCohortDependencyAnalyzer.h"
 #include "DistDataCollector.h"
@@ -47,7 +48,7 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     std::vector<double> data(numData);
 
     // Initial conditions from the other cohorts
-    std::fill(localData.begin(), localData.end(), 0.0);
+    std::fill(localData.begin(), localData.end(), std::numeric_limits<double>::max());
 
     for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
 
@@ -85,19 +86,6 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
 
         dataCollector->startEpoch();
 
-        // Notify manager that this step has finished
-        int success = task_id; // for instance
-        int output[3] = {task_id, step, success};
-        MPI_Isend(output,        // buffer
-                  3,             // count
-                  MPI_INT,       // datatype
-                  0,             // destination rank
-                  endTaskTag,    // tag
-                  comm,          // communicator
-                  &request);     // request handle
-
-
-
         // Pretend we are computing some data
         std::fill(localData.begin(), localData.end(), double(task_id));
         // Send the data to the manager. Here, the data are 
@@ -105,12 +93,18 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // array is at index chunk_id.
         int chunk_id = getChunkId(task_id, step, numAgeGroups);
         dataCollector->putAsync(chunk_id, localData.data());
-
         dataCollector->flush();
         dataCollector->endEpoch();
 
-        // Now the send async send must have succeeded
-        MPI_Wait(&request, &status);
+        // Only now do we notify manager that this step has finished
+        int success = task_id; // for instance
+        int output[3] = {task_id, step, success};
+        MPI_Send(output,        // buffer
+                  3,             // count
+                  MPI_INT,       // datatype
+                  0,             // destination rank
+                  endTaskTag,    // tag
+                  comm);          // communicator
     }
 }
 
@@ -209,7 +203,7 @@ int main(int argc, char** argv) {
         // Manager
         
         // note: the number of tasks is the number of cohorts
-        TaskStepManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap);
+        TaskStepSyncManager manager(MPI_COMM_WORLD, numCohorts, stepBegMap, stepEndMap, dependencyMap);
 
         double tic = MPI_Wtime();
 

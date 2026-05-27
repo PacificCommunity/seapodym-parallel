@@ -4,8 +4,8 @@
 #include <set>
 #include <array>
 
-#ifndef TASK_DEPENDENCY_MANAGER
-#define TASK_DEPENDENCY_MANAGER
+#ifndef TASK_STEP_MANAGER
+#define TASK_STEP_MANAGER
 
 /**
  * Class TaskStepManager
@@ -94,4 +94,4 @@ class TaskStepManager {
 
 };
 
-#endif // TASK_DEPENDENCY_MANAGER
+#endif // TASK_STEP_MANAGER

@@ -1,4 +1,4 @@
-#include "TaskStepManager.h"
+#include "TaskStepSyncManager.h"
 #include "Tags.h"
 #include <set>
 #include <unordered_set>
@@ -8,7 +8,7 @@
 #include <thread>
 #include <iostream>
 
-TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
+TaskStepSyncManager::TaskStepSyncManager(MPI_Comm comm, int numTasks, 
       const std::map<int, int>& stepBegMap, 
       const std::map<int, int>& stepEndMap,
       const std::map<int, std::set<dep_type>>& dependencyMap) {
@@ -22,7 +22,7 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
 
 //std::unordered_set< std::array<int, 3> >
 std::set< std::array<int, 3> >
-TaskStepManager::run() const {
+TaskStepSyncManager::run() const {
 
     int size;
     MPI_Comm_size(this->comm, &size);
@@ -96,7 +96,7 @@ TaskStepManager::run() const {
                 // Trigger task
                 MPI_Send(&task_id, 1, MPI_INT, worker, START_TASK_TAG, this->comm);
                 assigned.insert(task_id);
-                it = task_queue.erase(it);
+                it = task_queue.erase(it);                
             } else {
                 // Next task
                 ++it;
