@@ -31,36 +31,39 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    DataProvider dataProvider(MPI_COMM_WORLD);
+    // Make sure the DataProvider destructor is called before MPI_Finalize
+    {
+        DataProvider dataProvider(MPI_COMM_WORLD);
 
-    int shmRank = dataProvider.getShmRank();
-    double* data = nullptr;
-    int numData = 0;
+        int shmRank = dataProvider.getShmRank();
+        double* data = nullptr;
+        int numData = 0;
 
-    if (dataProvider.isShmRoot()) {
+        if (dataProvider.isShmRoot()) {
 
-        // Only the shmRoot rank on each shared-memory node initializes the data. There are as many shmRoot
-        // ranks as there are nodes.
-        numData = cmdLine.get<int>("-nd");
-        std::vector<double> localData(numData);
-        for (int i = 0; i < numData; ++i)
-        {
-            localData[i] = worldRank * 1000.0 + i;
+            // Only the shmRoot rank on each shared-memory node initializes the data. There are as many shmRoot
+            // ranks as there are nodes.
+            numData = cmdLine.get<int>("-nd");
+            std::vector<double> localData(numData);
+            for (int i = 0; i < numData; ++i)
+            {
+                localData[i] = worldRank * 1000.0 + i;
+            }
+            data = localData.data();
         }
-        data = localData.data();
-    }
-    dataProvider.setDataPtr(data, numData);
+        dataProvider.setDataPtr(data, numData);
 
-    // Now each rank can get the pointer to the shared data array. 
-    const double* shmDataPtr = dataProvider.getDataPtr();
+        // Now each rank can get the pointer to the shared data array. 
+        const double* shmDataPtr = dataProvider.getDataPtr();
 
-    double checksum = std::accumulate(shmDataPtr, shmDataPtr + numData, 0.0);
+        double checksum = std::accumulate(shmDataPtr, shmDataPtr + numData, 0.0);
 
-    std::cout
-        << "worldRank=" << worldRank
-        << " shmRank=" << shmRank
-        << " checksum=" << checksum
-        << "\n";
+        std::cout
+            << "worldRank=" << worldRank
+            << " shmRank=" << shmRank
+            << " checksum=" << checksum
+            << "\n";
+ }
 
     MPI_Finalize();
 
