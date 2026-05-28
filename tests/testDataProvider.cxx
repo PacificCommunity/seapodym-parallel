@@ -39,7 +39,6 @@ int main(int argc, char** argv)
 
         // on this rank
         double* dataPtr = nullptr;
-        size_t numDataPtr = 0;
         std::vector<double> localData; // make sure localData lives until the end of the scope, so that the data pointer remains valid
 
         // actual data size on the shmRoot rank
@@ -47,7 +46,6 @@ int main(int argc, char** argv)
 
         if (dataProvider.isShmRoot()) {
 
-            numDataPtr = numData;
             localData.resize(numData);
 
             // Only the shmRoot rank on each shared-memory node initializes the data. There are as many shmRoot
@@ -60,38 +58,35 @@ int main(int argc, char** argv)
         }
 
         // associate the data pointer with the DataProvider. 
-        // This will set up the shared memory window and make the data available to all ranks on the same node.   
+        // This will set up the shared memory window and make the data available to all ranks on the same node. 
+        // numData is only needed on the shmRoot rank.  
         dataProvider.setDataPtr(dataPtr, numData);
 
         // Now each rank can get the pointer to the shared data array. 
         const double* shmDataPtr = dataProvider.getDataPtr();
 
-        for (auto i = 0; i < numData; ++i) {
-                std::cout
-                << "worldRank=" << worldRank
+        double checksum = std::accumulate(shmDataPtr, shmDataPtr + numData, 0.0);
+        double expectedChecksum = 0.5 * (numData + 1) * numData; // sum of 1, 2, ..., numData
+
+        if (checksum != expectedChecksum) {
+            std::cerr
+                << "Error: worldRank=" << worldRank
                 << " shmRank=" << shmRank
-                << " i=" << i
-                << " value=" << std::setw(8)
-                << shmDataPtr[i]
+                << " checksum=" << checksum
+                << " does not match expectedChecksum=" << expectedChecksum
                 << "\n";
+            MPI_Abort(MPI_COMM_WORLD, 1);
         }
-
-        // double checksum = std::accumulate(shmDataPtr, shmDataPtr + numData, 0.0);
-        // double expectedChecksum = 0.5 * (numData + 1) * numData; // sum of 1, 2, ..., numData
-
-        // std::cout
-        //     << "worldRank=" << worldRank
-        //     << " shmRank=" << shmRank
-        //     << " checksum=" << checksum
-        //     << " expectedChecksum=" << expectedChecksum
-        //     << "\n";
 
     }
 
 
+    if (worldRank == 0) {
+        std::cout << "Success\n";
+    }
+
     MPI_Finalize();
 
-    std::cout << "Success\n";
 
     return 0;
 }
