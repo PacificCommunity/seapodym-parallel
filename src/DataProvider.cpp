@@ -66,6 +66,6 @@ DataProvider::getDataPtr() const{
 }
 
 size_t
-DataProvider::size() const {
+DataProvider::getNumElements() const {
     return n_;
 }
