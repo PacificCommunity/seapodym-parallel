@@ -16,11 +16,9 @@ public:
     /**
     * @brief Constructor
     * @param comm root MPI communicator, the shared memory communicator will be derived from this
-    * @param data Pointer to the data to share (only used on originRank)
     * @param n Number of elements in the data array
-    * @param originRank Rank on the shared memory communicator that provides the data on each node (default: 0)
     */  
-    DataProvider(MPI_Comm comm);
+    DataProvider(MPI_Comm comm, size_t n);
 
     ~DataProvider();
 
@@ -37,15 +35,10 @@ public:
     bool isShmRoot() const { return shmRank_ == 0; }
 
     /**
-     * @brief Set data pointer.
-     */
-    void setDataPtr(const double* data, size_t n);
-
-    /**
      * @brief Get a pointer to the shared data array
      * @return pointer to the shared data array
      */
-    const double* getDataPtr() const {
+    double* getDataPtr() const {
         return baseptr_;
     }
 

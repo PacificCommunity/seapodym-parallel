@@ -33,40 +33,31 @@ int main(int argc, char** argv)
 
     // Make sure the DataProvider destructor is called before MPI_Finalize
     {
-        DataProvider dataProvider(MPI_COMM_WORLD);
+        const int numData = cmdLine.get<int>("-nd");
+        DataProvider dataProvider(MPI_COMM_WORLD, numData);
 
-        int shmRank = dataProvider.getShmRank();
-
-        // on this rank
-        double* dataPtr = nullptr;
-        std::vector<double> localData; // make sure localData lives until the end of the scope, so that the data pointer remains valid
-
-        // actual data size on the shmRoot rank
-        size_t numData = (size_t) cmdLine.get<int>("-nd");
+        // get the pointer to the shared data array
+        double* shmDataPtr = dataProvider.getDataPtr();
 
         if (dataProvider.isShmRoot()) {
-
-            localData.resize(numData);
 
             // Only the shmRoot rank on each shared-memory node initializes the data. There are as many shmRoot
             // ranks as there are nodes.
             for (auto i = 0; i < numData; ++i) {
-                localData[i] = (double) (i + 1);
+                shmDataPtr[i] = (double) (i + 1);
             }
-            // set the pointer
-            dataPtr = localData.data();
         }
 
-        // associate the data pointer with the DataProvider. 
-        // This will set up the shared memory window and make the data available to all ranks on the same node. 
-        // numData is only needed on the shmRoot rank.  
-        dataProvider.setDataPtr(dataPtr, numData);
+        // synchronize shared-memory access to make sure the data are visible to all ranks on the same node
+        MPI_Barrier(MPI_COMM_WORLD);
 
-        // Now each rank can get the pointer to the shared data array. 
-        const double* shmDataPtr = dataProvider.getDataPtr();
-
+        // from now on, all ranks on the same shared-memory node can directly read the shared data array 
+        // without MPI communication
         double checksum = std::accumulate(shmDataPtr, shmDataPtr + numData, 0.0);
         double expectedChecksum = 0.5 * (numData + 1) * numData; // sum of 1, 2, ..., numData
+
+        // get the rank of the calling process in the shared memory communicator
+        int shmRank = dataProvider.getShmRank();
 
         if (checksum != expectedChecksum) {
             std::cerr

@@ -1,6 +1,6 @@
 #include "DataProvider.h"
 
-DataProvider::DataProvider(MPI_Comm comm)
+DataProvider::DataProvider(MPI_Comm comm, size_t n)
         : comm_(comm), win_(MPI_WIN_NULL), baseptr_(nullptr), n_(0) {
 
     // Split to shared-memory communicator
@@ -12,11 +12,8 @@ DataProvider::DataProvider(MPI_Comm comm)
         &this->shmcomm_);
 
     MPI_Comm_rank(this->shmcomm_, &this->shmRank_);
-}
 
-void
-DataProvider::setDataPtr(const double* data, size_t n) {
-
+    // number of element in the shared array
     this->n_ = n;
 
     MPI_Aint bytes = 0;
@@ -45,17 +42,6 @@ DataProvider::setDataPtr(const double* data, size_t n) {
         &size,
         &disp_unit,
         &this->baseptr_);
-
-    // copy the data into the shared memory segment on the origin rank
-    if (this->shmRank_ == 0 && data != nullptr) {
-        std::memcpy(
-        this->baseptr_,
-        data,
-        n * sizeof(double));
-    }
-
-    // Ensure visibility of initialization
-    MPI_Barrier(this->shmcomm_);
 }
 
 DataProvider::~DataProvider() {
