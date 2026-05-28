@@ -1,23 +1,29 @@
 #include "DataProvider.h"
 
-DataProvider::DataProvider(MPI_Comm comm, const double* data, size_t n, int originRank)
-        : comm_(comm), win_(MPI_WIN_NULL), baseptr_(nullptr), n_(n) {
+DataProvider::DataProvider(MPI_Comm comm)
+        : comm_(comm), win_(MPI_WIN_NULL), baseptr_(nullptr), n_(0) {
 
     // Split to shared-memory communicator
     MPI_Comm_split_type(
-        comm_,
+        this->comm_,
         MPI_COMM_TYPE_SHARED,
         0,
         MPI_INFO_NULL,
-        &shmcomm_);
+        &this->shmcomm_);
 
-    MPI_Comm_rank(shmcomm_, &shmRank_);
+    MPI_Comm_rank(this->shmcomm_, &this->shmRank_);
+}
+
+void
+DataProvider::setDataPtr(const double* data, size_t n) {
+
+    this->n_ = n;
 
     MPI_Aint bytes = 0;
 
     // Only origin rank allocates memory
-    if (shmRank_ == originRank) {
-        bytes = static_cast<MPI_Aint>(n_) * sizeof(double);
+    if (this->shmRank_ == 0) { // local rank that stores the data is 0 
+        bytes = static_cast<MPI_Aint>(this->n_) * sizeof(double);
     }
 
     // Allocate shared memory window
@@ -25,26 +31,23 @@ DataProvider::DataProvider(MPI_Comm comm, const double* data, size_t n, int orig
         bytes,
         sizeof(double),
         MPI_INFO_NULL,
-        shmcomm_,
-        &baseptr_,
-        &win_);
+        this->shmcomm_,
+        &this->baseptr_,
+        &this->win_);
 
     // Everyone queries origin memory
     MPI_Aint size;
     int disp_unit;
 
     MPI_Win_shared_query(
-        win_,
-        originRank,
+        this->win_,
+        0, // query rank 0's allocation
         &size,
         &disp_unit,
         &baseptr_);
 
-    // Initialize on origin rank
-    if (shmRank_ == originRank)
-    {
-        std::memcpy(baseptr_, data, n_ * sizeof(double));
-    }
+    // assume the data pointer is only valid on the origin rank, and the data are already initialized there
+    this->baseptr_ = data;
 
     // Ensure visibility of initialization
     MPI_Barrier(shmcomm_);
@@ -58,14 +61,4 @@ DataProvider::~DataProvider() {
 
     if (shmcomm_ != MPI_COMM_NULL)
         MPI_Comm_free(&shmcomm_);
-}
-
-const double* 
-DataProvider::getDataPtr() const{
-    return baseptr_;
-}
-
-size_t
-DataProvider::getNumElements() const {
-    return n_;
 }
