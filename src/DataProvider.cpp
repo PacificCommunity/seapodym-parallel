@@ -44,7 +44,7 @@ DataProvider::setDataPtr(const double* data, size_t n) {
         0, // query rank 0's allocation
         &size,
         &disp_unit,
-        &baseptr_);
+        &this->baseptr_);
 
     // copy the data into the shared memory segment on the origin rank
     if (this->shmRank_ == 0 && data != nullptr) {
@@ -55,15 +55,13 @@ DataProvider::setDataPtr(const double* data, size_t n) {
     }
 
     // Ensure visibility of initialization
-    MPI_Barrier(shmcomm_);
-    MPI_Win_sync(win_);
-    MPI_Barrier(shmcomm_);
+    MPI_Barrier(this->shmcomm_);
 }
 
 DataProvider::~DataProvider() {
-    if (win_ != MPI_WIN_NULL)
-        MPI_Win_free(&win_);
+    if (this->win_ != MPI_WIN_NULL)
+        MPI_Win_free(&this->win_);
 
-    if (shmcomm_ != MPI_COMM_NULL)
-        MPI_Comm_free(&shmcomm_);
+    if (this->shmcomm_ != MPI_COMM_NULL)
+        MPI_Comm_free(&this->shmcomm_);
 }
