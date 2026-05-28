@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <CmdLineArgParser.h>
 
 int main(int argc, char** argv)
 {
@@ -10,6 +11,23 @@ int main(int argc, char** argv)
     int worldRank, worldSize;
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
     MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+
+    // Parse the command line arguments
+    CmdLineArgParser cmdLine;
+    cmdLine.set("-nd", 5, "Number of data values in each chunk");
+    bool success = cmdLine.parse(argc, argv);
+    bool help = cmdLine.get<bool>("-help") || cmdLine.get<bool>("-h");
+    if (!success) {
+        std::cerr << "Error parsing command line arguments." << std::endl;
+        cmdLine.help();
+        MPI_Finalize();
+        return 1;
+    }
+    if (help) {
+        cmdLine.help();
+        MPI_Finalize();
+        return 1;
+    }
 
     // Create communicator containing ranks on the same shared-memory node
     MPI_Comm shmcomm;
@@ -25,8 +43,8 @@ int main(int argc, char** argv)
     MPI_Comm_size(shmcomm, &shmSize);
 
     // Example dimensions
-    const int numChunks = 4;
-    const int numData   = 8;
+    const int numChunks = shmSize;
+    const int numData   = cmdLine.get<int>("-nd");
 
     const MPI_Aint localSize =
         (shmRank == 0)
@@ -37,7 +55,7 @@ int main(int argc, char** argv)
 
     MPI_Win win;
 
-    // Rank 0 allocates the shared memory segment
+    // Rank 0 allocates the shared memory segment, all other ranks specify size 0
     MPI_Win_allocate_shared(
         localSize,
         sizeof(double),
@@ -76,7 +94,7 @@ int main(int argc, char** argv)
     // Synchronize shared-memory access
     MPI_Barrier(shmcomm);
 
-    // Every rank can now directly read the shared array
+    // Every rank can now directly read the shared array (including rank 0)
     for (int c = 0; c < numChunks; ++c)
     {
         for (int i = 0; i < numData; ++i)
@@ -100,5 +118,8 @@ int main(int argc, char** argv)
     MPI_Comm_free(&shmcomm);
 
     MPI_Finalize();
+
+    std::cout << "Success\n";
+
     return 0;
 }
