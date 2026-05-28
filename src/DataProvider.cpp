@@ -46,8 +46,13 @@ DataProvider::setDataPtr(const double* data, size_t n) {
         &disp_unit,
         &baseptr_);
 
-    // assume the data pointer is only valid on the origin rank, and the data are already initialized there
-    this->baseptr_ = data;
+    // copy the data into the shared memory segment on the origin rank
+    if (this->shmRank_ == 0 && data != nullptr) {
+        std::memcpy(
+        this->baseptr_,
+        data,
+        n * sizeof(double));
+    }
 
     // Ensure visibility of initialization
     MPI_Barrier(shmcomm_);

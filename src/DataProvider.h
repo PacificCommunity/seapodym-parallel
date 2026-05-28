@@ -62,7 +62,7 @@ private:
     MPI_Comm shmcomm_;
     MPI_Win win_;
 
-    const double* baseptr_;
+    double* baseptr_;
     size_t n_;
     int shmRank_;
 };
