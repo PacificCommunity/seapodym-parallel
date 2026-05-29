@@ -4,7 +4,7 @@ var searchData=
   ['getarrayfromstate_1',['getArrayFromState',['../classSeapodymCohortAbstract.html#afcabc8d41e389a745d882b128fd79554',1,'SeapodymCohortAbstract::getArrayFromState()'],['../classSeapodymCohortFake.html#aa68cfe739b4d29154aa7c1f5a1e8e87b',1,'SeapodymCohortFake::getArrayFromState()']]],
   ['getasync_2',['getAsync',['../classDistDataCollector.html#abd4acdc1b5069dc34ab2bec45c2ead5b',1,'DistDataCollector']]],
   ['getcollecteddataptr_3',['getCollectedDataPtr',['../classDistDataCollector.html#a1f38912a18c0150e7828668a6bf62d57',1,'DistDataCollector']]],
-  ['getdataptr_4',['getDataPtr',['../classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882',1,'SeapodymCourier']]],
+  ['getdataptr_4',['getDataPtr',['../classDataProvider.html#aa11707f81197bf3393a8364ff404e470',1,'DataProvider::getDataPtr()'],['../classSeapodymCourier.html#ac63cac5667d7f923915b74b96fbdc882',1,'SeapodymCourier::getDataPtr()']]],
   ['getdependencies_5',['getDependencies',['../classSeapodymCohortManager.html#ae15701826cfb8393928ca0d0d2af49f5',1,'SeapodymCohortManager']]],
   ['getdependencymap_6',['getDependencyMap',['../classSeapodymCohortDependencyAnalyzer.html#a2c28c7ab585875a208343926f9da35ed',1,'SeapodymCohortDependencyAnalyzer']]],
   ['getinitcohortids_7',['getInitCohortIds',['../classSeapodymCohortManager.html#a8d90c24a146c23af511eb06fbc942c6a',1,'SeapodymCohortManager']]],
@@ -13,9 +13,11 @@ var searchData=
   ['getnumberofcohorts_10',['getNumberOfCohorts',['../classSeapodymCohortDependencyAnalyzer.html#ac04d9d679a683db23a43dfddf9125660',1,'SeapodymCohortDependencyAnalyzer']]],
   ['getnumberofcohortsteps_11',['getNumberOfCohortSteps',['../classSeapodymCohortDependencyAnalyzer.html#af235e3d52e21539b8291bda27e23da7b',1,'SeapodymCohortDependencyAnalyzer']]],
   ['getnumchunks_12',['getNumChunks',['../classDistDataCollector.html#aa6537a314c706a06004f3d47c2016b09',1,'DistDataCollector']]],
-  ['getnumsize_13',['getNumSize',['../classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d',1,'DistDataCollector']]],
-  ['getnumsteps_14',['getNumSteps',['../classSeapodymCohortManager.html#ae34f18f3427e70e294759cffa82850a9',1,'SeapodymCohortManager']]],
-  ['getstepbegmap_15',['getStepBegMap',['../classSeapodymCohortDependencyAnalyzer.html#af759705b4a84ccd0edbf29060e401791',1,'SeapodymCohortDependencyAnalyzer']]],
-  ['getstependmap_16',['getStepEndMap',['../classSeapodymCohortDependencyAnalyzer.html#ad7b6a3e2efb1059aad833c1449f9e53a',1,'SeapodymCohortDependencyAnalyzer']]],
-  ['getwin_17',['getWin',['../classDistDataCollector.html#afa03a029cdb45ed452f3c8e9d0850279',1,'DistDataCollector']]]
+  ['getnumelements_13',['getNumElements',['../classDataProvider.html#a9becee87ede0fe1af88362e48aac239c',1,'DataProvider']]],
+  ['getnumsize_14',['getNumSize',['../classDistDataCollector.html#a17446d432f5982ccc125ec4d3a162b0d',1,'DistDataCollector']]],
+  ['getnumsteps_15',['getNumSteps',['../classSeapodymCohortManager.html#ae34f18f3427e70e294759cffa82850a9',1,'SeapodymCohortManager']]],
+  ['getshmrank_16',['getShmRank',['../classDataProvider.html#a5f3072406817ce6b14476f24710b2e94',1,'DataProvider']]],
+  ['getstepbegmap_17',['getStepBegMap',['../classSeapodymCohortDependencyAnalyzer.html#af759705b4a84ccd0edbf29060e401791',1,'SeapodymCohortDependencyAnalyzer']]],
+  ['getstependmap_18',['getStepEndMap',['../classSeapodymCohortDependencyAnalyzer.html#ad7b6a3e2efb1059aad833c1449f9e53a',1,'SeapodymCohortDependencyAnalyzer']]],
+  ['getwin_19',['getWin',['../classDistDataCollector.html#afa03a029cdb45ed452f3c8e9d0850279',1,'DistDataCollector']]]
 ];
