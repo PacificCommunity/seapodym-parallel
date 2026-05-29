@@ -3,6 +3,7 @@ include_directories(
   ${MPI_CXX_INCLUDE_PATH}
 )
 set(SRCS
+   DataProvider.cpp
    DistDataCollector.cpp
    SeapodymCohortDependencyAnalyzer.cpp
    TaskStepManager.cpp
@@ -17,6 +18,7 @@ set(SRCS
    )
 set(HEADERS
    Tags.h
+   DataProvider.h
    DistDataCollector.h
    SeapodymCohortDependencyAnalyzer.h
    TaskStepManager.h
