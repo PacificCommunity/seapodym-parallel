@@ -17,13 +17,15 @@ class DataProvider {
 
 public:
 
+    DataProvider(const DataProvider&) = delete;
+    DataProvider& operator=(const DataProvider&) = delete;
+
     /**
     * @brief Constructor
     * @param comm root MPI communicator, the shared memory communicator will be derived from this
-    * @param names shared array names
-    * @param nsizes number of elements of each shared array, the order should be the same as the order of names
+    * @param nameSizePairs vector of pairs containing shared array names and their sizes
     */  
-    DataProvider(MPI_Comm comm, const std::vector<std::string>& names, const std::vector<std::size_t>& n);
+    DataProvider(MPI_Comm comm, const std::vector<std::pair<std::string, std::size_t> >& nameSizePairs);
 
     ~DataProvider();
 
@@ -42,6 +44,10 @@ public:
     /**
      * @brief Get a pointer to the shared data array
      * @return pointer to the shared data array
+     * @note the returned pointer is valid only within the same shared memory node, and should not be used for MPI communication 
+     * across different nodes. Additionally, the caller should ensure that the shared data array is properly synchronized 
+     * (e.g., using MPI_Barrier) before accessing the data to ensure visibility of the data updates across all ranks on the 
+     * same node.
      */
     double* getDataPtr(const std::string& name) const {
         auto it = this->data_.find(name);

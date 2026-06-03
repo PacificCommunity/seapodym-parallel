@@ -36,17 +36,23 @@ int main(int argc, char** argv)
         const int numData = cmdLine.get<int>("-nd");
 
         // list of fields
-        std::vector<std::string> names = {"un", "vn", "tempn", "oxygen"};
+        std::vector<std::pair<std::string, std::size_t>> nameSizePairs = {
+            {"un", static_cast<std::size_t>(numData)},
+            {"vn", static_cast<std::size_t>(numData)},
+            {"tempn", static_cast<std::size_t>(numData)},
+            {"oxygen", static_cast<std::size_t>(numData)}
+        };
 
         std::size_t n = static_cast<std::size_t>(numData);
         std::vector<std::size_t> nsizes = {n, n, n, n};
-        DataProvider dataProvider(MPI_COMM_WORLD, names, nsizes);
+        DataProvider dataProvider(MPI_COMM_WORLD, nameSizePairs);
 
         // set the field values
         if (dataProvider.isShmRoot()) {
-            for (size_t i = 0; i < names.size(); ++i) {
-                double* dataPtr = dataProvider.getDataPtr(names[i]);
-                std::size_t numData = dataProvider.getNumElements(names[i]);
+            for (size_t i = 0; i < nameSizePairs.size(); ++i) {
+                const std::string& name = nameSizePairs[i].first;
+                double* dataPtr = dataProvider.getDataPtr(name);
+                std::size_t numData = dataProvider.getNumElements(name);
                 for (auto j = 0; j < numData; ++j) {
                     // fill the data with some values, e.g., 1, 2, ..., numData for the first array, 
                     // 2, 4, ..., 2*numData for the second array, etc.
@@ -61,11 +67,12 @@ int main(int argc, char** argv)
         // from now on, all ranks on the same shared-memory node can directly read the shared data array 
         // without MPI communication
         double checksum = 0.0;
-        for (auto name : names) {
+        for (auto nameSize : nameSizePairs) {
+            const std::string& name = nameSize.first;
             double* dataPtr = dataProvider.getDataPtr(name);
             checksum += std::accumulate(dataPtr, dataPtr + dataProvider.getNumElements(name), 0.0);
         }
-        std::size_t numFields = names.size();
+        std::size_t numFields = nameSizePairs.size();
         double expectedChecksum = 0.5 * (numData + 1) * numData * 0.5 * (numFields + 1) * numFields;
 
         // get the rank of the calling process in the shared memory communicator

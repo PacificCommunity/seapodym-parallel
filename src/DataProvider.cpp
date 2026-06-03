@@ -1,10 +1,10 @@
 #include "DataProvider.h"
 
-DataProvider::DataProvider(MPI_Comm comm, const std::vector<std::string>& names,
-                           const std::vector<std::size_t>& nsizes)
+DataProvider::DataProvider(MPI_Comm comm, 
+                           const std::vector< std::pair<std::string, std::size_t> >& nameSizePairs)
         : comm_(comm), shmcomm_(MPI_COMM_NULL), shmRank_(-1) {
 
-    // Split to shared-memory communicator
+    // Split to get the shared-memory communicator
     MPI_Comm_split_type(
         this->comm_,
         MPI_COMM_TYPE_SHARED,
@@ -14,17 +14,15 @@ DataProvider::DataProvider(MPI_Comm comm, const std::vector<std::string>& names,
 
     MPI_Comm_rank(this->shmcomm_, &this->shmRank_);
 
-    // // Check number of elements
-    // if (names.size() != nsizes.size()) {
-    //     throw std::invalid_argument("The size of names and nsizes must be the same");
-    // }
+    for (const auto& ns : nameSizePairs) {
 
-    for (size_t i = 0; i < names.size(); ++i) {
+        const std::string& name = ns.first;
+        std::size_t size = ns.second;
 
         MPI_Aint bytes = 0;
         // Only origin rank allocates memory
         if (this->shmRank_ == 0) { // local rank 0 stores the data
-            bytes = static_cast<MPI_Aint>(nsizes[i]) * sizeof(double);
+            bytes = static_cast<MPI_Aint>(size) * sizeof(double);
         }
 
         double* baseptr = nullptr;
@@ -34,17 +32,17 @@ DataProvider::DataProvider(MPI_Comm comm, const std::vector<std::string>& names,
         MPI_Win_allocate_shared(bytes, sizeof(double), MPI_INFO_NULL, this->shmcomm_, &baseptr, &win);
 
         // Everyone queries origin memory
-        MPI_Aint size;
+        MPI_Aint size_mpi;
         int disp_unit;
 
         MPI_Win_shared_query(win,
         0, // query rank 0's allocation
-        &size,
+        &size_mpi,
         &disp_unit,
         &baseptr);
 
         // Store the base pointer, number of elements, and window in the data map
-        this->data_[names[i]] = std::make_tuple(baseptr, nsizes[i], win);
+        this->data_[name] = std::make_tuple(baseptr, size, win);
     }
   
 }
