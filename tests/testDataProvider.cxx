@@ -43,8 +43,6 @@ int main(int argc, char** argv)
             {"oxygen", static_cast<std::size_t>(numData)}
         };
 
-        std::size_t n = static_cast<std::size_t>(numData);
-        std::vector<std::size_t> nsizes = {n, n, n, n};
         DataProvider dataProvider(MPI_COMM_WORLD, nameSizePairs);
 
         // set the field values
