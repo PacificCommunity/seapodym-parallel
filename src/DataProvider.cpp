@@ -1,7 +1,8 @@
 #include "DataProvider.h"
 
-DataProvider::DataProvider(MPI_Comm comm, size_t n)
-        : comm_(comm), win_(MPI_WIN_NULL), baseptr_(nullptr), n_(0) {
+DataProvider::DataProvider(MPI_Comm comm, const std::vector<std::string>& names,
+                           const std::vector<std::size_t>& nsizes)
+        : comm_(comm) {
 
     // Split to shared-memory communicator
     MPI_Comm_split_type(
@@ -13,40 +14,49 @@ DataProvider::DataProvider(MPI_Comm comm, size_t n)
 
     MPI_Comm_rank(this->shmcomm_, &this->shmRank_);
 
-    // number of element in the shared array
-    this->n_ = n;
+    // // Check number of elements
+    // if (names.size() != nsizes.size()) {
+    //     throw std::invalid_argument("The size of names and nsizes must be the same");
+    // }
 
-    MPI_Aint bytes = 0;
+    for (size_t i = 0; i < names.size(); ++i) {
 
-    // Only origin rank allocates memory
-    if (this->shmRank_ == 0) { // local rank that stores the data is 0 
-        bytes = static_cast<MPI_Aint>(this->n_) * sizeof(double);
-    }
+        MPI_Aint bytes = 0;
+        // Only origin rank allocates memory
+        if (this->shmRank_ == 0) { // local rank 0 stores the data
+            bytes = static_cast<MPI_Aint>(nsizes[i]) * sizeof(double);
+        }
 
-    // Allocate shared memory window
-    MPI_Win_allocate_shared(
-        bytes,
-        sizeof(double),
-        MPI_INFO_NULL,
-        this->shmcomm_,
-        &this->baseptr_,
-        &this->win_);
+        double* baseptr = nullptr;
+        MPI_Win win = MPI_WIN_NULL;
 
-    // Everyone queries origin memory
-    MPI_Aint size;
-    int disp_unit;
+        // Allocate shared memory window for this array
+        MPI_Win_allocate_shared(bytes, sizeof(double), MPI_INFO_NULL, this->shmcomm_, &baseptr, &win);
 
-    MPI_Win_shared_query(
-        this->win_,
+        // Everyone queries origin memory
+        MPI_Aint size;
+        int disp_unit;
+
+        MPI_Win_shared_query(win,
         0, // query rank 0's allocation
         &size,
         &disp_unit,
-        &this->baseptr_);
+        &baseptr);
+
+        // Store the base pointer, number of elements, and window in the data map
+        this->data_[names[i]] = std::make_tuple(baseptr, nsizes[i], win);
+    }
+  
 }
 
 DataProvider::~DataProvider() {
-    if (this->win_ != MPI_WIN_NULL)
-        MPI_Win_free(&this->win_);
+
+    for (auto& [name, tuple] : this->data_) {
+        auto& [baseptr, n, win] = tuple;
+        if (win != MPI_WIN_NULL) {
+            MPI_Win_free(&win);
+        }
+    }
 
     if (this->shmcomm_ != MPI_COMM_NULL)
         MPI_Comm_free(&this->shmcomm_);
