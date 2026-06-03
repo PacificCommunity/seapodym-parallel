@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <tuple>
 
 #ifndef DATA_PROVIDER_H
@@ -68,7 +68,7 @@ public:
 private:
     MPI_Comm comm_;
     MPI_Comm shmcomm_;
-    std::map< std::string, std::tuple<double*, std::size_t, MPI_Win> > data_;
+    std::unordered_map< std::string, std::tuple<double*, std::size_t, MPI_Win> > data_;
     int shmRank_;
 };
 

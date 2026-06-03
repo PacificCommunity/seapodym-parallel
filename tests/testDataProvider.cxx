@@ -35,7 +35,9 @@ int main(int argc, char** argv)
     {
         const int numData = cmdLine.get<int>("-nd");
 
+        // list of fields
         std::vector<std::string> names = {"un", "vn", "tempn", "oxygen"};
+
         std::size_t n = static_cast<std::size_t>(numData);
         std::vector<std::size_t> nsizes = {n, n, n, n};
         DataProvider dataProvider(MPI_COMM_WORLD, names, nsizes);
@@ -46,7 +48,8 @@ int main(int argc, char** argv)
                 double* dataPtr = dataProvider.getDataPtr(names[i]);
                 std::size_t numData = dataProvider.getNumElements(names[i]);
                 for (auto j = 0; j < numData; ++j) {
-                    // fill the data with some values, e.g., 1, 2, ..., numData for the first array, 2, 4, ..., 2*numData for the second array, etc.
+                    // fill the data with some values, e.g., 1, 2, ..., numData for the first array, 
+                    // 2, 4, ..., 2*numData for the second array, etc.
                     dataPtr[j] = (double) (j + 1) * (i + 1);
                 }
             }

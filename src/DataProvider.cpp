@@ -2,7 +2,7 @@
 
 DataProvider::DataProvider(MPI_Comm comm, const std::vector<std::string>& names,
                            const std::vector<std::size_t>& nsizes)
-        : comm_(comm) {
+        : comm_(comm), shmcomm_(MPI_COMM_NULL), shmRank_(-1) {
 
     // Split to shared-memory communicator
     MPI_Comm_split_type(
