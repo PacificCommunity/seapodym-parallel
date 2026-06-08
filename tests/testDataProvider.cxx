@@ -34,27 +34,44 @@ int main(int argc, char** argv)
     // Make sure the DataProvider destructor is called before MPI_Finalize
     {
         const int numData = cmdLine.get<int>("-nd");
-        DataProvider dataProvider(MPI_COMM_WORLD, numData);
 
-        // get the pointer to the shared data array
-        double* shmDataPtr = dataProvider.getDataPtr();
+        // list of fields
+        std::vector<std::pair<std::string, std::size_t>> nameSizePairs = {
+            {"un", static_cast<std::size_t>(numData)},
+            {"vn", static_cast<std::size_t>(numData)},
+            {"tempn", static_cast<std::size_t>(numData)},
+            {"oxygen", static_cast<std::size_t>(numData)}
+        };
 
+        DataProvider dataProvider(MPI_COMM_WORLD, nameSizePairs);
+
+        // set the field values
         if (dataProvider.isShmRoot()) {
-
-            // Only the shmRoot rank on each shared-memory node initializes the data. There are as many shmRoot
-            // ranks as there are nodes.
-            for (auto i = 0; i < numData; ++i) {
-                shmDataPtr[i] = (double) (i + 1);
+            for (size_t i = 0; i < nameSizePairs.size(); ++i) {
+                const std::string& name = nameSizePairs[i].first;
+                double* dataPtr = dataProvider.getDataPtr(name);
+                std::size_t numData = dataProvider.getNumElements(name);
+                for (auto j = 0; j < numData; ++j) {
+                    // fill the data with some values, e.g., 1, 2, ..., numData for the first array, 
+                    // 2, 4, ..., 2*numData for the second array, etc.
+                    dataPtr[j] = (double) (j + 1) * (i + 1);
+                }
             }
         }
 
         // synchronize shared-memory access to make sure the data are visible to all ranks on the same node
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(dataProvider.getShmComm());
 
         // from now on, all ranks on the same shared-memory node can directly read the shared data array 
         // without MPI communication
-        double checksum = std::accumulate(shmDataPtr, shmDataPtr + numData, 0.0);
-        double expectedChecksum = 0.5 * (numData + 1) * numData; // sum of 1, 2, ..., numData
+        double checksum = 0.0;
+        for (auto nameSize : nameSizePairs) {
+            const std::string& name = nameSize.first;
+            double* dataPtr = dataProvider.getDataPtr(name);
+            checksum += std::accumulate(dataPtr, dataPtr + dataProvider.getNumElements(name), 0.0);
+        }
+        std::size_t numFields = nameSizePairs.size();
+        double expectedChecksum = 0.5 * (numData + 1) * numData * 0.5 * (numFields + 1) * numFields;
 
         // get the rank of the calling process in the shared memory communicator
         int shmRank = dataProvider.getShmRank();
