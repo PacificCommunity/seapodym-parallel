@@ -86,22 +86,27 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a67c84971f471002b895a39e7e8b8b1a2" id="r_a67c84971f471002b895a39e7e8b8b1a2"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a67c84971f471002b895a39e7e8b8b1a2">DataProvider</a> (MPI_Comm comm, size_t n)</td></tr>
-<tr class="memdesc:a67c84971f471002b895a39e7e8b8b1a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
+<tr class="memitem:a2867675919e68d09ed6fea832afee2e1" id="r_a2867675919e68d09ed6fea832afee2e1"><td class="memItemLeft"><a id="a2867675919e68d09ed6fea832afee2e1" name="a2867675919e68d09ed6fea832afee2e1"></a>
+&#160;</td><td class="memItemRight"><b>DataProvider</b> (const <a class="el" href="classDataProvider.html">DataProvider</a> &amp;)=delete</td></tr>
+<tr class="memitem:a8a14325a97c3aaf52dfd35812a70c152" id="r_a8a14325a97c3aaf52dfd35812a70c152"><td class="memItemLeft"><a id="a8a14325a97c3aaf52dfd35812a70c152" name="a8a14325a97c3aaf52dfd35812a70c152"></a>
+<a class="el" href="classDataProvider.html">DataProvider</a> &amp;&#160;</td><td class="memItemRight"><b>operator=</b> (const <a class="el" href="classDataProvider.html">DataProvider</a> &amp;)=delete</td></tr>
+<tr class="memitem:a505690c3fd3c522e2e21b00b0e198846" id="r_a505690c3fd3c522e2e21b00b0e198846"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a505690c3fd3c522e2e21b00b0e198846">DataProvider</a> (MPI_Comm comm, const std::vector&lt; std::pair&lt; std::string, std::size_t &gt; &gt; &amp;nameSizePairs)</td></tr>
+<tr class="memdesc:a505690c3fd3c522e2e21b00b0e198846"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
 <tr class="memitem:a5f3072406817ce6b14476f24710b2e94" id="r_a5f3072406817ce6b14476f24710b2e94"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5f3072406817ce6b14476f24710b2e94">getShmRank</a> () const</td></tr>
 <tr class="memdesc:a5f3072406817ce6b14476f24710b2e94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the rank of the calling process in the shared memory communicator.  <br /></td></tr>
 <tr class="memitem:a1895e4875fe8f5c2d68b0540ab894003" id="r_a1895e4875fe8f5c2d68b0540ab894003"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a1895e4875fe8f5c2d68b0540ab894003">isShmRoot</a> () const</td></tr>
 <tr class="memdesc:a1895e4875fe8f5c2d68b0540ab894003"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the calling process is the root of the shared memory communicator (i.e., the one that provides the data).  <br /></td></tr>
-<tr class="memitem:aa11707f81197bf3393a8364ff404e470" id="r_aa11707f81197bf3393a8364ff404e470"><td class="memItemLeft">double *&#160;</td><td class="memItemRight"><a class="el" href="#aa11707f81197bf3393a8364ff404e470">getDataPtr</a> () const</td></tr>
-<tr class="memdesc:aa11707f81197bf3393a8364ff404e470"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a pointer to the shared data array.  <br /></td></tr>
-<tr class="memitem:a9becee87ede0fe1af88362e48aac239c" id="r_a9becee87ede0fe1af88362e48aac239c"><td class="memItemLeft">size_t&#160;</td><td class="memItemRight"><a class="el" href="#a9becee87ede0fe1af88362e48aac239c">getNumElements</a> () const</td></tr>
-<tr class="memdesc:a9becee87ede0fe1af88362e48aac239c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of elements in the shared data array.  <br /></td></tr>
+<tr class="memitem:a8310f2e2bc48a8788e4e7bbf42983756" id="r_a8310f2e2bc48a8788e4e7bbf42983756"><td class="memItemLeft">double *&#160;</td><td class="memItemRight"><a class="el" href="#a8310f2e2bc48a8788e4e7bbf42983756">getDataPtr</a> (const std::string &amp;name) const</td></tr>
+<tr class="memdesc:a8310f2e2bc48a8788e4e7bbf42983756"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a pointer to the shared data array.  <br /></td></tr>
+<tr class="memitem:ad4a07ca87a5907d13a7907a5ffff2505" id="r_ad4a07ca87a5907d13a7907a5ffff2505"><td class="memItemLeft">size_t&#160;</td><td class="memItemRight"><a class="el" href="#ad4a07ca87a5907d13a7907a5ffff2505">getNumElements</a> (const std::string &amp;name) const</td></tr>
+<tr class="memdesc:ad4a07ca87a5907d13a7907a5ffff2505"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of elements in the shared data array.  <br /></td></tr>
+<tr class="memitem:a76f34648f82e491e88cd54f418d2959a" id="r_a76f34648f82e491e88cd54f418d2959a"><td class="memItemLeft">MPI_Comm&#160;</td><td class="memItemRight"><a class="el" href="#a76f34648f82e491e88cd54f418d2959a">getShmComm</a> () const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classDataProvider.html" title="DataProvider is a class that provides shared memory data access to any local-node MPI process.">DataProvider</a> is a class that provides shared memory data access to any local-node MPI process. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a67c84971f471002b895a39e7e8b8b1a2" name="a67c84971f471002b895a39e7e8b8b1a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a67c84971f471002b895a39e7e8b8b1a2">&#9670;&#160;</a></span>DataProvider()</h2>
+<a id="a505690c3fd3c522e2e21b00b0e198846" name="a505690c3fd3c522e2e21b00b0e198846"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a505690c3fd3c522e2e21b00b0e198846">&#9670;&#160;</a></span>DataProvider()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -114,7 +119,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span>&#160;)</td>
+          <td class="paramtype">const std::vector&lt; std::pair&lt; std::string, std::size_t &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nameSizePairs</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -123,7 +128,7 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">comm</td><td>root MPI communicator, the shared memory communicator will be derived from this </td></tr>
-    <tr><td class="paramname">n</td><td>Number of elements in the data array </td></tr>
+    <tr><td class="paramname">nameSizePairs</td><td>vector of pairs containing shared array names and their sizes </td></tr>
   </table>
   </dd>
 </dl>
@@ -131,8 +136,8 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="aa11707f81197bf3393a8364ff404e470" name="aa11707f81197bf3393a8364ff404e470"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa11707f81197bf3393a8364ff404e470">&#9670;&#160;</a></span>getDataPtr()</h2>
+<a id="a8310f2e2bc48a8788e4e7bbf42983756" name="a8310f2e2bc48a8788e4e7bbf42983756"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8310f2e2bc48a8788e4e7bbf42983756">&#9670;&#160;</a></span>getDataPtr()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -143,7 +148,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">double * DataProvider::getDataPtr </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -156,11 +161,12 @@ Public Member Functions</h2></td></tr>
 
 <p>Get a pointer to the shared data array. </p>
 <dl class="section return"><dt>Returns</dt><dd>pointer to the shared data array </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>the returned pointer is valid only within the same shared memory node, and should not be used for MPI communication across different nodes. Additionally, the caller should ensure that the shared data array is properly synchronized (e.g., using MPI_Barrier) before accessing the data to ensure visibility of the data updates across all ranks on the same node. </dd></dl>
 
 </div>
 </div>
-<a id="a9becee87ede0fe1af88362e48aac239c" name="a9becee87ede0fe1af88362e48aac239c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9becee87ede0fe1af88362e48aac239c">&#9670;&#160;</a></span>getNumElements()</h2>
+<a id="ad4a07ca87a5907d13a7907a5ffff2505" name="ad4a07ca87a5907d13a7907a5ffff2505"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4a07ca87a5907d13a7907a5ffff2505">&#9670;&#160;</a></span>getNumElements()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -171,7 +177,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">size_t DataProvider::getNumElements </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -184,6 +190,32 @@ Public Member Functions</h2></td></tr>
 
 <p>Get the number of elements in the shared data array. </p>
 <dl class="section return"><dt>Returns</dt><dd>number of elements in the shared data array </dd></dl>
+
+</div>
+</div>
+<a id="a76f34648f82e491e88cd54f418d2959a" name="a76f34648f82e491e88cd54f418d2959a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76f34648f82e491e88cd54f418d2959a">&#9670;&#160;</a></span>getShmComm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">MPI_Comm DataProvider::getShmComm </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the MPI shm communicator </p><dl class="section return"><dt>Returns</dt><dd>the MPI shm communicator </dd></dl>
 
 </div>
 </div>
