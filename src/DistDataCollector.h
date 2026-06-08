@@ -71,7 +71,7 @@ class DistDataCollector {
     }
 
     /** 
-     * @brief Ensure that all RMA operations are completed
+     * @brief Ensure that the RMA operation is completed and the data are visible to the manager
      */
     void inline flush() {
         // Flush the manager (rank zero)

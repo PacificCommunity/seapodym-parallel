@@ -5,6 +5,13 @@ include_directories(
 )
 
 # Add the test executables
+
+add_executable(testDataProvider testDataProvider.cxx)
+target_link_libraries(testDataProvider PRIVATE seapodym_api)
+
+add_executable(testMpiSharedPtr testMpiSharedPtr.cxx)
+target_link_libraries(testMpiSharedPtr PRIVATE seapodym_api)
+
 configure_file(testSeapodymCohort.cpp testSeapodymCohort.cxx)
 add_executable(testSeapodymCohort testSeapodymCohort.cxx)
 target_link_libraries(testSeapodymCohort PRIVATE seapodym_api)
@@ -126,3 +133,9 @@ set_tests_properties(testGet PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED")
 
 add_test(NAME testPut COMMAND mpiexec -n 6 ./testPut)
 set_tests_properties(testPut PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED")
+
+add_test(NAME testMpiSharedPtr3 COMMAND mpiexec -n 3 ./testMpiSharedPtr)
+set_tests_properties(testMpiSharedPtr3 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+
+add_test(NAME testDataProvider COMMAND mpiexec -n 5 ./testDataProvider)
+set_tests_properties(testDataProvider PROPERTIES PASS_REGULAR_EXPRESSION "Success")
