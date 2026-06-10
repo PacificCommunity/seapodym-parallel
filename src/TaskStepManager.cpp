@@ -46,6 +46,10 @@ TaskStepManager::run() const {
     std::set<int> active_workers;
     for (int i = 1; i < size; ++i) active_workers.insert(i);
 
+    // Track which worker is currently executing each task.
+    // Used to send DOWNSTREAM_TAG when a new dependent task is assigned.
+    std::map<int, int> task_to_worker;
+
     std::array<int, 3> output;
     MPI_Status status;
 
@@ -58,8 +62,10 @@ TaskStepManager::run() const {
             int task_id = output[0];
             int step    = output[1];
             completed.insert({task_id, step});
-            if (step == this->stepEndMap.at(task_id) - 1)
+            if (step == this->stepEndMap.at(task_id) - 1) {
                 assigned.erase(task_id);
+                task_to_worker.erase(task_id);
+            }
         } else { // WORKER_AVAILABLE_TAG
             int dummy;
             MPI_Recv(&dummy, 1, MPI_INT, st.MPI_SOURCE, WORKER_AVAILABLE_TAG,
@@ -94,6 +100,20 @@ TaskStepManager::run() const {
                 active_workers.erase(active_workers.begin());
                 MPI_Send(&task_id, 1, MPI_INT, worker, START_TASK_TAG, this->comm);
                 assigned.insert(task_id);
+                task_to_worker[task_id] = worker;
+
+                // Tell every upstream worker that is still running about this
+                // new downstream so it can send STEP_DONE notifications directly.
+                for (const auto& dep : this->deps.at(task_id)) {
+                    int dep_task_id = dep[0];
+                    auto it2 = task_to_worker.find(dep_task_id);
+                    if (it2 != task_to_worker.end()) {
+                        int upstream_worker = it2->second;
+                        MPI_Send(&worker, 1, MPI_INT, upstream_worker,
+                                 DOWNSTREAM_TAG, this->comm);
+                    }
+                }
+
                 it = task_queue.erase(it);
             } else {
                 ++it;
