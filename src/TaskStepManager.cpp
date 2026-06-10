@@ -1,15 +1,21 @@
 #include "TaskStepManager.h"
 #include "Tags.h"
 #include <set>
-#include <vector>
+#include <unordered_set>
+#include <list>
 #include <map>
-#include <chrono>
-#include <thread>
+#include <algorithm>
 #include <iostream>
 
+// Hash for std::array<int,2> so it can be used in unordered_set (O(1) lookups).
+struct DepHash {
+    size_t operator()(const std::array<int,2>& a) const {
+        return std::hash<long long>()((long long)a[0] << 32 | (unsigned int)a[1]);
+    }
+};
 
-TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks, 
-      const std::map<int, int>& stepBegMap, 
+TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
+      const std::map<int, int>& stepBegMap,
       const std::map<int, int>& stepEndMap,
       const std::map<int, std::set<dep_type>>& dependencyMap) {
 
@@ -23,71 +29,69 @@ TaskStepManager::TaskStepManager(MPI_Comm comm, int numTasks,
 std::set< std::array<int, 3> >
 TaskStepManager::run() const {
 
-    const int managerRank = 0;
-
     int size;
     MPI_Comm_size(this->comm, &size);
 
     std::set<std::array<int,3>> results;
-    std::set<std::array<int,2>> completed;
+
+    // O(1) average lookup vs O(log N) for std::set
+    std::unordered_set<std::array<int,2>, DepHash> completed;
 
     std::set<int> assigned;
-    std::vector<int> task_queue(this->numTasks);
-    for (int i = 0; i < this->numTasks; ++i) {
-        task_queue[i] = i;
-    }
+
+    // std::list gives O(1) erase-by-iterator during task assignment
+    std::list<int> task_queue;
+    for (int i = 0; i < this->numTasks; ++i) task_queue.push_back(i);
+
     std::set<int> active_workers;
+    for (int i = 1; i < size; ++i) active_workers.insert(i);
 
-    // task_id, step, result
     std::array<int, 3> output;
+    MPI_Status status;
 
-    // Declare all workers to be active initially
-    for (int i = 1; i < size; ++i) {
-        active_workers.insert(i);
-    }
+    // Receive and process a single message whose tag was already probed.
+    auto processMessage = [&](const MPI_Status& st) {
+        if (st.MPI_TAG == END_TASK_TAG) {
+            MPI_Recv(output.data(), 3, MPI_INT, st.MPI_SOURCE, END_TASK_TAG,
+                     this->comm, MPI_STATUS_IGNORE);
+            results.insert(output);
+            int task_id = output[0];
+            int step    = output[1];
+            completed.insert({task_id, step});
+            if (step == this->stepEndMap.at(task_id) - 1)
+                assigned.erase(task_id);
+        } else { // WORKER_AVAILABLE_TAG
+            int dummy;
+            MPI_Recv(&dummy, 1, MPI_INT, st.MPI_SOURCE, WORKER_AVAILABLE_TAG,
+                     this->comm, MPI_STATUS_IGNORE);
+            active_workers.insert(st.MPI_SOURCE);
+        }
+    };
 
     while (!task_queue.empty() || !assigned.empty()) {
 
-        MPI_Status status;
-
-        // Drain all step-complete messages (tag END_TASK_TAG)
-        while (true) {
-
+        // --- Non-blocking drain: receive everything currently queued (both tags) ---
+        bool received_any = false;
+        {
             int flag = 0;
-            // Probe for messages from workers
-            MPI_Iprobe(MPI_ANY_SOURCE, END_TASK_TAG, this->comm, &flag, &status);
-            if (!flag) {
-                // not an end task message
-                break;
-            }
-
-            MPI_Recv(output.data(), 3, MPI_INT, status.MPI_SOURCE, END_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
-
-            // Store the result
-            results.insert(output);
-            int task_id = output[0];
-            int step = output[1];
-            completed.insert(std::array<int,2>{task_id, step});
-
-            if (step == this->stepEndMap.at(task_id) - 1) {
-                assigned.erase(task_id);
+            MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, this->comm, &flag, &status);
+            while (flag) {
+                processMessage(status);
+                received_any = true;
+                MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, this->comm, &flag, &status);
             }
         }
 
-        // Assign ready tasks to any available worker
-        for (auto it = task_queue.begin(); it != task_queue.end();) {
+        // --- Assign all ready tasks to available workers ---
+        for (auto it = task_queue.begin();
+             it != task_queue.end() && !active_workers.empty(); ) {
             int task_id = *it;
-            const auto& deps = this->deps.at(task_id);
-            bool ready = true;
-            for (auto& dep : deps) {
-                if (completed.find(dep) == completed.end()) {
-                    ready = false;
-                    break;
-                }
-            }
-            if (ready && !active_workers.empty()) {
+            const auto& task_deps = this->deps.at(task_id);
+            bool ready = std::all_of(task_deps.begin(), task_deps.end(),
+                [&](const dep_type& d) { return completed.count(d) > 0; });
+            if (ready) {
                 int worker = *active_workers.begin();
-                active_workers.erase(worker);
+                active_workers.erase(active_workers.begin());
                 MPI_Send(&task_id, 1, MPI_INT, worker, START_TASK_TAG, this->comm);
                 assigned.insert(task_id);
                 it = task_queue.erase(it);
@@ -96,27 +100,20 @@ TaskStepManager::run() const {
             }
         }
 
-        // Drain all worker-available messages (tag WORKER_AVAILABLE_TAG)
-        for (int worker = 1; worker < size; ++worker) {
-            int flag = 0;
-            MPI_Iprobe(worker, WORKER_AVAILABLE_TAG, this->comm, &flag, &status);
-            if (flag) {
-                int dummy;
-                MPI_Recv(&dummy, 1, MPI_INT, worker, WORKER_AVAILABLE_TAG, this->comm, MPI_STATUS_IGNORE);
-                active_workers.insert(worker);
-            }
+        // --- Block until the next message if there is nothing else to do ---
+        // This eliminates the hot-spin when all workers are busy and no
+        // messages have arrived yet.  assigned.empty() is impossible here
+        // (the outer while would have exited), so a blocking probe is safe.
+        if (!received_any && !assigned.empty()) {
+            MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, this->comm, &status);
+            processMessage(status);
         }
-
-        // (optional) avoid hot-spinning if nothing to do
-        //if (active_workers.empty() && assigned.empty()) {
-        //    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        //}
     }
 
-    // Send stop signal
+    // Shutdown all workers
     const int stop = -1;
     for (int worker = 1; worker < size; ++worker) {
-        std::cout << "[Manager] shutting down worker " << worker << std::endl;
+        std::cout << "[Manager] shutting down worker " << worker << "\n";
         MPI_Send(&stop, 1, MPI_INT, worker, START_TASK_TAG, this->comm);
     }
 
