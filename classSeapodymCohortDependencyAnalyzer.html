@@ -86,7 +86,7 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac854aebd45e9821a8b632a7aa4443470" id="r_ac854aebd45e9821a8b632a7aa4443470"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ac854aebd45e9821a8b632a7aa4443470">SeapodymCohortDependencyAnalyzer</a> (int numAgeGroups, int numTimeSteps)</td></tr>
+<tr class="memitem:a641f3ea4ade504c529a3c6565ef7042b" id="r_a641f3ea4ade504c529a3c6565ef7042b"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a641f3ea4ade504c529a3c6565ef7042b">SeapodymCohortDependencyAnalyzer</a> (int numAgeGroups, int numTimeSteps, int ageMature=0)</td></tr>
 <tr class="memitem:ac04d9d679a683db23a43dfddf9125660" id="r_ac04d9d679a683db23a43dfddf9125660"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac04d9d679a683db23a43dfddf9125660">getNumberOfCohorts</a> () const</td></tr>
 <tr class="memitem:af235e3d52e21539b8291bda27e23da7b" id="r_af235e3d52e21539b8291bda27e23da7b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af235e3d52e21539b8291bda27e23da7b">getNumberOfCohortSteps</a> () const</td></tr>
 <tr class="memitem:af759705b4a84ccd0edbf29060e401791" id="r_af759705b4a84ccd0edbf29060e401791"><td class="memItemLeft">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af759705b4a84ccd0edbf29060e401791">getStepBegMap</a> () const</td></tr>
@@ -102,8 +102,8 @@ Public Member Functions</h2></td></tr>
 6 4 5
 </pre><p> where the numbers are the cohort Ids. The horizontal axis represents the different age groups and the vertical axis is time. A each time step a new cohort is born. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ac854aebd45e9821a8b632a7aa4443470" name="ac854aebd45e9821a8b632a7aa4443470"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac854aebd45e9821a8b632a7aa4443470">&#9670;&#160;</a></span>SeapodymCohortDependencyAnalyzer()</h2>
+<a id="a641f3ea4ade504c529a3c6565ef7042b" name="a641f3ea4ade504c529a3c6565ef7042b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a641f3ea4ade504c529a3c6565ef7042b">&#9670;&#160;</a></span>SeapodymCohortDependencyAnalyzer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -116,7 +116,12 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numTimeSteps</em></span>&#160;)</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numTimeSteps</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>ageMature</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -125,6 +130,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">numAgeGroups</td><td>number of age groups (e.g. 3 in the above example) </td></tr>
     <tr><td class="paramname">numTimeSteps</td><td>number of tiem steps (e.g. 5 in the above example) </td></tr>
+    <tr><td class="paramname">ageMature</td><td>index of the first mature age class. A newborn cohort only needs the densities of mature age classes (ageMature..numAgeGroups-1) of the previous time step, so dependencies on younger ages are omitted. Defaults to 0 = dependence on the full state at time t-1. </td></tr>
   </table>
   </dd>
 </dl>
