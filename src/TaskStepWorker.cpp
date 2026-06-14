@@ -51,7 +51,7 @@ TaskStepWorker::run() const {
         // Notify the manager that this worker is available again
         int done = 1;
         logger->info("Notifying manager");
-        MPI_Send(&done, 1, MPI_INT, managerRank, WORKER_AVAILABLE_TAG, MPI_COMM_WORLD);
+        MPI_Send(&done, 1, MPI_INT, managerRank, WORKER_AVAILABLE_TAG, this->comm);
         logger->info("Done.");
     }
  
