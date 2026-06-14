@@ -1,10 +1,15 @@
 #include "SeapodymCohortDependencyAnalyzer.h"
 
-SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps) {
+SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps, int ageMature) {
 
     this->numAgeGroups = numAgeGroups;
     this->numTimeSteps = numTimeSteps;
     this->numIds = numAgeGroups + numTimeSteps - 1;
+    // a newborn cohort only reads mature ages of the previous time step, so younger
+    // age classes (0..ageMature-1) are NOT real dependencies; including them delays
+    // consecutive births and makes workers idle. This fix removes current cap ~na/2.
+    if (ageMature < 0) ageMature = 0;
+    if (ageMature >= numAgeGroups) ageMature = 0;   // guard against a degenerate value
 
     // set the min/mas step indices
     for (int task_id = 0; task_id < this->numIds; ++task_id) {
@@ -28,7 +33,7 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
 
         std::set< std::array<int, 2>> dep_set;
 
-        for (int step = 0; step < this->numAgeGroups; ++step) {
+        for (int step = ageMature; step < this->numAgeGroups; ++step) {
 
             int otherTaskId = task_id - step - 1;
             dep_set.insert(std::array<int, 2>{otherTaskId, step});

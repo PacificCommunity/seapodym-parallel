@@ -53,8 +53,12 @@ public:
      * 
      * @param numAgeGroups number of age groups (e.g. 3 in the above example)
      * @param numTimeSteps number of tiem steps (e.g. 5 in the above example)
+     * @param ageMature index of the first mature age class. A newborn cohort only
+     *        needs the densities of mature age classes (ageMature..numAgeGroups-1)
+     *        of the previous time step, so dependencies on younger ages are omitted.
+     *        Defaults to 0 = dependence on the full state at time t-1.
      */
-    SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps);
+    SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps, int ageMature = 0);
 
     /**
      * Get the number of cohorts
