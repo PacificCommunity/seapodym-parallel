@@ -57,8 +57,9 @@ public:
      *        needs the densities of mature age classes (ageMature..numAgeGroups-1)
      *        of the previous time step, so dependencies on younger ages are omitted.
      *        Defaults to 0 = dependence on the full state at time t-1.
+     * @param aPlusCohort whether to add the A+ cohort dependency
      */
-    SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps, int ageMature = 0);
+    SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps, int ageMature = 0, bool aPlusCohort = false);
 
     /**
      * Get the number of cohorts

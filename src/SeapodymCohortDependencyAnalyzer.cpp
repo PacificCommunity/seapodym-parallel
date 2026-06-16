@@ -1,6 +1,6 @@
 #include "SeapodymCohortDependencyAnalyzer.h"
 
-SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps, int ageMature) {
+SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps, int ageMature, bool aPlusCohort) {
 
     this->numAgeGroups = numAgeGroups;
     this->numTimeSteps = numTimeSteps;
@@ -11,7 +11,7 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
     if (ageMature < 0) ageMature = 0;
     if (ageMature >= numAgeGroups) ageMature = 0;   // guard against a degenerate value
 
-    // set the min/mas step indices
+    // set the min/max step indices
     for (int task_id = 0; task_id < this->numIds; ++task_id) {
 
         this->stepBegMap[task_id] = std::max(0, this->numAgeGroups - 1 - task_id);
@@ -29,6 +29,7 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
         this->dependencyMap[task_id] = std::set< std::array<int, 2>>();
     }
 
+    // add "living" cohort dependencies
     for (int task_id = this->numAgeGroups; task_id < this->numIds; ++task_id) {
 
         std::set< std::array<int, 2>> dep_set;
@@ -41,6 +42,17 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
         }
     
         this->dependencyMap[task_id] = dep_set;
+    }
+
+    if (aPlusCohort) {
+        // add the A+ cohort dependencies. To fit with the existing dependency representation, cohort Id: {(otherCohortId, step), ...}
+        // the A+ cohort is treated as a separate cohort with a negative id at each time step. The (negative) id is -timeStep.
+        for (auto timeStep = 1; timeStep < this->numTimeSteps; ++timeStep) {
+            this->dependencyMap[-timeStep] = std::set< std::array<int, 2>>{{timeStep - 1, this->numAgeGroups - 1}};
+        // Not sure if we need this
+        this->stepBegMap[-timeStep] = 0;
+        this->stepEndMap[-timeStep] = 1;
+        }
     }
 
 }
