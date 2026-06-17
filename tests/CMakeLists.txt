@@ -43,6 +43,9 @@ target_link_libraries(testTaskStepFarming PRIVATE seapodym_api spdlog::spdlog fm
 add_executable(testTaskStepFarmingCohort testTaskStepFarmingCohort.cxx)
 target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
+add_executable(testTaskStepFarmingCohortAPlus testTaskStepFarmingCohortAPlus.cxx)
+target_link_libraries(testTaskStepFarmingCohortAPlus PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
+
 add_executable(testDistDataCollector testDistDataCollector.cxx)
 target_link_libraries(testDistDataCollector PRIVATE seapodym_api)
 
@@ -106,6 +109,12 @@ set_tests_properties(testTaskStepFarmingCohortNa1Nt2 PROPERTIES PASS_REGULAR_EXP
 
 add_test(NAME testTaskStepFarmingCohortNa5Nt10 COMMAND mpiexec -n 6 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1)
 set_tests_properties(testTaskStepFarmingCohortNa5Nt10 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")
+
+add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3Mature0 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1 -age_mature 0)
+set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature0 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")
+
+add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3Mature1 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1 -age_mature 1)
+set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")
 
 add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1)
 set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")

@@ -41,7 +41,7 @@ TaskStepManager::run() const {
 
     // std::list gives O(1) erase-by-iterator during task assignment
     std::list<int> task_queue;
-    for (int i = 0; i < this->numTasks; ++i) task_queue.push_back(i);
+    for (const auto& [task_id, beg] : this->stepBegMap) task_queue.push_back(task_id);
 
     std::set<int> active_workers;
     for (int i = 1; i < size; ++i) active_workers.insert(i);
@@ -111,10 +111,10 @@ TaskStepManager::run() const {
     }
 
     // Shutdown all workers
-    const int stop = -1;
+    const int stop = 0;
     for (int worker = 1; worker < size; ++worker) {
         std::cout << "[Manager] shutting down worker " << worker << "\n";
-        MPI_Send(&stop, 1, MPI_INT, worker, START_TASK_TAG, this->comm);
+        MPI_Send(&stop, 1, MPI_INT, worker, SHUTDOWN_TAG, this->comm);
     }
 
     return results;

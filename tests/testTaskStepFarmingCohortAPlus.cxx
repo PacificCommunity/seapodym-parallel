@@ -21,10 +21,16 @@
  * @param step step in the task
  * @return index
  */
-int inline getChunkId(int task_id, int step, int numAgeGroups) {
-    int row = task_id + step - numAgeGroups + 1;
-    int col = task_id % numAgeGroups;
-    return row * numAgeGroups + col;
+int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps) {
+    if (task_id >= 0) {
+        // normal cohort
+        int row = task_id + step - numAgeGroups + 1;
+        int col = task_id % numAgeGroups;
+        return row * numAgeGroups + col;
+    } else {
+        // A+, append at the end. Assume each A+ cohort has a single step == 0
+        return numAgeGroups * numTimeSteps + std::abs(task_id) - 1;
+    }
 }
 
 // Task for the workers to execute
@@ -35,10 +41,17 @@ int inline getChunkId(int task_id, int step, int numAgeGroups) {
  * @param stepEnd last step index (exclusive)
  * @param comm MPI communicator
  * @param ms Sleep # milliseconds
+ * @param numAgeGroups number of age groups
+ * @param numTimeSteps number of time steps
+ * @param numData number of doubles to send to manager
+ * @param dataCollector
+ * @param dependencyMap
+ * @param rng
+ * @param dist
  */
 void inline 
 taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
-    int ms, int numAgeGroups, int numData, 
+    int ms, int numAgeGroups, int numTimeSteps, int numData, 
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
     std::mt19937* rng, std::gamma_distribution<double>* dist) {
@@ -49,9 +62,10 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     // Initial conditions from the other cohorts
 
     std::fill(localData.begin(), localData.end(), 0.0);
+    
     for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
 
-        int chunk_id = getChunkId(task_id2, step, numAgeGroups);
+        int chunk_id = getChunkId(task_id2, step, numAgeGroups, numTimeSteps);
 
         // fetch the data
         dataCollector->get(chunk_id, data.data());
@@ -68,6 +82,7 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     }
 
     // step through...
+
     for (auto step = stepBeg; step < stepEnd; ++step) {
 
         // Perform the work, just sleeping here zzzzzzz
@@ -80,7 +95,9 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // Send the data to the manager. Here, the data are 
         // collected row by row. The entry into the collected 
         // array is at index chunk_id.
-        int chunk_id = getChunkId(task_id, step, numAgeGroups);
+        int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps);
+
+        // send the data to the manager
         dataCollector->put(chunk_id, localData.data());
 
         // E.g.
@@ -141,7 +158,8 @@ int main(int argc, char** argv) {
     std::gamma_distribution<double> dist(k, theta);
 
     // analyze the cohort Id task dependencies
-    SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps, ageMature);
+    const bool aPlusCohort = true;
+    SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps, ageMature, aPlusCohort);
     int numCohorts = taskDeps.getNumberOfCohorts();
     int numCohortSteps = taskDeps.getNumberOfCohortSteps();
     std::map<int, int> stepBegMap = taskDeps.getStepBegMap();
@@ -150,6 +168,7 @@ int main(int argc, char** argv) {
 
     // print the dependencies for debugging
     if (workerId == 0) {
+        std::cout << "Number of age groups: " << numAgeGroups << " number of time steps: " << numTimeSteps << " number of doubles per chunk: " << numData << '\n';
         for (const auto& [task_id, stepBeg] : stepBegMap) {
             int globalTimeIndex = std::max(0, task_id - numAgeGroups + 1);
             std::cout << "At time " << globalTimeIndex << " Task " << task_id << " has steps " << stepBeg << "..." << stepEndMap.at(task_id) - 1 << " and depends on: ";
@@ -160,8 +179,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    // set up the data collector
-    int numChunks = numAgeGroups * numTimeSteps;
+    // set up the data collector, includes the A+ group
+    int numChunks = (numAgeGroups + 1) * numTimeSteps;
     DistDataCollector dataCollect(MPI_COMM_WORLD, numChunks, numData);
 
     // workers expect a function that takes a 4 arguments. We bind the last
@@ -173,13 +192,13 @@ int main(int argc, char** argv) {
         std::placeholders::_4, // comm
         milliseconds,
         numAgeGroups,
+        numTimeSteps,
         numData,
         &dataCollect,
         &dependencyMap,
         &rng,
         &dist);
 
-    
 
     TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
     // sync the manager and workers
@@ -234,6 +253,7 @@ int main(int argc, char** argv) {
             for (auto i = 0; i < numSize; ++i) {
                 checksum += data[chunk*numSize + i];
             }
+            printf("checksum after chunk %d is %.0lf\n", chunk, checksum);
         }
         printf("\nchecksum: %.0lf\n", checksum);
     }

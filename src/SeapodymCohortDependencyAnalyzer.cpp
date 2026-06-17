@@ -45,14 +45,29 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
     }
 
     if (aPlusCohort) {
-        // add the A+ cohort dependencies. To fit with the existing dependency representation, cohort Id: {(otherCohortId, step), ...}
-        // the A+ cohort is treated as a separate cohort with a negative id at each time step. The (negative) id is -timeStep.
+
+        // add the A+ cohort dependencies. To fit with the existing dependency representation, cohort Id: {(otherCohortId, step), ...},
+        // the A+ cohort is treated as a separate cohort with a negative id at each time step
+
+        // first A+ (task_id = -1) has no dependency; add it to all maps
+        this->dependencyMap[-1] = std::set< std::array<int, 2>>();
+        this->stepBegMap[-1] = 0;
+        this->stepEndMap[-1] = 1;
+
         for (auto timeStep = 1; timeStep < this->numTimeSteps; ++timeStep) {
-            this->dependencyMap[-timeStep] = std::set< std::array<int, 2>>{{timeStep - 1, this->numAgeGroups - 1}};
-        // Not sure if we need this
-        this->stepBegMap[-timeStep] = 0;
-        this->stepEndMap[-timeStep] = 1;
+
+            // use negative IDs
+            int aPlusId = -timeStep - 1;
+
+            // depends on the last step of the oldest cohort and on the A+ at the previous step
+            this->dependencyMap[aPlusId] = std::set< std::array<int, 2>>{{timeStep - 1, this->numAgeGroups - 1}, {aPlusId + 1, 0}};
+
+            // treat each A+ cohort at each step as a separate cohort with a single step
+            this->stepBegMap[aPlusId] = 0;
+            this->stepEndMap[aPlusId] = 1;
         }
+
+        this->numIds += this->numTimeSteps;
     }
 
 }
@@ -62,9 +77,13 @@ SeapodymCohortDependencyAnalyzer::getNumberOfCohorts() const {
     return this->numIds;
 }
 
-int 
+int
 SeapodymCohortDependencyAnalyzer::getNumberOfCohortSteps() const {
-    return this->numAgeGroups * this->numTimeSteps;
+    int total = 0;
+    for (const auto& [id, beg] : this->stepBegMap) {
+        total += this->stepEndMap.at(id) - beg;
+    }
+    return total;
 }
 
 std::map<int, int>
