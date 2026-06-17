@@ -249,11 +249,24 @@ int main(int argc, char** argv) {
         double* data = dataCollect.getCollectedDataPtr();
         int numSize = dataCollect.getNumSize();
         double checksum = 0;
-        for (auto chunk = 0; chunk < dataCollect.getNumChunks(); ++chunk) {\
-            for (auto i = 0; i < numSize; ++i) {
-                checksum += data[chunk*numSize + i];
+        // sum the cohorts' contributions
+        for (auto& [task_id, stepBeg] : stepBegMap) {
+            if (task_id < 0) continue; // A+ handled separately below
+            int stepEnd = stepEndMap.at(task_id);
+            for (auto step = stepBeg; step < stepEnd; ++step) {
+                int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps);
+                double taskStepChecksum = std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
+                checksum += taskStepChecksum;
+                printf("checksum after chunk %d (task_id=%d step=%d) is %.0lf\n", chunk_id, task_id, step, checksum);
             }
-            printf("checksum after chunk %d is %.0lf\n", chunk, checksum);
+        }
+        // now add the A+ contributions
+        for (auto task_id = -numTimeSteps; task_id < 0; ++task_id) {
+            // only one step (0)
+            int chunk_id = getChunkId(task_id, 0, numAgeGroups, numTimeSteps);
+            double taskStepChecksum = std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
+            checksum += taskStepChecksum;
+            printf("checksum after A+ chunk %d (task_id=%d) is %.0lf\n", chunk_id, task_id, checksum);
         }
         printf("\nchecksum: %.0lf\n", checksum);
     }

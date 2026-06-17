@@ -34,7 +34,7 @@ private:
     // number of time steps
     int numTimeSteps;
 
-    // total number of cohorts
+    // total number of cohorts (excluding A+)
     int numIds;
 
     // cohort Id: starting step index
@@ -62,7 +62,7 @@ public:
     SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps, int ageMature = 0, bool aPlusCohort = false);
 
     /**
-     * Get the number of cohorts
+     * Get the number of cohorts (excluding A+)
      * 
      * In the above example, there are 7 cohorts with Ids 0..6
      * @return number
