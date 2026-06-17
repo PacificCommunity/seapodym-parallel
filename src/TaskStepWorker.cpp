@@ -30,10 +30,11 @@ TaskStepWorker::run() const {
         // Get the task_id to operate on
         int task_id;
         logger->info("Waiting for manager to send a task...");
-        MPI_Recv(&task_id, 1, MPI_INT, managerRank, START_TASK_TAG, this->comm, MPI_STATUS_IGNORE);
+        MPI_Status recv_status;
+        MPI_Recv(&task_id, 1, MPI_INT, managerRank, MPI_ANY_TAG, this->comm, &recv_status);
         logger->info("Received task {}", task_id);
 
-        if (task_id == -1) {
+        if (recv_status.MPI_TAG == SHUTDOWN_TAG) {
             // Shutdown
             logger->info("Shutting down.");
             break;
