@@ -51,7 +51,7 @@ int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps)
  */
 void inline 
 taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
-    int ms, int numAgeGroups, int numTimeSteps, int numData, 
+    int ms, int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData, 
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
     std::mt19937* rng, std::gamma_distribution<double>* dist) {
@@ -79,6 +79,9 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         }
         // sum up the cohort data at the previous time step
         std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
+
+        // pretend to initialise
+        std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
     }
 
     // step through...
@@ -124,7 +127,8 @@ int main(int argc, char** argv) {
     CmdLineArgParser cmdLine;
     cmdLine.set("-na", 5, "Number of age groups");
     cmdLine.set("-nt", 5, "Total number of steps");
-    cmdLine.set("-nm", 100, "Sleep milliseconds");
+    cmdLine.set("-nm", 100, "Sleep milliseconds when executing a task");
+    cmdLine.set("-ni", 10, "Sleep milliseconds when initialising a new cohort");
     cmdLine.set("-sd", 0.1, "Sleep standard deviation in milliseconds (> 0)");
     cmdLine.set("-seed", 123456789, "Random seed");
     cmdLine.set("-nd", 10000, "Number of data values to send from worker to manager at each step");
@@ -146,6 +150,7 @@ int main(int argc, char** argv) {
     int numAgeGroups = cmdLine.get<int>("-na");
     int numTimeSteps = cmdLine.get<int>("-nt");
     int milliseconds = cmdLine.get<int>("-nm");
+    int init_milliseconds = cmdLine.get<int>("-ni");
     int numData = cmdLine.get<int>("-nd");
     int seed = cmdLine.get<int>("-seed") + workerId;
     double sd = cmdLine.get<double>("-sd");
@@ -191,6 +196,7 @@ int main(int argc, char** argv) {
         std::placeholders::_3, // stepEnd
         std::placeholders::_4, // comm
         milliseconds,
+        init_milliseconds,
         numAgeGroups,
         numTimeSteps,
         numData,
