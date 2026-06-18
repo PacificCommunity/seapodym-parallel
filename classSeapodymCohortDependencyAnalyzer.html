@@ -95,12 +95,15 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A class to compute the task dependencies of multiple fish cohort tasks. </p>
-<p>A fish cohort is a population of fish that were born in the same interval of time. A task evolves a fish cohort over multiple time steps. After some time steps, the cohort is removed from the population and a new cohort is being born by combining the biomass of the cohorts from the previous time step. For instance, let there be 3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time steps. This can be represented as: </p><pre class="fragment">0 1 2
-3 1 2
-3 4 2
-3 4 5
-6 4 5
-</pre><p> where the numbers are the cohort Ids. The horizontal axis represents the different age groups and the vertical axis is time. A each time step a new cohort is born. </p>
+<p>A fish cohort is a population of fish that were born in the same interval of time. A task evolves a fish cohort over multiple time steps. After some time steps, the cohort is removed from the population and a new cohort is being born by combining the biomass of the cohorts from the previous time step. For instance, let there be 3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time steps. This can be represented as: </p><pre class="fragment">(0,2) (1,1) (2,0) (-1,0)
+(3,0) (1,2) (2,1) (-2,0)
+(3,1) (4,0) (2,2) (-3,0)
+(3,2) (4,1) (5,0) (-4,0)
+(6,0) (4,2) (5,1) (-5,0)
+</pre><p> where (i=cohort, j=step). The horizontal axis represents the different age groups (in this case 3) and the vertical axis is time. A each time step a new cohort is born. A+ cohorts have i &lt; 0 and, in this representation, run for only one step.</p>
+<p>Note that i + j = const across a row (normal cohorts only; A+ cohorts always have j=0).</p>
+<p>Initially, (0,2) (1,1) (2,0) (-1,0) have no dependency and can be started immediately. Any new, "living" cohort depends on cohorts which have attained a maturity age "am" at the previous time step (in addition to the A+ cohort, if present). If am == 1 then (3,0) depends on (0,2) (1,1) (-1,0) (4,0) depends on (1,2) (2,1) (-2,0) (5,0) depends on (3,1) (2,2) (-3,0)</p>
+<p>Therefore (i, 0) depends on (i-j-1, j) for j = am...na-1, and on (-(i-na)-1, 0) </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aaeec90184400557e7ca4bd907cbd5321" name="aaeec90184400557e7ca4bd907cbd5321"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaeec90184400557e7ca4bd907cbd5321">&#9670;&#160;</a></span>SeapodymCohortDependencyAnalyzer()</h2>
@@ -159,7 +162,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get the dependency map</p>
-<p>In the above example, cohorts 0, 1 and 2 have no dependencies. Cohort 3 depends on cohorts 0, 1, 2 all at step 0; cohort 4 depends on cohort 0 at step 1, cohort 1 at step 1 and cohort 3 at step 0; etc. </p><dl class="section return"><dt>Returns</dt><dd>Id: {(Id, step), ...} map </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Id: {(Id, step), ...} map </dd></dl>
 
 </div>
 </div>
@@ -177,8 +180,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the number of cohorts (excluding A+)</p>
-<p>In the above example, there are 7 cohorts with Ids 0..6 </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
+<p>Get the total number of cohorts (normal + A+ if aPlusCohort=true)</p>
+<p>In the above example without A+: 7 cohorts (Ids 0..6). With A+: 7 + 5 = 12 cohorts (Ids -5..-1 and 0..6). </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
 
 </div>
 </div>
@@ -196,8 +199,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the number of cohort steps</p>
-<p>In the above example, there are 5*3 = 15 cohort-steps </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
+<p>Get the total number of cohort steps across all cohorts</p>
+<p>In the above example without A+: 5*3 = 15 steps. With A+: 5*3 + 5 = 20 steps. </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
 
 </div>
 </div>
@@ -215,8 +218,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the cohort Id: starting index map</p>
-<p>In the above example, 0-&gt;2, 1-&gt;1, 2-&gt;0, 3-&gt;0...4-&gt;0, 5-&gt;0, 6-&gt;0 </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
+<p>Get the cohort Id to first step index map</p>
+<p>In the above example (normal cohorts): 0-&gt;2, 1-&gt;1, 2-&gt;0, 3-&gt;0, 4-&gt;0, 5-&gt;0, 6-&gt;0. A+ cohorts (if present) all map to 0: -1-&gt;0, -2-&gt;0, ..., -nt-&gt;0. </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
 
 </div>
 </div>
@@ -234,8 +237,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the cohort Id: last index + 1 map</p>
-<p>In the above example, 0-&gt;3, 1-&gt;3, ....4-&gt;3, 5-&gt;2, 6-&gt;1 </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
+<p>Get the cohort Id to last step + 1 map</p>
+<p>In the above example (normal cohorts): 0-&gt;3, 1-&gt;3, 2-&gt;3, 3-&gt;3, 4-&gt;3, 5-&gt;2, 6-&gt;1. A+ cohorts (if present) all map to 1: -1-&gt;1, -2-&gt;1, ..., -nt-&gt;1. </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
 
 </div>
 </div>
