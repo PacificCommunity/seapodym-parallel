@@ -257,7 +257,7 @@ int main(int argc, char** argv) {
                 int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps);
                 double taskStepChecksum = std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
                 checksum += taskStepChecksum;
-                printf("checksum after chunk %d (task_id=%d step=%d) is %.0lf\n", chunk_id, task_id, step, checksum);
+                // printf("checksum after chunk %d (task_id=%d step=%d) is %.0lf\n", chunk_id, task_id, step, checksum);
             }
         }
         // now add the A+ contributions
@@ -266,7 +266,7 @@ int main(int argc, char** argv) {
             int chunk_id = getChunkId(task_id, 0, numAgeGroups, numTimeSteps);
             double taskStepChecksum = std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
             checksum += taskStepChecksum;
-            printf("checksum after A+ chunk %d (task_id=%d) is %.0lf\n", chunk_id, task_id, checksum);
+            // printf("checksum after A+ chunk %d (task_id=%d) is %.0lf\n", chunk_id, task_id, checksum);
         }
         printf("\nchecksum: %.0lf\n", checksum);
     }
