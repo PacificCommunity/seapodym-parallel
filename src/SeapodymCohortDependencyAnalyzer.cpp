@@ -52,7 +52,7 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
         // first A+ (task_id = -1) has no dependency; add it to all maps
         this->dependencyMap[-1] = std::set< std::array<int, 2>>();
         this->stepBegMap[-1] = 0;
-        this->stepEndMap[-1] = 1;
+        this->stepEndMap[-1] = 1; // one past last index
 
         for (auto timeStep = 1; timeStep < this->numTimeSteps; ++timeStep) {
 
@@ -67,7 +67,17 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
             this->stepEndMap[aPlusId] = 1;
         }
 
+        // update the number of Ids
         this->numIds += this->numTimeSteps;
+
+        // add the dependency of new cohorts on A+
+        for (auto& [task_id, deps] : this->dependencyMap) {
+
+            if (task_id < this->numAgeGroups) continue; // initial cohorts and A+ have no A+ dependency
+
+            // e.g., if numAgeGroups == 5, (6,0) depends on (-2, 0)
+            deps.insert(std::array<int, 2>{-(task_id - this->numAgeGroups)- 1, 0});
+        }
     }
 
 }
