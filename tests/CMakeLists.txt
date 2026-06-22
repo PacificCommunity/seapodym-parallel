@@ -46,9 +46,6 @@ target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog::spd
 add_executable(testTaskStepFarmingCohortAPlus testTaskStepFarmingCohortAPlus.cxx)
 target_link_libraries(testTaskStepFarmingCohortAPlus PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
-add_executable(testTaskStepFarmingCohortAPlus2 testTaskStepFarmingCohortAPlus2.cxx)
-target_link_libraries(testTaskStepFarmingCohortAPlus2 PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
-
 add_executable(testTaskStepFarmingCohortAPlus3 testTaskStepFarmingCohortAPlus3.cxx)
 target_link_libraries(testTaskStepFarmingCohortAPlus3 PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
@@ -124,12 +121,6 @@ set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1 PROPERTIES PASS_
 
 add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus -na 5 -nt 10 -nd 100000 -nm 1 -age_mature 1)
 set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 27000000")
-
-# testTaskStepFarmingCohortAPlus2: A+ accumulator on the last rank (dep graph)
-# dataCollect checksum = same as the non-APlus cohort test (32500000)
-# aplusCollect chunk 1 checksum: sum(0..nt-2)*nd = 36*100000 = 3600000 for nt=10
-add_test(NAME testTaskStepFarmingCohortAPlus2Na5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus2 -na 5 -nt 10 -nd 100000 -nm 1)
-set_tests_properties(testTaskStepFarmingCohortAPlus2Na5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "dataCollect checksum: 32500000")
 
 # testTaskStepFarmingCohortAPlus3: A+ via ping-pong protocol, no dep graph entry
 # Same expected checksums as APlus2 (same cohort structure, same accumulation).
