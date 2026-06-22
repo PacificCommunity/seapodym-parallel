@@ -80,8 +80,10 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // sum up the cohort data at the previous time step
         std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
 
-        // pretend to initialise
-        std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
+        // pretend to initialise, but only for the normal cohorts (A+ does not have an initialisation time)
+        if (task_id >= 0) {
+            std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
+        }
     }
 
     // step through...
@@ -92,8 +94,12 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         int tsleep = static_cast<int>( std::round( (*dist)(*rng) ) );
         std::this_thread::sleep_for( std::chrono::milliseconds(tsleep) );
 
-        // Pretend we are computing some data
-        std::fill(localData.begin(), localData.end(), double(task_id));
+        // Pretend we are computing some data.
+        // For normal cohorts, fill with task_id.
+        // For A+ cohorts, keep the accumulated sum from the dependency loop.
+        if (task_id >= 0) {
+            std::fill(localData.begin(), localData.end(), double(task_id));
+        }
         
         // Send the data to the manager. Here, the data are 
         // collected row by row. The entry into the collected 
@@ -254,27 +260,28 @@ int main(int argc, char** argv) {
     if (workerId == 0) {
         double* data = dataCollect.getCollectedDataPtr();
         int numSize = dataCollect.getNumSize();
-        double checksum = 0;
-        // sum the cohorts' contributions
+
+        // Normal-cohort checksum (matches testTaskStepFarmingCohortAPlus3 dataCollect checksum).
+        // Expected for na=5, nt=10, nd=100000: 32500000
+        double normalChecksum = 0;
         for (auto& [task_id, stepBeg] : stepBegMap) {
-            if (task_id < 0) continue; // A+ handled separately below
+            if (task_id < 0) continue;
             int stepEnd = stepEndMap.at(task_id);
             for (auto step = stepBeg; step < stepEnd; ++step) {
                 int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps);
-                double taskStepChecksum = std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
-                checksum += taskStepChecksum;
-                // printf("checksum after chunk %d (task_id=%d step=%d) is %.0lf\n", chunk_id, task_id, step, checksum);
+                normalChecksum += std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
             }
         }
-        // now add the A+ contributions
-        for (auto task_id = -numTimeSteps; task_id < 0; ++task_id) {
-            // only one step (0)
-            int chunk_id = getChunkId(task_id, 0, numAgeGroups, numTimeSteps);
-            double taskStepChecksum = std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
-            checksum += taskStepChecksum;
-            // printf("checksum after A+ chunk %d (task_id=%d) is %.0lf\n", chunk_id, task_id, checksum);
-        }
-        printf("\nchecksum: %.0lf\n", checksum);
+        printf("\ndataCollect checksum: %.0lf\n", normalChecksum);
+
+        // Final A+ accumulator checksum: the last A+ chunk holds the running total
+        // after all feeder cohorts (0..nt-2) have contributed.
+        // Expected for na=5, nt=10, nd=100000: sum(0..8)*100000 = 36*100000 = 3600000
+        int lastAPlusChunkId = getChunkId(-numTimeSteps, 0, numAgeGroups, numTimeSteps);
+        double aplusAccumChecksum = std::accumulate(
+            &data[lastAPlusChunkId * numSize],
+            &data[(lastAPlusChunkId + 1) * numSize], 0.0);
+        printf("aplusCollect accumulator (chunk 1) checksum: %.0lf\n", aplusAccumChecksum);
     }
 
     dataCollect.free();

@@ -49,6 +49,9 @@ target_link_libraries(testTaskStepFarmingCohortAPlus PRIVATE seapodym_api spdlog
 add_executable(testTaskStepFarmingCohortAPlus3 testTaskStepFarmingCohortAPlus3.cxx)
 target_link_libraries(testTaskStepFarmingCohortAPlus3 PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
+add_executable(testTaskStepFarmingCohortAPlus4 testTaskStepFarmingCohortAPlus4.cxx)
+target_link_libraries(testTaskStepFarmingCohortAPlus4 PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
+
 add_executable(testDistDataCollector testDistDataCollector.cxx)
 target_link_libraries(testDistDataCollector PRIVATE seapodym_api)
 
@@ -120,12 +123,17 @@ add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3Mature1 COMMAND mpiexec -n 4 ./
 set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")
 
 add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus -na 5 -nt 10 -nd 100000 -nm 1 -age_mature 1)
-set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 27000000")
+set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus PROPERTIES PASS_REGULAR_EXPRESSION "dataCollect checksum: 32500000")
 
 # testTaskStepFarmingCohortAPlus3: A+ via ping-pong protocol, no dep graph entry
-# Same expected checksums as APlus2 (same cohort structure, same accumulation).
 add_test(NAME testTaskStepFarmingCohortAPlus3Na5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus3 -na 5 -nt 10 -nd 100000 -nm 1)
 set_tests_properties(testTaskStepFarmingCohortAPlus3Na5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "dataCollect checksum: 32500000")
+
+# testTaskStepFarmingCohortAPlus4: A+ via MPI_Accumulate — no A+ worker, no ping-pong.
+# aplusCollect is 1 chunk on rank 0; feeders accumulate directly with MPI_SUM.
+# Requires only 2 ranks (manager + 1 worker).
+add_test(NAME testTaskStepFarmingCohortAPlus4Na5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus4 -na 5 -nt 10 -nd 100000 -nm 1)
+set_tests_properties(testTaskStepFarmingCohortAPlus4Na5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "dataCollect checksum: 32500000")
 
 
 add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1)
