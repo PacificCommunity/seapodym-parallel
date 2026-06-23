@@ -40,7 +40,6 @@ int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps)
  * @param stepBeg first step index (inclusive)
  * @param stepEnd last step index (exclusive)
  * @param comm MPI communicator
- * @param ms Sleep # milliseconds
  * @param numAgeGroups number of age groups
  * @param numTimeSteps number of time steps
  * @param numData number of doubles to send to manager
@@ -49,9 +48,9 @@ int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps)
  * @param rng
  * @param dist
  */
-void inline 
-taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm, 
-    int ms, int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData, 
+void inline
+taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
+    int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData,
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
     std::mt19937* rng, std::gamma_distribution<double>* dist) {
@@ -194,14 +193,11 @@ int main(int argc, char** argv) {
     int numChunks = (numAgeGroups + 1) * numTimeSteps;
     DistDataCollector dataCollect(MPI_COMM_WORLD, numChunks, numData);
 
-    // workers expect a function that takes a 4 arguments. We bind the last
-    // argument to milliseconds
-    auto taskFunc = std::bind(taskFunction, 
+    auto taskFunc = std::bind(taskFunction,
         std::placeholders::_1, // task_id
         std::placeholders::_2, // stepBeg
         std::placeholders::_3, // stepEnd
         std::placeholders::_4, // comm
-        milliseconds,
         init_milliseconds,
         numAgeGroups,
         numTimeSteps,

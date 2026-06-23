@@ -74,7 +74,7 @@ int inline getChunkId(int task_id, int step, int na) {
  */
 void inline
 taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
-    int ms, int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData,
+    int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData,
     DistDataCollector* dataCollector,
     DistDataCollector* aplusCollect,
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
@@ -255,7 +255,6 @@ int main(int argc, char** argv) {
         std::placeholders::_2,   // stepBeg
         std::placeholders::_3,   // stepEnd
         std::placeholders::_4,   // comm
-        milliseconds,
         init_milliseconds,
         numAgeGroups,
         numTimeSteps,
