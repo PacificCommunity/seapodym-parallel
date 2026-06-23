@@ -82,7 +82,7 @@ int inline getChunkId(int task_id, int step, int na) {
 void inline
 taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     MPI_Comm worldComm, int aPlusWorkerRank,
-    int ms, int numAgeGroups, int numTimeSteps, int numData,
+    int ms, int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData,
     DistDataCollector* dataCollector,
     DistDataCollector* aplusCollect,
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
@@ -116,6 +116,9 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         std::transform(data.begin(), data.end(),
                        localData.begin(), localData.begin(), std::plus<double>());
     }
+
+    // pretend to spend time initialising
+    std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
 
     // ------------------------------------------------------------------
     // Step through the cohort's time range.
@@ -178,6 +181,7 @@ int main(int argc, char** argv) {
     cmdLine.set("-na",        5,         "Number of age groups");
     cmdLine.set("-nt",        5,         "Total number of time steps");
     cmdLine.set("-nm",        100,       "Mean sleep milliseconds per step");
+    cmdLine.set("-ni", 10, "Sleep milliseconds when initialising a new cohort");
     cmdLine.set("-sd",        0.1,       "Sleep standard deviation in ms (> 0)");
     cmdLine.set("-seed",      123456789, "Random seed");
     cmdLine.set("-nd",        10000,     "Number of doubles exchanged per chunk");
@@ -208,6 +212,7 @@ int main(int argc, char** argv) {
     int    numAgeGroups = cmdLine.get<int>("-na");
     int    numTimeSteps = cmdLine.get<int>("-nt");
     int    milliseconds = cmdLine.get<int>("-nm");
+    int init_milliseconds = cmdLine.get<int>("-ni");
     int    numData      = cmdLine.get<int>("-nd");
     int    seed         = cmdLine.get<int>("-seed") + rank;
     double sd           = cmdLine.get<double>("-sd");
@@ -293,6 +298,7 @@ int main(int argc, char** argv) {
             MPI_COMM_WORLD,          // worldComm
             aPlusWorkerRank,
             milliseconds,
+            init_milliseconds,
             numAgeGroups,
             numTimeSteps,
             numData,

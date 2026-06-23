@@ -79,11 +79,11 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         }
         // sum up the cohort data at the previous time step
         std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
+    }
 
-        // pretend to initialise, but only for the normal cohorts (A+ does not have an initialisation time)
-        if (task_id >= 0) {
-            std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
-        }
+    // pretend to initialise, but only for the normal cohorts (A+ does not have an initialisation time)
+    if (task_id >= 0) {
+        std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
     }
 
     // step through...
