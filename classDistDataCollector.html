@@ -107,6 +107,8 @@ void&#160;</td><td class="memItemRight"><b>endEpoch</b> ()</td></tr>
 <tr class="memdesc:a118faa1333cae78fa6ec862638d11389"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the local data into the collected array.  <br /></td></tr>
 <tr class="memitem:a2c654981dd8e13801eddda28d38856e3" id="r_a2c654981dd8e13801eddda28d38856e3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2c654981dd8e13801eddda28d38856e3">putAsync</a> (int chunkId, const double *data)</td></tr>
 <tr class="memdesc:a2c654981dd8e13801eddda28d38856e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the local data into the collected array (non-blocking).  <br /></td></tr>
+<tr class="memitem:ae2feb11f05abdae66ee954cfa9ad7ea6" id="r_ae2feb11f05abdae66ee954cfa9ad7ea6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ae2feb11f05abdae66ee954cfa9ad7ea6">accumulate</a> (int chunkId, const double *data)</td></tr>
+<tr class="memdesc:ae2feb11f05abdae66ee954cfa9ad7ea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Atomically accumulate (add) local data into a chunk on rootRank. Uses MPI_Accumulate with MPI_SUM under a shared lock, so concurrent calls from different origins are safe. Blocks until the operation is complete and the result is visible at rootRank.  <br /></td></tr>
 <tr class="memitem:a182a20ab1ace0a73bbad1e25753661db" id="r_a182a20ab1ace0a73bbad1e25753661db"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a182a20ab1ace0a73bbad1e25753661db">get</a> (int chunkId)</td></tr>
 <tr class="memdesc:a182a20ab1ace0a73bbad1e25753661db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a slice of the remote, collected array to the local worker.  <br /></td></tr>
 <tr class="memitem:af023a167441c0cf51629fbcf67803fb4" id="r_af023a167441c0cf51629fbcf67803fb4"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#af023a167441c0cf51629fbcf67803fb4">get</a> (int chunkId, double *buffer)</td></tr>
@@ -179,6 +181,36 @@ const double&#160;</td><td class="memItemRight"><b>BAD_VALUE</b> = std::numeric_
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="ae2feb11f05abdae66ee954cfa9ad7ea6" name="ae2feb11f05abdae66ee954cfa9ad7ea6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2feb11f05abdae66ee954cfa9ad7ea6">&#9670;&#160;</a></span>accumulate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DistDataCollector::accumulate </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>chunkId</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>data</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Atomically accumulate (add) local data into a chunk on rootRank. Uses MPI_Accumulate with MPI_SUM under a shared lock, so concurrent calls from different origins are safe. Blocks until the operation is complete and the result is visible at rootRank. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">chunkId</td><td>Leading index in the collected array </td></tr>
+    <tr><td class="paramname">data</td><td>Pointer to the values to add (must have numSize elements) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a0afc36c7d0082e3bfe7c1d9e045559fb" name="a0afc36c7d0082e3bfe7c1d9e045559fb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0afc36c7d0082e3bfe7c1d9e045559fb">&#9670;&#160;</a></span>fence()</h2>
 
@@ -462,8 +494,7 @@ const double&#160;</td><td class="memItemRight"><b>BAD_VALUE</b> = std::numeric_
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">chunkId</td><td>Leading index in the collected array </td></tr>
-    <tr><td class="paramname">data</td><td>Pointer to the local data to inject <br  />
- </td></tr>
+    <tr><td class="paramname">data</td><td>Pointer to the local data to inject </td></tr>
   </table>
   </dd>
 </dl>
