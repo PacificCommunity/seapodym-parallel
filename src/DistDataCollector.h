@@ -99,13 +99,23 @@ class DistDataCollector {
     /**
      * @brief Put the local data into the collected array (non-blocking)
      * @param chunkId Leading index in the collected array
-     * @param data Pointer to the local data to inject  
+     * @param data Pointer to the local data to inject
      * @note this should be executed on the source process, typically by the worker
      * This is a non-blocking call which relies on startEpoch/flush/endEpoch to
      */
     void inline putAsync(int chunkId, const double* data) {
         MPI_Put(data, this->numSize, MPI_DOUBLE, this->rootRank, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
     }
+
+    /**
+     * @brief Atomically accumulate (add) local data into a chunk on rootRank.
+     *        Uses MPI_Accumulate with MPI_SUM under a shared lock, so concurrent
+     *        calls from different origins are safe.  Blocks until the operation
+     *        is complete and the result is visible at rootRank.
+     * @param chunkId Leading index in the collected array
+     * @param data    Pointer to the values to add (must have numSize elements)
+     */
+    void accumulate(int chunkId, const double* data);
 
     /**
      * @brief Get a slice of the remote, collected array to the local worker

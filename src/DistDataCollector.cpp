@@ -82,3 +82,18 @@ DistDataCollector::get(int chunkId, double* buffer) {
     MPI_Win_unlock(this->rootRank, this->win);
 }
 
+void
+DistDataCollector::accumulate(int chunkId, const double* data) {
+
+    // Shared lock: concurrent MPI_Accumulate calls with the same op (MPI_SUM)
+    // from different origins are safe under shared locks per the MPI standard.
+    MPI_Win_lock(MPI_LOCK_SHARED, this->rootRank, 0, this->win);
+
+    MPI_Accumulate(data, this->numSize, MPI_DOUBLE,
+                   this->rootRank, chunkId * this->numSize, this->numSize, MPI_DOUBLE,
+                   MPI_SUM, this->win);
+    MPI_Win_flush(this->rootRank, this->win);
+
+    MPI_Win_unlock(this->rootRank, this->win);
+}
+

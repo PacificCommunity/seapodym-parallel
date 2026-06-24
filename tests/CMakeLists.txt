@@ -46,6 +46,12 @@ target_link_libraries(testTaskStepFarmingCohort PRIVATE seapodym_api spdlog::spd
 add_executable(testTaskStepFarmingCohortAPlus testTaskStepFarmingCohortAPlus.cxx)
 target_link_libraries(testTaskStepFarmingCohortAPlus PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
 
+add_executable(testTaskStepFarmingCohortAPlus3 testTaskStepFarmingCohortAPlus3.cxx)
+target_link_libraries(testTaskStepFarmingCohortAPlus3 PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
+
+add_executable(testTaskStepFarmingCohortAPlus4 testTaskStepFarmingCohortAPlus4.cxx)
+target_link_libraries(testTaskStepFarmingCohortAPlus4 PRIVATE seapodym_api spdlog::spdlog fmt::fmt)
+
 add_executable(testDistDataCollector testDistDataCollector.cxx)
 target_link_libraries(testDistDataCollector PRIVATE seapodym_api)
 
@@ -116,8 +122,18 @@ set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature0 PROPERTIES PASS_
 add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3Mature1 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1 -age_mature 1)
 set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1 PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 32500000")
 
-add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus -na 5 -nt 10 -nd 100000 -nm 1 -age_mature 1)
-set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus PROPERTIES PASS_REGULAR_EXPRESSION "checksum: 27000000")
+add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus -ni 7 -na 5 -nt 10 -nd 100000 -nm 1 -age_mature 1)
+set_tests_properties(testTaskStepFarmingCohortNa5Nt10Nw3Mature1APlus PROPERTIES PASS_REGULAR_EXPRESSION "dataCollect checksum: 32500000")
+
+# testTaskStepFarmingCohortAPlus3: A+ via ping-pong protocol, no dep graph entry
+add_test(NAME testTaskStepFarmingCohortAPlus3Na5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus3 -ni 7 -na 5 -nt 10 -nd 100000 -nm 1)
+set_tests_properties(testTaskStepFarmingCohortAPlus3Na5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "dataCollect checksum: 32500000")
+
+# testTaskStepFarmingCohortAPlus4: A+ via MPI_Accumulate — no A+ worker, no ping-pong.
+# aplusCollect is 1 chunk on rank 0; feeders accumulate directly with MPI_SUM.
+# Requires only 2 ranks (manager + 1 worker).
+add_test(NAME testTaskStepFarmingCohortAPlus4Na5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohortAPlus4 -ni 7 -na 5 -nt 10 -nd 100000 -nm 1)
+set_tests_properties(testTaskStepFarmingCohortAPlus4Na5Nt10Nw3 PROPERTIES PASS_REGULAR_EXPRESSION "dataCollect checksum: 32500000")
 
 
 add_test(NAME testTaskStepFarmingCohortNa5Nt10Nw3 COMMAND mpiexec -n 4 ./testTaskStepFarmingCohort -na 5 -nt 10 -nd 100000 -nm 1)
