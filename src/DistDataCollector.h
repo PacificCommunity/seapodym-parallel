@@ -9,12 +9,12 @@
 
 /**
  * @brief DistDataCollector is a class that collects data stored on multiple MPI processes
- *                          into a large array stored on rank 0
+ *                          into a large array stored on a designated root rank
  */
 class DistDataCollector {
-    
+
     private:
-    
+
         // MPI communicator to use for communication
         MPI_Comm comm;
 
@@ -24,11 +24,14 @@ class DistDataCollector {
         // local size of the data
         std::size_t numSize;
 
-        // the array that collects the data of size numChunks * numSize on rank 0
+        // the array that collects the data of size numChunks * numSize on rootRank
         double* collectedData;
-        
+
         // MPI window for remote memory access
         MPI_Win win;
+
+        // MPI rank that holds the collected data
+        int rootRank;
 
         public:
 
@@ -38,10 +41,11 @@ class DistDataCollector {
     /**
      * @brief Constructor
      * @param comm MPI communicator to use for communication
-     * @param numChunks The number of array slices on rank 0
+     * @param numChunks The number of array slices on rootRank
      * @param numSize The size of each slice
+     * @param rootRank MPI rank that holds the collected data (default: 0)
      */
-    DistDataCollector(MPI_Comm comm, int numChunks, int numSize);
+    DistDataCollector(MPI_Comm comm, int numChunks, int numSize, int rootRank = 0);
 
     /**
      * @brief Destructor
@@ -74,7 +78,7 @@ class DistDataCollector {
      * @brief Ensure that the RMA operation is completed and the data are visible to the manager
      */
     void inline flush() {
-        MPI_Win_flush(0, this->win);
+        MPI_Win_flush(this->rootRank, this->win);
     }
 
     /** 
@@ -95,13 +99,23 @@ class DistDataCollector {
     /**
      * @brief Put the local data into the collected array (non-blocking)
      * @param chunkId Leading index in the collected array
-     * @param data Pointer to the local data to inject  
+     * @param data Pointer to the local data to inject
      * @note this should be executed on the source process, typically by the worker
      * This is a non-blocking call which relies on startEpoch/flush/endEpoch to
      */
     void inline putAsync(int chunkId, const double* data) {
-        MPI_Put(data, this->numSize, MPI_DOUBLE, 0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+        MPI_Put(data, this->numSize, MPI_DOUBLE, this->rootRank, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
     }
+
+    /**
+     * @brief Atomically accumulate (add) local data into a chunk on rootRank.
+     *        Uses MPI_Accumulate with MPI_SUM under a shared lock, so concurrent
+     *        calls from different origins are safe.  Blocks until the operation
+     *        is complete and the result is visible at rootRank.
+     * @param chunkId Leading index in the collected array
+     * @param data    Pointer to the values to add (must have numSize elements)
+     */
+    void accumulate(int chunkId, const double* data);
 
     /**
      * @brief Get a slice of the remote, collected array to the local worker
@@ -127,13 +141,13 @@ class DistDataCollector {
      * This is a non-blocking call which relies on startEpoch/flush/endEpoch to complete
      */
     void inline getAsync(int chunkId, double* buffer) {
-        MPI_Get(buffer, this->numSize, MPI_DOUBLE, 0, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
+        MPI_Get(buffer, this->numSize, MPI_DOUBLE, this->rootRank, chunkId * this->numSize, this->numSize, MPI_DOUBLE, this->win);
     }
 
     /**
      * Get the pointer to the collected data
      * @return pointer
-     * @note this returns a null pointer on ranks other than 0
+     * @note this returns a null pointer on ranks other than rootRank
      */
     double* getCollectedDataPtr() {
         return this->collectedData;

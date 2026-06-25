@@ -21,10 +21,16 @@
  * @param step step in the task
  * @return index
  */
-int inline getChunkId(int task_id, int step, int numAgeGroups) {
-    int row = task_id + step - numAgeGroups + 1;
-    int col = task_id % numAgeGroups;
-    return row * numAgeGroups + col;
+int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps) {
+    if (task_id >= 0) {
+        // normal cohort
+        int row = task_id + step - numAgeGroups + 1;
+        int col = task_id % numAgeGroups;
+        return row * numAgeGroups + col;
+    } else {
+        // A+, append at the end. Assume each A+ cohort has a single step == 0
+        return numAgeGroups * numTimeSteps + std::abs(task_id) - 1;
+    }
 }
 
 // Task for the workers to execute
@@ -34,11 +40,17 @@ int inline getChunkId(int task_id, int step, int numAgeGroups) {
  * @param stepBeg first step index (inclusive)
  * @param stepEnd last step index (exclusive)
  * @param comm MPI communicator
- * @param init_milliseconds Sleep # milliseconds when initializing a cohort
+ * @param numAgeGroups number of age groups
+ * @param numTimeSteps number of time steps
+ * @param numData number of doubles to send to manager
+ * @param dataCollector
+ * @param dependencyMap
+ * @param rng
+ * @param dist
  */
 void inline
 taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
-    int init_milliseconds, int numAgeGroups, int numData,
+    int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData,
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
     std::mt19937* rng, std::gamma_distribution<double>* dist) {
@@ -49,9 +61,10 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     // Initial conditions from the other cohorts
 
     std::fill(localData.begin(), localData.end(), 0.0);
+    
     for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
 
-        int chunk_id = getChunkId(task_id2, step, numAgeGroups);
+        int chunk_id = getChunkId(task_id2, step, numAgeGroups, numTimeSteps);
 
         // fetch the data
         dataCollector->get(chunk_id, data.data());
@@ -66,24 +79,33 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // sum up the cohort data at the previous time step
         std::transform(data.begin(), data.end(), localData.begin(), localData.begin(), std::plus<double>());
     }
-    
-    // pretend to initialise
-    std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
+
+    // pretend to initialise, but only for the normal cohorts (A+ does not have an initialisation time)
+    if (task_id >= 0) {
+        std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
+    }
 
     // step through...
+
     for (auto step = stepBeg; step < stepEnd; ++step) {
 
         // Perform the work, just sleeping here zzzzzzz
         int tsleep = static_cast<int>( std::round( (*dist)(*rng) ) );
         std::this_thread::sleep_for( std::chrono::milliseconds(tsleep) );
 
-        // Pretend we are computing some data
-        std::fill(localData.begin(), localData.end(), double(task_id));
+        // Pretend we are computing some data.
+        // For normal cohorts, fill with task_id.
+        // For A+ cohorts, keep the accumulated sum from the dependency loop.
+        if (task_id >= 0) {
+            std::fill(localData.begin(), localData.end(), double(task_id));
+        }
         
         // Send the data to the manager. Here, the data are 
         // collected row by row. The entry into the collected 
         // array is at index chunk_id.
-        int chunk_id = getChunkId(task_id, step, numAgeGroups);
+        int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps);
+
+        // send the data to the manager
         dataCollector->put(chunk_id, localData.data());
 
         // E.g.
@@ -110,7 +132,7 @@ int main(int argc, char** argv) {
     CmdLineArgParser cmdLine;
     cmdLine.set("-na", 5, "Number of age groups");
     cmdLine.set("-nt", 5, "Total number of steps");
-    cmdLine.set("-nm", 100, "Sleep milliseconds");
+    cmdLine.set("-nm", 100, "Sleep milliseconds when executing a task");
     cmdLine.set("-ni", 10, "Sleep milliseconds when initialising a new cohort");
     cmdLine.set("-sd", 0.1, "Sleep standard deviation in milliseconds (> 0)");
     cmdLine.set("-seed", 123456789, "Random seed");
@@ -146,7 +168,8 @@ int main(int argc, char** argv) {
     std::gamma_distribution<double> dist(k, theta);
 
     // analyze the cohort Id task dependencies
-    SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps, ageMature);
+    const bool aPlusCohort = true;
+    SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps, ageMature, aPlusCohort);
     int numCohorts = taskDeps.getNumberOfCohorts();
     int numCohortSteps = taskDeps.getNumberOfCohortSteps();
     std::map<int, int> stepBegMap = taskDeps.getStepBegMap();
@@ -155,6 +178,7 @@ int main(int argc, char** argv) {
 
     // print the dependencies for debugging
     if (workerId == 0) {
+        std::cout << "Number of age groups: " << numAgeGroups << " number of time steps: " << numTimeSteps << " number of doubles per chunk: " << numData << '\n';
         for (const auto& [task_id, stepBeg] : stepBegMap) {
             int globalTimeIndex = std::max(0, task_id - numAgeGroups + 1);
             std::cout << "At time " << globalTimeIndex << " Task " << task_id << " has steps " << stepBeg << "..." << stepEndMap.at(task_id) - 1 << " and depends on: ";
@@ -165,8 +189,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    // set up the data collector
-    int numChunks = numAgeGroups * numTimeSteps;
+    // set up the data collector, includes the A+ group
+    int numChunks = (numAgeGroups + 1) * numTimeSteps;
     DistDataCollector dataCollect(MPI_COMM_WORLD, numChunks, numData);
 
     auto taskFunc = std::bind(taskFunction,
@@ -176,13 +200,13 @@ int main(int argc, char** argv) {
         std::placeholders::_4, // comm
         init_milliseconds,
         numAgeGroups,
+        numTimeSteps,
         numData,
         &dataCollect,
         &dependencyMap,
         &rng,
         &dist);
 
-    
 
     TaskStepWorker worker(MPI_COMM_WORLD, taskFunc, stepBegMap, stepEndMap);
     // sync the manager and workers
@@ -232,13 +256,28 @@ int main(int argc, char** argv) {
     if (workerId == 0) {
         double* data = dataCollect.getCollectedDataPtr();
         int numSize = dataCollect.getNumSize();
-        double checksum = 0;
-        for (auto chunk = 0; chunk < dataCollect.getNumChunks(); ++chunk) {\
-            for (auto i = 0; i < numSize; ++i) {
-                checksum += data[chunk*numSize + i];
+
+        // Normal-cohort checksum (matches testTaskStepFarmingCohortAPlus3 dataCollect checksum).
+        // Expected for na=5, nt=10, nd=100000: 32500000
+        double normalChecksum = 0;
+        for (auto& [task_id, stepBeg] : stepBegMap) {
+            if (task_id < 0) continue;
+            int stepEnd = stepEndMap.at(task_id);
+            for (auto step = stepBeg; step < stepEnd; ++step) {
+                int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps);
+                normalChecksum += std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
             }
         }
-        printf("\nchecksum: %.0lf\n", checksum);
+        printf("\ndataCollect checksum: %.0lf\n", normalChecksum);
+
+        // Final A+ accumulator checksum: the last A+ chunk holds the running total
+        // after all feeder cohorts (0..nt-2) have contributed.
+        // Expected for na=5, nt=10, nd=100000: sum(0..8)*100000 = 36*100000 = 3600000
+        int lastAPlusChunkId = getChunkId(-numTimeSteps, 0, numAgeGroups, numTimeSteps);
+        double aplusAccumChecksum = std::accumulate(
+            &data[lastAPlusChunkId * numSize],
+            &data[(lastAPlusChunkId + 1) * numSize], 0.0);
+        printf("aplusCollect accumulator (chunk 1) checksum: %.0lf\n", aplusAccumChecksum);
     }
 
     dataCollect.free();
