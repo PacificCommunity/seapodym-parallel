@@ -92,18 +92,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af759705b4a84ccd0edbf29060e401791" id="r_af759705b4a84ccd0edbf29060e401791"><td class="memItemLeft">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af759705b4a84ccd0edbf29060e401791">getStepBegMap</a> () const</td></tr>
 <tr class="memitem:ad7b6a3e2efb1059aad833c1449f9e53a" id="r_ad7b6a3e2efb1059aad833c1449f9e53a"><td class="memItemLeft">std::map&lt; int, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ad7b6a3e2efb1059aad833c1449f9e53a">getStepEndMap</a> () const</td></tr>
 <tr class="memitem:a2c28c7ab585875a208343926f9da35ed" id="r_a2c28c7ab585875a208343926f9da35ed"><td class="memItemLeft">std::map&lt; int, std::set&lt; std::array&lt; int, 2 &gt; &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a2c28c7ab585875a208343926f9da35ed">getDependencyMap</a> () const</td></tr>
+<tr class="memitem:ac5bb33db900e3a04c97db01a4efd7608" id="r_ac5bb33db900e3a04c97db01a4efd7608"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac5bb33db900e3a04c97db01a4efd7608">getFirstAPlusCohortId</a> () const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A class to compute the task dependencies of multiple fish cohort tasks. </p>
-<p>A fish cohort is a population of fish that were born in the same interval of time. A task evolves a fish cohort over multiple time steps. After some time steps, the cohort is removed from the population and a new cohort is being born by combining the biomass of the cohorts from the previous time step. For instance, let there be 3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time steps. This can be represented as: </p><pre class="fragment">(0,2) (1,1) (2,0) (-1,0)
-(3,0) (1,2) (2,1) (-2,0)
-(3,1) (4,0) (2,2) (-3,0)
-(3,2) (4,1) (5,0) (-4,0)
-(6,0) (4,2) (5,1) (-5,0)
-</pre><p> where (i=cohort, j=step). The horizontal axis represents the different age groups (in this case 3) and the vertical axis is time. At each time step a new cohort is born. A+ cohorts have i &lt; 0 and run for only one step.</p>
+<p>A fish cohort is a population of fish that were born in the same interval of time. A task evolves a fish cohort over multiple time steps. After some time steps, the cohort is removed from the population and a new cohort is being born by combining the biomass of the cohorts from the previous time step. For instance, let there be 3 starting age groups (0, 1 and 2) whose populations are modelled over 5 time steps. This can be represented as: </p><pre class="fragment">(0,2) (1,1) (2,0) (7,0)
+(3,0) (1,2) (2,1) (8,0)
+(3,1) (4,0) (2,2) (9,0)
+(3,2) (4,1) (5,0) (10,0)
+(6,0) (4,2) (5,1) (11,0)
+</pre><p> (here numAgeGroups=3, numTimeSteps=5, so f = <a class="el" href="#ac5bb33db900e3a04c97db01a4efd7608">getFirstAPlusCohortId()</a> = 7; the last column is the A+ cohort f+t at time row t) where (i=cohort, j=step). The horizontal axis represents the different age groups (in this case 3) and the vertical axis is time. At each time step a new cohort is born. A+ cohorts are appended as ordinary, positive Ids right after the last normal Id (i.e. Ids numAgeGroups+numTimeSteps-1 .. numAgeGroups+2*numTimeSteps-2) and run for only one step each, just like the initial cohorts (0..numAgeGroups-1). Use <a class="el" href="#ac5bb33db900e3a04c97db01a4efd7608">getFirstAPlusCohortId()</a> to find where the A+ Ids start.</p>
 <p>Note that normal cohorts (excluding A+) have i + j = const across a row. A+ cohorts always have j=0.</p>
-<p>Initially, (0,2) (1,1) (2,0) (-1,0) have no dependency and can be started immediately. Any new, "living" cohort depends on cohorts which have attained a maturity age "am" at the previous time step (in addition to the A+ cohort, if present). If am == 1 then (3,0) depends on (0,2) (1,1) (-1,0) (4,0) depends on (1,2) (2,1) (-2,0) (5,0) depends on (3,1) (2,2) (-3,0)</p>
-<p>Therefore (i, 0) depends on (i-j-1, j) for j = am...na-1, and on (-(i-na)-1, 0) </p>
+<p>Let f = <a class="el" href="#ac5bb33db900e3a04c97db01a4efd7608">getFirstAPlusCohortId()</a> (= numAgeGroups+numTimeSteps-1). Then A+ cohort f+t represents the "plus group" accumulated through time step t. Initially, (0,2) (1,1) (2,0) (f,0) have no dependency and can be started immediately. Any new, "living" cohort depends on cohorts which have attained a maturity age "am" at the previous time step (in addition to the A+ cohort, if present). If am == 1 then (3,0) depends on (0,2) (1,1) (f,0) (4,0) depends on (1,2) (2,1) (f+1,0) (5,0) depends on (3,1) (2,2) (f+2,0)</p>
+<p>Therefore (i, 0) depends on (i-j-1, j) for j = am...na-1, and on (f+(i-na), 0). The A+ chain itself is (f+t, 0) depends on (t-1, na-1) and (f+t-1, 0) for t = 1...nt-1. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aaeec90184400557e7ca4bd907cbd5321" name="aaeec90184400557e7ca4bd907cbd5321"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaeec90184400557e7ca4bd907cbd5321">&#9670;&#160;</a></span>SeapodymCohortDependencyAnalyzer()</h2>
@@ -136,7 +137,7 @@ Public Member Functions</h2></td></tr>
 <p>Constructor</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">numAgeGroups</td><td>number of age groups (e.g. 3 in the above example) </td></tr>
+    <tr><td class="paramname">numAgeGroups</td><td>number of normal age groups, excluding the A+ "plus group" (e.g. 3 in the above example; A+, if requested, is on top of these 3) </td></tr>
     <tr><td class="paramname">numTimeSteps</td><td>number of tiem steps (e.g. 5 in the above example) </td></tr>
     <tr><td class="paramname">ageMature</td><td>index of the first mature age class. A newborn cohort only needs the densities of mature age classes (ageMature..numAgeGroups-1) of the previous time step, so dependencies on younger ages are omitted. Defaults to 0 = dependence on the full state at time t-1. </td></tr>
     <tr><td class="paramname">aPlusCohort</td><td>whether to add the A+ cohort dependency </td></tr>
@@ -166,6 +167,25 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ac5bb33db900e3a04c97db01a4efd7608" name="ac5bb33db900e3a04c97db01a4efd7608"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5bb33db900e3a04c97db01a4efd7608">&#9670;&#160;</a></span>getFirstAPlusCohortId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int SeapodymCohortDependencyAnalyzer::getFirstAPlusCohortId </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the Id of the first A+ cohort, i.e. the threshold above which (and including) cohort Ids represent A+ cohorts.</p>
+<p>Equal to numAgeGroups + numTimeSteps - 1, regardless of whether aPlusCohort was requested. If aPlusCohort is false, no Ids &gt;= this value exist. A consumer can test <span class="tt">id &gt;= <a class="el" href="#ac5bb33db900e3a04c97db01a4efd7608">getFirstAPlusCohortId()</a></span> in place of the old <span class="tt">id &lt; 0</span> check. </p><dl class="section return"><dt>Returns</dt><dd>Id </dd></dl>
+
+</div>
+</div>
 <a id="ac04d9d679a683db23a43dfddf9125660" name="ac04d9d679a683db23a43dfddf9125660"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac04d9d679a683db23a43dfddf9125660">&#9670;&#160;</a></span>getNumberOfCohorts()</h2>
 
@@ -181,7 +201,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get the total number of cohorts (normal + A+ if aPlusCohort=true)</p>
-<p>In the above example without A+: 7 cohorts (Ids 0..6). With A+: 7 + 5 = 12 cohorts (Ids -5..-1 and 0..6). </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
+<p>In the above example without A+: 7 cohorts (Ids 0..6). With A+: 7 + 5 = 12 cohorts (Ids 0..6 normal, Ids 7..11 are the A+ cohorts). </p><dl class="section return"><dt>Returns</dt><dd>number </dd></dl>
 
 </div>
 </div>
@@ -219,7 +239,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get the cohort Id to first step index map</p>
-<p>In the above example (normal cohorts): 0-&gt;2, 1-&gt;1, 2-&gt;0, 3-&gt;0, 4-&gt;0, 5-&gt;0, 6-&gt;0. A+ cohorts (if present) all map to 0: -1-&gt;0, -2-&gt;0, ..., -nt-&gt;0. </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
+<p>In the above example (normal cohorts): 0-&gt;2, 1-&gt;1, 2-&gt;0, 3-&gt;0, 4-&gt;0, 5-&gt;0, 6-&gt;0. A+ cohorts (if present) all map to 0: 7-&gt;0, 8-&gt;0, ..., 11-&gt;0. </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
 
 </div>
 </div>
@@ -238,7 +258,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get the cohort Id to last step + 1 map</p>
-<p>In the above example (normal cohorts): 0-&gt;3, 1-&gt;3, 2-&gt;3, 3-&gt;3, 4-&gt;3, 5-&gt;2, 6-&gt;1. A+ cohorts (if present) all map to 1: -1-&gt;1, -2-&gt;1, ..., -nt-&gt;1. </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
+<p>In the above example (normal cohorts): 0-&gt;3, 1-&gt;3, 2-&gt;3, 3-&gt;3, 4-&gt;3, 5-&gt;2, 6-&gt;1. A+ cohorts (if present) all map to 1: 7-&gt;1, 8-&gt;1, ..., 11-&gt;1. </p><dl class="section return"><dt>Returns</dt><dd>Id to number map </dd></dl>
 
 </div>
 </div>
