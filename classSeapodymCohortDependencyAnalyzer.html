@@ -100,8 +100,8 @@ Public Member Functions</h2></td></tr>
 (3,1) (4,0) (2,2) (-3,0)
 (3,2) (4,1) (5,0) (-4,0)
 (6,0) (4,2) (5,1) (-5,0)
-</pre><p> where (i=cohort, j=step). The horizontal axis represents the different age groups (in this case 3) and the vertical axis is time. A each time step a new cohort is born. A+ cohorts have i &lt; 0 and, in this representation, run for only one step.</p>
-<p>Note that i + j = const across a row (normal cohorts only; A+ cohorts always have j=0).</p>
+</pre><p> where (i=cohort, j=step). The horizontal axis represents the different age groups (in this case 3) and the vertical axis is time. At each time step a new cohort is born. A+ cohorts have i &lt; 0 and run for only one step.</p>
+<p>Note that normal cohorts (excluding A+) have i + j = const across a row. A+ cohorts always have j=0.</p>
 <p>Initially, (0,2) (1,1) (2,0) (-1,0) have no dependency and can be started immediately. Any new, "living" cohort depends on cohorts which have attained a maturity age "am" at the previous time step (in addition to the A+ cohort, if present). If am == 1 then (3,0) depends on (0,2) (1,1) (-1,0) (4,0) depends on (1,2) (2,1) (-2,0) (5,0) depends on (3,1) (2,2) (-3,0)</p>
 <p>Therefore (i, 0) depends on (i-j-1, j) for j = am...na-1, and on (-(i-na)-1, 0) </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
