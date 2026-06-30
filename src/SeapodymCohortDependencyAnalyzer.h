@@ -48,7 +48,7 @@ class SeapodymCohortDependencyAnalyzer {
 
 private:
 
-    // number of age groups
+    // number of (normal) age groups, excluding the A+ "plus group"
     int numAgeGroups;
 
     // number of time steps
@@ -71,7 +71,8 @@ public:
     /**
      * Constructor
      * 
-     * @param numAgeGroups number of age groups (e.g. 3 in the above example)
+     * @param numAgeGroups number of normal age groups, excluding the A+ "plus group"
+     *        (e.g. 3 in the above example; A+, if requested, is on top of these 3)
      * @param numTimeSteps number of tiem steps (e.g. 5 in the above example)
      * @param ageMature index of the first mature age class. A newborn cohort only
      *        needs the densities of mature age classes (ageMature..numAgeGroups-1)
