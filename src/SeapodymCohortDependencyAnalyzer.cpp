@@ -1,6 +1,7 @@
 #include "SeapodymCohortDependencyAnalyzer.h"
 
-SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps, int ageMature, bool aPlusCohort) {
+SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGroups, int numTimeSteps,
+                                  int ageMature, bool aPlusCohort) {
 
     this->numAgeGroups = numAgeGroups;
     this->numTimeSteps = numTimeSteps;

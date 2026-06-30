@@ -22,10 +22,10 @@
 (6,0) (4,2) (5,1) (-5,0)
 \endverbatim
  *          where (i=cohort, j=step). The horizontal axis represents the different
- *          age groups (in this case 3) and the vertical axis is time. A each time step a new cohort is born. 
- *          A+ cohorts have i < 0 and, in this representation, run for only one step.
+ *          age groups (in this case 3) and the vertical axis is time. At each time step a new cohort is born. 
+ *          A+ cohorts have i < 0 and run for only one step.
  * 
- *          Note that i + j = const across a row (normal cohorts only; A+ cohorts always have j=0).
+ *          Note that normal cohorts (excluding A+) have i + j = const across a row. A+ cohorts always have j=0.
  *
  *          Initially, (0,2) (1,1) (2,0) (-1,0) have no dependency and can be started immediately.
  *          Any new, "living" cohort depends on cohorts which have attained a maturity age "am"
