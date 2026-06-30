@@ -47,21 +47,26 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
 
     if (aPlusCohort) {
 
-        // add the A+ cohort dependencies. To fit with the existing dependency representation, cohort Id: {(otherCohortId, step), ...},
-        // the A+ cohort is treated as a separate cohort with a negative id at each time step
+        // Add the A+ cohorts. Each A+ cohort is treated exactly like any other
+        // one-step cohort (same as the initial cohorts 0..numAgeGroups-1): it
+        // gets a plain, positive Id, a single step (stepBeg=0, stepEnd=1), and
+        // an entry in dependencyMap. A+ Ids are simply appended right after the
+        // last normal Id, so there is no separate negative-Id namespace to
+        // reason about downstream.
+        int firstAPlusId = this->numIds; // == numAgeGroups + numTimeSteps - 1
 
-        // first A+ (task_id = -1) has no dependency; add it to all maps
-        this->dependencyMap[-1] = std::set< std::array<int, 2>>();
-        this->stepBegMap[-1] = 0;
-        this->stepEndMap[-1] = 1; // one past last index
+        // A+ at time step 0 (Id = firstAPlusId) has no dependency; it is the
+        // first thing that can run, just like the initial normal cohorts.
+        this->dependencyMap[firstAPlusId] = std::set< std::array<int, 2>>();
+        this->stepBegMap[firstAPlusId] = 0;
+        this->stepEndMap[firstAPlusId] = 1;
 
         for (auto timeStep = 1; timeStep < this->numTimeSteps; ++timeStep) {
 
-            // use negative IDs
-            int aPlusId = -timeStep - 1;
+            int aPlusId = firstAPlusId + timeStep;
 
-            // depends on the last step of the oldest cohort and on the A+ at the previous step
-            this->dependencyMap[aPlusId] = std::set< std::array<int, 2>>{{timeStep - 1, this->numAgeGroups - 1}, {aPlusId + 1, 0}};
+            // depends on the oldest age class at the previous time step and on the A+ cohort at the previous step
+            this->dependencyMap[aPlusId] = std::set< std::array<int, 2>>{{timeStep - 1, this->numAgeGroups - 1}, {aPlusId - 1, 0}};
 
             // treat each A+ cohort at each step as a separate cohort with a single step
             this->stepBegMap[aPlusId] = 0;
@@ -71,13 +76,14 @@ SeapodymCohortDependencyAnalyzer::SeapodymCohortDependencyAnalyzer(int numAgeGro
         // update the number of Ids
         this->numIds += this->numTimeSteps;
 
-        // add the dependency of new cohorts on A+
+        // add the dependency of new ("living") cohorts on the matching A+ cohort
         for (auto& [task_id, deps] : this->dependencyMap) {
 
-            if (task_id < this->numAgeGroups) continue; // initial cohorts and A+ have no A+ dependency
+            if (task_id < this->numAgeGroups) continue; // initial cohorts have no A+ dependency
+            if (task_id >= firstAPlusId) continue;       // A+ cohorts themselves have no A+ dependency
 
-            // e.g., if numAgeGroups == 5, (6,0) depends on (-2, 0)
-            deps.insert(std::array<int, 2>{-(task_id - this->numAgeGroups)- 1, 0});
+            // e.g., if numAgeGroups == 5, (6,0) depends on (firstAPlusId+1, 0)
+            deps.insert(std::array<int, 2>{firstAPlusId + (task_id - this->numAgeGroups), 0});
         }
     }
 
@@ -107,7 +113,12 @@ SeapodymCohortDependencyAnalyzer::getStepEndMap() const {
     return this->stepEndMap;
 }
 
-std::map<int, std::set<std::array<int, 2>>> 
+std::map<int, std::set<std::array<int, 2>>>
 SeapodymCohortDependencyAnalyzer::getDependencyMap() const {
     return this->dependencyMap;
+}
+
+int
+SeapodymCohortDependencyAnalyzer::getFirstAPlusCohortId() const {
+    return this->numAgeGroups + this->numTimeSteps - 1;
 }

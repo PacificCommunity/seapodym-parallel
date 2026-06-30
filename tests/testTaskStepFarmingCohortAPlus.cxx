@@ -15,21 +15,24 @@
 #undef NDEBUG
 #include <cassert>
 
-/** 
+/**
  * Return the chunk Id
  * @param task_id Id of the task (same as cohort Id)
  * @param step step in the task
+ * @param numAgeGroups number of age groups
+ * @param numTimeSteps number of time steps
+ * @param firstAPlusId Id of the first A+ cohort (see SeapodymCohortDependencyAnalyzer::getFirstAPlusCohortId)
  * @return index
  */
-int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps) {
-    if (task_id >= 0) {
+int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps, int firstAPlusId) {
+    if (task_id < firstAPlusId) {
         // normal cohort
         int row = task_id + step - numAgeGroups + 1;
         int col = task_id % numAgeGroups;
         return row * numAgeGroups + col;
     } else {
-        // A+, append at the end. Assume each A+ cohort has a single step == 0
-        return numAgeGroups * numTimeSteps + std::abs(task_id) - 1;
+        // A+, append at the end. Each A+ cohort has a single step == 0
+        return numAgeGroups * numTimeSteps + (task_id - firstAPlusId);
     }
 }
 
@@ -43,6 +46,7 @@ int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps)
  * @param numAgeGroups number of age groups
  * @param numTimeSteps number of time steps
  * @param numData number of doubles to send to manager
+ * @param firstAPlusId Id of the first A+ cohort
  * @param dataCollector
  * @param dependencyMap
  * @param rng
@@ -50,7 +54,7 @@ int inline getChunkId(int task_id, int step, int numAgeGroups, int numTimeSteps)
  */
 void inline
 taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
-    int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData,
+    int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData, int firstAPlusId,
     DistDataCollector* dataCollector, // need to be a pointer, or else provide a copy constructor
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
     std::mt19937* rng, std::gamma_distribution<double>* dist) {
@@ -61,10 +65,10 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     // Initial conditions from the other cohorts
 
     std::fill(localData.begin(), localData.end(), 0.0);
-    
+
     for (const auto& [task_id2, step] : (*dependencyMap)[task_id]) {
 
-        int chunk_id = getChunkId(task_id2, step, numAgeGroups, numTimeSteps);
+        int chunk_id = getChunkId(task_id2, step, numAgeGroups, numTimeSteps, firstAPlusId);
 
         // fetch the data
         dataCollector->get(chunk_id, data.data());
@@ -81,7 +85,7 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     }
 
     // pretend to initialise, but only for the normal cohorts (A+ does not have an initialisation time)
-    if (task_id >= 0) {
+    if (task_id < firstAPlusId) {
         std::this_thread::sleep_for( std::chrono::milliseconds(init_milliseconds) );
     }
 
@@ -96,14 +100,14 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // Pretend we are computing some data.
         // For normal cohorts, fill with task_id.
         // For A+ cohorts, keep the accumulated sum from the dependency loop.
-        if (task_id >= 0) {
+        if (task_id < firstAPlusId) {
             std::fill(localData.begin(), localData.end(), double(task_id));
         }
-        
-        // Send the data to the manager. Here, the data are 
-        // collected row by row. The entry into the collected 
+
+        // Send the data to the manager. Here, the data are
+        // collected row by row. The entry into the collected
         // array is at index chunk_id.
-        int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps);
+        int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps, firstAPlusId);
 
         // send the data to the manager
         dataCollector->put(chunk_id, localData.data());
@@ -172,6 +176,7 @@ int main(int argc, char** argv) {
     SeapodymCohortDependencyAnalyzer taskDeps(numAgeGroups, numTimeSteps, ageMature, aPlusCohort);
     int numCohorts = taskDeps.getNumberOfCohorts();
     int numCohortSteps = taskDeps.getNumberOfCohortSteps();
+    int firstAPlusId = taskDeps.getFirstAPlusCohortId();
     std::map<int, int> stepBegMap = taskDeps.getStepBegMap();
     std::map<int, int> stepEndMap = taskDeps.getStepEndMap();
     std::map<int, std::set<std::array<int, 2>>> dependencyMap = taskDeps.getDependencyMap();
@@ -202,6 +207,7 @@ int main(int argc, char** argv) {
         numAgeGroups,
         numTimeSteps,
         numData,
+        firstAPlusId,
         &dataCollect,
         &dependencyMap,
         &rng,
@@ -261,10 +267,10 @@ int main(int argc, char** argv) {
         // Expected for na=5, nt=10, nd=100000: 32500000
         double normalChecksum = 0;
         for (auto& [task_id, stepBeg] : stepBegMap) {
-            if (task_id < 0) continue;
+            if (task_id >= firstAPlusId) continue;
             int stepEnd = stepEndMap.at(task_id);
             for (auto step = stepBeg; step < stepEnd; ++step) {
-                int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps);
+                int chunk_id = getChunkId(task_id, step, numAgeGroups, numTimeSteps, firstAPlusId);
                 normalChecksum += std::accumulate(&data[chunk_id*numSize], &data[(chunk_id + 1)*numSize], 0.0);
             }
         }
@@ -273,7 +279,7 @@ int main(int argc, char** argv) {
         // Final A+ accumulator checksum: the last A+ chunk holds the running total
         // after all feeder cohorts (0..nt-2) have contributed.
         // Expected for na=5, nt=10, nd=100000: sum(0..8)*100000 = 36*100000 = 3600000
-        int lastAPlusChunkId = getChunkId(-numTimeSteps, 0, numAgeGroups, numTimeSteps);
+        int lastAPlusChunkId = getChunkId(firstAPlusId + numTimeSteps - 1, 0, numAgeGroups, numTimeSteps, firstAPlusId);
         double aplusAccumChecksum = std::accumulate(
             &data[lastAPlusChunkId * numSize],
             &data[(lastAPlusChunkId + 1) * numSize], 0.0);
