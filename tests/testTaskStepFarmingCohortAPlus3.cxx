@@ -7,36 +7,37 @@
  * each feeder cohort and the A+ worker:
  *
  *   feeder at step na-1:
- *     1. blocking put  → aplusCollect chunk 0   (data visible before return)
- *     2. MPI_Send NOTIFY → A+ worker            (wake it up)
- *     3. MPI_Recv ACK  ← A+ worker              (wait until accumulation done)
- *     4. MPI_Send END_TASK_TAG → manager        (only now does manager know
+ *     1. MPI_Send NOTIFY(payload) → A+ worker   (the message itself carries
+ *                                                the feeder's density data;
+ *                                                wakes the A+ worker up)
+ *     2. MPI_Recv ACK  ← A+ worker              (wait until accumulation done)
+ *     3. MPI_Send END_TASK_TAG → manager        (only now does manager know
  *                                                feeder is finished)
  *
- * Because the manager learns the feeder is done only AFTER step 4, any new
+ * Because the manager learns the feeder is done only AFTER step 3, any new
  * cohort it assigns after that point is guaranteed to see an up-to-date
- * aplusCollect chunk 1 — no A+ entry in the dependency graph is needed.
+ * A+ accumulator — no A+ entry in the dependency graph is needed.
+ *
+ * There is no shared RMA input slot: earlier revisions of this test staged
+ * the feeder's data in a single shared "chunk 0" that the A+ worker then
+ * read, which left a theoretical race if two feeders' NOTIFYs happened to
+ * overlap (a second put could clobber the first before it was consumed).
+ * Embedding the payload directly in the NOTIFY message removes that window
+ * entirely: each MPI_Recv on the A+ worker consumes exactly one sender's
+ * complete message, so there is nothing for a second sender to overwrite.
  *
  * Communicator split:
  *   comm_farm  (ranks 0 .. size-2) — TaskStepManager / TaskStepWorker / dataCollect
- *   MPI_COMM_WORLD                 — aplusCollect window + NOTIFY/ACK signals
+ *   MPI_COMM_WORLD                 — NOTIFY(payload)/ACK signals with the A+ worker
  *
  * Requires >= 3 MPI ranks:
  *   rank 0          – manager
  *   ranks 1..size-2 – normal cohort workers
  *   rank size-1     – A+ worker (independent loop, not in dep graph)
  *
- * aplusCollect layout (2 chunks of numData doubles, rootRank = size-1):
- *   chunk 0  – one-slot input: the feeder cohort's output at step na-1
- *   chunk 1  – running accumulator, updated by A+ worker after each NOTIFY
- *
- * NOTE: chunk 0 is a single shared slot.  Different feeder cohorts (0..nt-2)
- * write to it at different times, but because each feeder blocks on the ACK
- * before notifying the manager, a later feeder's step na-1 cannot begin until
- * the new cohort that depends on the earlier feeder has been assigned — which
- * gives a natural temporal separation.  A theoretical race remains if two
- * feeder cohorts reach step na-1 simultaneously; in practice the sequential
- * A+ loop and per-step sleep time make this benign.
+ * The A+ worker keeps its running accumulator in ordinary local memory (a
+ * std::vector, not an RMA window) — no other rank ever reads it, so there is
+ * nothing to publish over MPI between A+ steps.
  */
 
 #include <mpi.h>
@@ -75,8 +76,8 @@ int inline getChunkId(int task_id, int step, int na) {
  *
  * @param comm            farming communicator (comm_farm) – used for all
  *                        manager notifications (END_TASK_TAG etc.)
- * @param worldComm       MPI_COMM_WORLD – used for NOTIFY/ACK with A+ worker
- *                        and for aplusCollect RMA
+ * @param worldComm       MPI_COMM_WORLD – used for NOTIFY(payload)/ACK with
+ *                        the A+ worker
  * @param aPlusWorkerRank rank of the A+ worker in MPI_COMM_WORLD (= size-1)
  */
 void inline
@@ -84,7 +85,6 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
     MPI_Comm worldComm, int aPlusWorkerRank,
     int init_milliseconds, int numAgeGroups, int numTimeSteps, int numData,
     DistDataCollector* dataCollector,
-    DistDataCollector* aplusCollect,
     std::map<int, std::set<std::array<int, 2>>>* dependencyMap,
     std::mt19937* rng, std::gamma_distribution<double>* dist) {
 
@@ -103,16 +103,6 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         if (!data.empty() && data.back() == dataCollector->BAD_VALUE) {
             MPI_Abort(worldComm, 1);
         }
-        std::transform(data.begin(), data.end(),
-                       localData.begin(), localData.begin(), std::plus<double>());
-    }
-
-    // New cohorts (task_id >= numAgeGroups) implicitly depend on the A+
-    // accumulator.  By the time the manager assigns this cohort, the feeder
-    // cohort has already completed its ping-pong with the A+ worker, so
-    // chunk 1 is guaranteed up to date.
-    if (task_id >= numAgeGroups) {
-        aplusCollect->get(1, data.data());
         std::transform(data.begin(), data.end(),
                        localData.begin(), localData.begin(), std::plus<double>());
     }
@@ -140,23 +130,22 @@ taskFunction(int task_id, int stepBeg, int stepEnd, MPI_Comm comm,
         // ------------------------------------------------------------------
         if (step == numAgeGroups - 1 && task_id <= numTimeSteps - 2) {
 
-            // 1. Blocking put to chunk 0 (data guaranteed visible before return).
-            aplusCollect->put(0, localData.data());
-
-            // 2. Notify A+ worker.
-            int dummy = 1;
-            MPI_Send(&dummy, 1, MPI_INT,
+            // 1. Notify A+ worker, embedding this feeder's data directly in
+            //    the message. No shared slot exists, so there is nothing for
+            //    a concurrent feeder's NOTIFY to clobber.
+            MPI_Send(localData.data(), numData, MPI_DOUBLE,
                      aPlusWorkerRank, APLUS_NOTIFY_TAG, worldComm);
 
-            // 3. Block until A+ worker has finished accumulating into chunk 1.
-            //    Only after this ACK is chunk 1 safe for new cohorts to read.
+            // 2. Block until A+ worker has finished accumulating.
+            //    Only after this ACK does the manager learn this step is done.
+            int dummy;
             MPI_Recv(&dummy, 1, MPI_INT,
                      aPlusWorkerRank, APLUS_ACK_TAG, worldComm, MPI_STATUS_IGNORE);
         }
 
-        // 4. Notify the manager that this step is complete.
+        // 3. Notify the manager that this step is complete.
         //    For feeder steps, this happens AFTER the ACK, so the manager
-        //    only unblocks downstream cohorts once chunk 1 is updated.
+        //    only unblocks downstream cohorts once the A+ worker is updated.
         int output[3] = {task_id, step, task_id};
         MPI_Send(output, 3, MPI_INT, 0, endTaskTag, comm);
     }
@@ -260,23 +249,7 @@ int main(int argc, char** argv) {
                    (rank < size - 1) ? 0 : MPI_UNDEFINED,
                    rank, &comm_farm);
 
-    // ------------------------------------------------------------------
-    // A+ data collector: 2 chunks of numData doubles on rank size-1.
-    //   chunk 0 – feeder cohort output at step na-1  (input slot)
-    //   chunk 1 – running accumulator
-    // All ranks participate (MPI_COMM_WORLD) since rootRank = size-1.
-    // ------------------------------------------------------------------
     int numChunks = numAgeGroups * numTimeSteps;
-    DistDataCollector aplusCollect(MPI_COMM_WORLD, 2, numData, aPlusWorkerRank);
-
-    // Initialise chunk 1 to zero before any farming begins.
-    // Use the RMA put interface so the write is visible to all ranks.
-    if (rank == aPlusWorkerRank) {
-        std::vector<double> zeros(numData, 0.0);
-        aplusCollect.put(1, zeros.data());
-    }
-    // Barrier: guarantee chunk 1 is initialised before any worker reads it.
-    MPI_Barrier(MPI_COMM_WORLD);
 
     // ------------------------------------------------------------------
     // Branch: farming ranks vs A+ worker
@@ -302,7 +275,6 @@ int main(int argc, char** argv) {
             numTimeSteps,
             numData,
             &dataCollect,
-            &aplusCollect,
             &dependencyMap,
             &rng,
             &dist);
@@ -359,72 +331,60 @@ int main(int argc, char** argv) {
         // --------------------------------------------------------------
         // A+ worker (rank size-1): independent accumulation loop.
         //
-        // Receives numTimeSteps-1 NOTIFY signals from feeder cohorts
-        // (cohorts 0..numTimeSteps-2 at step na-1), accumulating
-        // chunk 0 into chunk 1 after each notification.
-        //
-        // Direct pointer access is used for the local window memory.
-        // This is safe here because:
-        //   - chunk 0 is written by feeder cohorts using blocking put
-        //     before NOTIFY is sent, so it is visible on arrival
-        //   - chunk 1 is only written by this loop; farm workers read
-        //     it via RMA get, which uses passive-target locking and
-        //     completes after the ACK ordering guarantee
+        // Receives numTimeSteps-1 NOTIFY(payload) messages from feeder
+        // cohorts (cohorts 0..numTimeSteps-2 at step na-1), accumulating
+        // each one into a local running total. The accumulator lives in
+        // ordinary process memory: no other rank ever reads it, so there
+        // is no RMA window and nothing to publish between iterations.
         // --------------------------------------------------------------
-        double* base = aplusCollect.getCollectedDataPtr(); // 2*numData doubles
+        std::vector<double> accumulator(numData, 0.0);
+        std::vector<double> incoming(numData);
 
-        int      dummy;
+        int dummy = 0;
         MPI_Status status;
         const int numAccumulations = numTimeSteps - 1; // feeder cohorts 0..nt-2
 
         for (int iter = 0; iter < numAccumulations; ++iter) {
 
-            // Wait for a feeder cohort to signal that chunk 0 is ready.
-            MPI_Recv(&dummy, 1, MPI_INT,
+            // Wait for a feeder cohort's NOTIFY; the message itself carries
+            // that feeder's data, so there is no shared slot a second
+            // feeder's message could clobber.
+            MPI_Recv(incoming.data(), numData, MPI_DOUBLE,
                      MPI_ANY_SOURCE, APLUS_NOTIFY_TAG, MPI_COMM_WORLD, &status);
 
-            // Accumulate: chunk1 += chunk0  (local memory, no RMA needed).
+            // Accumulate (local memory, no RMA needed).
             for (int i = 0; i < numData; ++i)
-                base[numData + i] += base[i];
+                accumulator[i] += incoming[i];
 
             // Simulate A+ processing work using the same gamma distribution
             // as a normal step.  This must complete before the ACK so that
-            // new cohorts reading chunk 1 see a fully processed result.
+            // any dependent code path sees a fully processed result.
             int tsleep_aplus = static_cast<int>(std::round(dist(rng)));
             std::this_thread::sleep_for(std::chrono::milliseconds(tsleep_aplus));
 
-            // Acknowledge: the feeder cohort will now notify the manager,
-            // unblocking any new cohorts that depend on chunk 1.
+            // Acknowledge: the feeder cohort will now notify the manager.
             MPI_Send(&dummy, 1, MPI_INT,
                      status.MPI_SOURCE, APLUS_ACK_TAG, MPI_COMM_WORLD);
 
         }
 
+        // Checksum of the local accumulator, printed directly by this rank
+        // (no RMA readback needed — this rank is the sole owner of the data).
+        // Expected for nt=5,  nd=10000:   60000   (0+1+2+3     = 6)
+        // Expected for nt=10, nd=100000:  3600000 (0+1+..+8    = 36)
+        double checksum = std::accumulate(accumulator.begin(), accumulator.end(), 0.0);
+        printf("[Rank %d] A+ accumulator checksum: %.0lf\n", rank, checksum);
+
     } // end rank split
 
     // ------------------------------------------------------------------
-    // Synchronise all ranks before printing the A+ checksum.
+    // Synchronise all ranks before exiting.
     // ------------------------------------------------------------------
     MPI_Barrier(MPI_COMM_WORLD);
-
-    // Checksum of the A+ accumulator (chunk 1), printed by rank size-1.
-    // Final value = sum of feeder cohort outputs = sum(0..nt-2) per element.
-    // Expected for nt=5,  nd=10000:   60000   (0+1+2+3     = 6)
-    // Expected for nt=10, nd=100000:  3600000 (0+1+..+8    = 36)
-    if (rank == aPlusWorkerRank) {
-        double* aplusData = aplusCollect.getCollectedDataPtr();
-        int     numSize   = aplusCollect.getNumSize();
-        double  checksum  = std::accumulate(aplusData + numSize,
-                                             aplusData + 2 * numSize, 0.0);
-        printf("[Rank %d] aplusCollect accumulator (chunk 1) checksum: %.0lf\n",
-               aPlusWorkerRank, checksum);
-    }
 
     // ------------------------------------------------------------------
     // Cleanup
     // ------------------------------------------------------------------
-    aplusCollect.free(); // collective on MPI_COMM_WORLD
-
     if (comm_farm != MPI_COMM_NULL)
         MPI_Comm_free(&comm_farm);
 
