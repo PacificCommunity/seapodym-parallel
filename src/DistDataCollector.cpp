@@ -24,6 +24,24 @@ DistDataCollector::DistDataCollector(MPI_Comm comm, int numChunks, int numSize, 
     if (rank == rootRank) {
         std::fill(this->collectedData, this->collectedData + (numChunks * numSize), BAD_VALUE);
     }
+
+    // MPI_Win_allocate is collective and returns on every rank once the
+    // memory is allocated, but it does NOT wait for rootRank's subsequent,
+    // purely-local fill() above to finish. For a large window (this one can
+    // be several GB), that fill can take a non-trivial, multi-second amount
+    // of time - and without this barrier, any other rank is free to start
+    // issuing put()/get() calls into the window as soon as its own
+    // MPI_Win_allocate returns, i.e. potentially *while* rootRank's fill is
+    // still sweeping through memory. A remote put() landing on a byte range
+    // rootRank's fill hasn't reached yet is silently overwritten with
+    // BAD_VALUE once the fill catches up - a real, reproducible corruption,
+    // not a hypothetical one (this is what caused an early write to a
+    // high-offset chunk to read back as NaN much later, even though the
+    // write itself completed correctly and was never subsequently touched
+    // by any other put()). This barrier makes the whole constructor -
+    // allocation AND initialization - complete before any rank can use the
+    // window at all.
+    MPI_Barrier(comm);
 }
 
 DistDataCollector::~DistDataCollector() {
